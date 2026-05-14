@@ -1,0 +1,8 @@
+const { Deuda } = require("../../../../core/db/db.associations");
+const createCrudRepository = require("../../../shared/repository/createCrudRepository");
+
+module.exports = createCrudRepository({
+  Model: Deuda,
+  entity: "deuda",
+  primaryKeys: ["id_deuda"],
+});

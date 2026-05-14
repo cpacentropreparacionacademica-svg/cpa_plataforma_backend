@@ -1,0 +1,202 @@
+const { sequelize } = require("./db.config");
+const models = {};
+
+  // Modelos ========================================================================================================================================================================
+models.Departamento = require("../../src/modules/administracion/models/departamento.model")(sequelize);
+models.Empleado = require("../../src/modules/administracion/models/empleado.model")(sequelize);
+models.EmpleadoPosicionPago = require("../../src/modules/administracion/models/empleado_posicion_pago.model")(sequelize);
+models.EmpleadoRegistroPago = require("../../src/modules/administracion/models/empleado_registro_pago.model")(sequelize);
+models.Kpi = require("../../src/modules/administracion/models/kpi.model")(sequelize);
+models.ObjetivoKpi = require("../../src/modules/administracion/models/objetivo_kpi.model")(sequelize);
+models.Posicion = require("../../src/modules/administracion/models/posicion.model")(sequelize);
+
+models.ArchivosTransaccion = require("../../src/modules/contabilidad/models/archivos_transaccion.model")(sequelize);
+models.CentroCosto = require("../../src/modules/contabilidad/models/centro_costo.model")(sequelize);
+models.CentroCostoMapa = require("../../src/modules/contabilidad/models/centro_costo_mapa.model")(sequelize);
+models.ConceptoCosto = require("../../src/modules/contabilidad/models/concepto_costo.model")(sequelize);
+models.Cuenta = require("../../src/modules/contabilidad/models/cuenta.model")(sequelize);
+models.CuentaAsignacion = require("../../src/modules/contabilidad/models/cuenta_asignacion.model")(sequelize);
+models.GrupoCuenta = require("../../src/modules/contabilidad/models/grupo_cuenta.model")(sequelize);
+models.PagoTutor = require("../../src/modules/contabilidad/models/pago_tutor.model")(sequelize);
+models.PagoTutorDetalle = require("../../src/modules/contabilidad/models/pago_tutor_detalle.model")(sequelize);
+models.Transaccion = require("../../src/modules/contabilidad/models/transaccion.model")(sequelize);
+models.TransaccionMovimientoCuenta = require("../../src/modules/contabilidad/models/transaccion_movimiento_cuenta.model")(sequelize);
+
+models.Deuda = require("../../src/modules/deuda/models/deuda.model")(sequelize);
+models.Pago = require("../../src/modules/deuda/models/pago.model")(sequelize);
+
+models.Edificio = require("../../src/modules/infraestructura/models/edificio.model")(sequelize);
+models.Encargado = require("../../src/modules/infraestructura/models/encargado.model")(sequelize);
+models.Espacio = require("../../src/modules/infraestructura/models/espacio.model")(sequelize);
+models.Sucursal = require("../../src/modules/infraestructura/models/sucursal.model")(sequelize);
+models.Tienda = require("../../src/modules/infraestructura/models/tienda.model")(sequelize);
+
+models.Bien = require("../../src/modules/inventario/models/bien.model")(sequelize);
+models.BienInstancia = require("../../src/modules/inventario/models/bien_instancia.model")(sequelize);
+models.BienLote = require("../../src/modules/inventario/models/bien_lote.model")(sequelize);
+models.MovimientoDetalle = require("../../src/modules/inventario/models/movimiento_detalle.model")(sequelize);
+
+models.EstudiantePadre = require("../../src/modules/persona/models/estudiante_padre.model")(sequelize);
+models.Persona = require("../../src/modules/persona/models/persona.model")(sequelize);
+models.PersonaEstudiante = require("../../src/modules/persona/models/persona_estudiante.model")(sequelize);
+models.PersonaPadre = require("../../src/modules/persona/models/persona_padre.model")(sequelize);
+models.PersonaTutor = require("../../src/modules/persona/models/persona_tutor.model")(sequelize);
+models.PersonaUsuario = require("../../src/modules/persona/models/persona_usuario.model")(sequelize);
+models.Proveedor = require("../../src/modules/persona/models/proveedor.model")(sequelize);
+models.UnidadEducativa = require("../../src/modules/persona/models/unidad_educativa.model")(sequelize);
+
+models.ActionLog = require("../../src/modules/seguridad/models/action_log.model")(sequelize);
+models.Permiso = require("../../src/modules/seguridad/models/permiso.model")(sequelize);
+models.Rol = require("../../src/modules/seguridad/models/rol.model")(sequelize);
+models.RolPermiso = require("../../src/modules/seguridad/models/rol_permiso.model")(sequelize);
+models.Sesion = require("../../src/modules/seguridad/models/sesion.model")(sequelize);
+models.UsuarioPermiso = require("../../src/modules/seguridad/models/usuario_permiso.model")(sequelize);
+models.UsuarioRol = require("../../src/modules/seguridad/models/usuario_rol.model")(sequelize);
+models.UsuarioTokenAccion = require("../../src/modules/seguridad/models/token.model")(sequelize);
+
+models.AsistenciaClaseCurso = require("../../src/modules/servicios_educativos/models/asistencia_clase_curso.model")(sequelize);
+models.ClaseCurso = require("../../src/modules/servicios_educativos/models/clase_curso.model")(sequelize);
+models.ClasePorHora = require("../../src/modules/servicios_educativos/models/clase_por_hora.model")(sequelize);
+models.CursoVersion = require("../../src/modules/servicios_educativos/models/curso_version.model")(sequelize);
+models.Horarios = require("../../src/modules/servicios_educativos/models/horarios.model")(sequelize);
+models.MateriaTree = require("../../src/modules/servicios_educativos/models/materia_tree.model")(sequelize);
+models.PaquetesProductoEducativo = require("../../src/modules/servicios_educativos/models/paquetes_producto_educativo.model")(sequelize);
+models.ProductoEducativo = require("../../src/modules/servicios_educativos/models/producto_educativo.model")(sequelize);
+
+models.ClaseTitulo = require("../../src/modules/societario/models/clase_titulo.model")(sequelize);
+models.Dividendo = require("../../src/modules/societario/models/dividendo.model")(sequelize);
+models.DividendoPago = require("../../src/modules/societario/models/dividendo_pago.model")(sequelize);
+models.EmisionTitulo = require("../../src/modules/societario/models/emision_titulo.model")(sequelize);
+models.Tenencia = require("../../src/modules/societario/models/tenencia.model")(sequelize);
+models.Titular = require("../../src/modules/societario/models/titular.model")(sequelize);
+models.TransferenciaTitulo = require("../../src/modules/societario/models/transferencia_titulo.model")(sequelize);
+
+  /*
+  Asociaciones ========================================================================================================================================================================
+    - SET NULL: Relación opcional. El registro hijo al elimnar el padre queda en NULL.
+    - CASCADE: Relacion obligatoria autodestructiva. Al eliminar el registro padre se eliminan los registros hijos.
+    - RESTRICT: Relacion obligatoria autoconservadora. No se puede eliminar un registro padre si antes no se elimina los registros hijos.
+  */
+
+models.Departamento.belongsTo(models.Departamento, { as: "departamentoPadre", foreignKey: "id_departamento_padre", onDelete: "SET NULL" });
+models.Departamento.belongsTo(models.Empleado, { as: "jefeEmpleado", foreignKey: "id_jefe_empleado", onDelete: "SET NULL" });
+models.Departamento.belongsTo(models.Sucursal, { as: "sucursal", foreignKey: "id_sucursal", onDelete: "SET NULL" });
+models.Empleado.belongsTo(models.Persona, { as: "persona", foreignKey: "id_persona", onDelete: "RESTRICT" });
+models.Empleado.belongsTo(models.Sucursal, { as: "sucursal", foreignKey: "id_sucursal" });
+models.EmpleadoPosicionPago.belongsTo(models.Empleado, { as: "empleado", foreignKey: "id_empleado", onDelete: "CASCADE" });
+models.EmpleadoPosicionPago.belongsTo(models.Posicion, { as: "posicion", foreignKey: "id_posicion", onDelete: "RESTRICT" });
+models.ObjetivoKpi.belongsTo(models.Kpi, { as: "kpi", foreignKey: "id_kpi", onDelete: "CASCADE" });
+models.ObjetivoKpi.belongsTo(models.ProductoEducativo, { as: "producto", foreignKey: "id_producto" });
+models.ObjetivoKpi.belongsTo(models.Bien, { as: "productoTienda", foreignKey: "id_producto_tienda" });
+models.ObjetivoKpi.belongsTo(models.Sucursal, { as: "sucursal", foreignKey: "id_sucursal" });
+models.ObjetivoKpi.belongsTo(models.Tienda, { as: "tienda", foreignKey: "id_tienda" });
+models.ObjetivoKpi.belongsTo(models.Empleado, { as: "responsableEmpleado", foreignKey: "responsable" });
+models.Posicion.belongsTo(models.Posicion, { as: "posicionParent", foreignKey: "id_posicion_parent" });
+models.ArchivosTransaccion.belongsTo(models.Transaccion, { as: "transaccion", foreignKey: "id_transaccion" });
+models.CentroCosto.belongsTo(models.Cuenta, { as: "cuentaCosto", foreignKey: "id_cuenta_costo" });
+models.CentroCosto.belongsTo(models.Cuenta, { as: "cuentaIngreso", foreignKey: "id_cuenta_ingreso" });
+models.CentroCostoMapa.belongsTo(models.Bien, { as: "bien", foreignKey: "id_bien" });
+models.CentroCostoMapa.belongsTo(models.CentroCosto, { as: "centroCosto", foreignKey: "id_centro_costo" });
+models.CentroCostoMapa.belongsTo(models.Departamento, { as: "departamento", foreignKey: "id_departamento" });
+models.CentroCostoMapa.belongsTo(models.Deuda, { as: "deuda", foreignKey: "id_deuda" });
+models.CentroCostoMapa.belongsTo(models.Empleado, { as: "empleado", foreignKey: "id_empleado" });
+models.CentroCostoMapa.belongsTo(models.Posicion, { as: "posicion", foreignKey: "id_posicion" });
+models.CentroCostoMapa.belongsTo(models.Sucursal, { as: "sucursal", foreignKey: "id_sucursal" });
+models.CentroCostoMapa.belongsTo(models.Tienda, { as: "tienda", foreignKey: "id_tienda" });
+models.Cuenta.belongsTo(models.GrupoCuenta, { as: "grupoCuenta", foreignKey: "id_grupo_cuenta" });
+models.CuentaAsignacion.belongsTo(models.Bien, { as: "bien", foreignKey: "id_bien" });
+models.CuentaAsignacion.belongsTo(models.Cuenta, { as: "cuenta", foreignKey: "id_cuenta" });
+models.CuentaAsignacion.belongsTo(models.Departamento, { as: "departamento", foreignKey: "id_departamento" });
+models.CuentaAsignacion.belongsTo(models.Deuda, { as: "deuda", foreignKey: "id_deuda" });
+models.CuentaAsignacion.belongsTo(models.Edificio, { as: "edificio", foreignKey: "id_edificio" });
+models.CuentaAsignacion.belongsTo(models.Empleado, { as: "empleado", foreignKey: "id_empleado" });
+models.CuentaAsignacion.belongsTo(models.PersonaEstudiante, { as: "personaEstudiante", foreignKey: "id_persona_estudiante" });
+models.CuentaAsignacion.belongsTo(models.PersonaTutor, { as: "personaTutor", foreignKey: "id_persona_tutor" });
+models.CuentaAsignacion.belongsTo(models.Proveedor, { as: "proveedor", foreignKey: "id_proveedor" });
+models.CuentaAsignacion.belongsTo(models.Sucursal, { as: "sucursal", foreignKey: "id_sucursal" });
+models.CuentaAsignacion.belongsTo(models.Tienda, { as: "tienda", foreignKey: "id_tienda" });
+models.GrupoCuenta.belongsTo(models.GrupoCuenta, { as: "parent", foreignKey: "id_parent" });
+models.PagoTutor.belongsTo(models.PersonaTutor, { as: "tutor", foreignKey: "id_tutor" });
+models.PagoTutorDetalle.belongsTo(models.ClasePorHora, { as: "clase", foreignKey: "id_clase" });
+models.PagoTutorDetalle.belongsTo(models.PagoTutor, { as: "pagoTutor", foreignKey: "id_pago_tutor", onDelete: "CASCADE" });
+models.Transaccion.belongsTo(models.Bien, { as: "bien", foreignKey: "id_bien" });
+models.Transaccion.belongsTo(models.CentroCostoMapa, { as: "centroCostoMapa", foreignKey: "id_centro_costo_mapa" });
+models.Transaccion.belongsTo(models.ClasePorHora, { as: "clasePorHora", foreignKey: "id_clase_por_hora" });
+models.Transaccion.belongsTo(models.Persona, { as: "cliente", foreignKey: "id_cliente" });
+models.Transaccion.belongsTo(models.CursoVersion, { as: "cursoVersion", foreignKey: "id_curso_version" });
+models.Transaccion.belongsTo(models.Departamento, { as: "departamento", foreignKey: "id_departamento" });
+models.Transaccion.belongsTo(models.Deuda, { as: "deuda", foreignKey: "id_deuda" });
+models.Transaccion.belongsTo(models.DividendoPago, { as: "dividendoPago", foreignKey: "id_dividendo_pago" });
+models.Transaccion.belongsTo(models.EmisionTitulo, { as: "emisionTitulo", foreignKey: "id_emision_titulo" });
+models.Transaccion.belongsTo(models.Empleado, { as: "empleado", foreignKey: "id_empleado" });
+models.Transaccion.belongsTo(models.EmpleadoRegistroPago, { as: "empleadoPago", foreignKey: "id_empleado_pago" });
+models.Transaccion.belongsTo(models.MovimientoDetalle, { as: "movimientoDetalle", foreignKey: "id_movimiento_detalle" });
+models.Transaccion.belongsTo(models.Pago, { as: "pagoDeuda", foreignKey: "id_pago_deuda" });
+models.Transaccion.belongsTo(models.PagoTutor, { as: "pagoTutor", foreignKey: "id_pago_tutor" });
+models.Transaccion.belongsTo(models.ProductoEducativo, { as: "productoEducativo", foreignKey: "id_producto_educativo" });
+models.Transaccion.belongsTo(models.Proveedor, { as: "proveedor", foreignKey: "id_proveedor" });
+models.Transaccion.belongsTo(models.Sucursal, { as: "sucursal", foreignKey: "id_sucursal" });
+models.Transaccion.belongsTo(models.Tienda, { as: "tienda", foreignKey: "id_tienda" });
+models.TransaccionMovimientoCuenta.belongsTo(models.Cuenta, { as: "cuenta", foreignKey: "id_cuenta" });
+models.TransaccionMovimientoCuenta.belongsTo(models.Transaccion, { as: "transaccion", foreignKey: "id_transaccion" });
+models.Deuda.belongsTo(models.Proveedor, { as: "proveedor", foreignKey: "id_proveedor", onDelete: "RESTRICT" });
+models.Pago.belongsTo(models.Deuda, { as: "deuda", foreignKey: "id_deuda", onDelete: "CASCADE" });
+models.Edificio.belongsTo(models.Empleado, { as: "administrador", foreignKey: "id_administrador" });
+models.Edificio.belongsTo(models.Sucursal, { as: "sucursal", foreignKey: "id_sucursal", onDelete: "CASCADE" });
+models.Encargado.belongsTo(models.Empleado, { as: "empleado", foreignKey: "id_empleado" });
+models.Encargado.belongsTo(models.Sucursal, { as: "sucursal", foreignKey: "id_sucursal" });
+models.Espacio.belongsTo(models.Edificio, { as: "edificio", foreignKey: "id_edificio", onDelete: "CASCADE" });
+models.Tienda.belongsTo(models.Espacio, { as: "espacio", foreignKey: "id_espacio", onDelete: "SET NULL" });
+models.Tienda.belongsTo(models.Persona, { as: "responsable", foreignKey: "id_responsable" });
+models.Bien.belongsTo(models.Cuenta, { as: "cuentaCostoVenta", foreignKey: "id_cuenta_costo_venta" });
+models.Bien.belongsTo(models.Cuenta, { as: "cuentaDepreciacionAcumulada", foreignKey: "id_cuenta_depreciacion_acumulada" });
+models.Bien.belongsTo(models.Cuenta, { as: "cuentaDepreciacion", foreignKey: "id_cuenta_depreciacion" });
+models.Bien.belongsTo(models.Cuenta, { as: "cuentaExistencias", foreignKey: "id_cuenta_existencias" });
+models.Bien.belongsTo(models.Cuenta, { as: "cuentaIngreso", foreignKey: "id_cuenta_ingreso" });
+models.BienInstancia.belongsTo(models.Bien, { as: "bien", foreignKey: "id_bien", onDelete: "CASCADE" });
+models.BienInstancia.belongsTo(models.Proveedor, { as: "proveedorCompra", foreignKey: "id_proveedor_compra" });
+models.BienLote.belongsTo(models.Bien, { as: "bien", foreignKey: "id_bien", onDelete: "CASCADE" });
+models.BienLote.belongsTo(models.Proveedor, { as: "proveedorCompra", foreignKey: "id_proveedor_compra" });
+models.MovimientoDetalle.belongsTo(models.Bien, { as: "bien", foreignKey: "id_bien" });
+models.MovimientoDetalle.belongsTo(models.BienInstancia, { as: "bienInstancia", foreignKey: "id_bien_instancia" });
+models.MovimientoDetalle.belongsTo(models.BienLote, { as: "lote", foreignKey: "id_lote" });
+models.EstudiantePadre.belongsTo(models.PersonaEstudiante, { as: "estudiante", foreignKey: "id_estudiante" });
+models.EstudiantePadre.belongsTo(models.PersonaPadre, { as: "padre", foreignKey: "id_padre" });
+models.PersonaEstudiante.belongsTo(models.Persona, { as: "persona", foreignKey: "id_persona", onDelete: "CASCADE" });
+models.PersonaEstudiante.belongsTo(models.UnidadEducativa, { as: "unidadEducativa", foreignKey: "id_unidad_educativa" });
+models.PersonaTutor.belongsTo(models.Persona, { as: "persona", foreignKey: "id_persona", onDelete: "CASCADE" });
+models.PersonaUsuario.belongsTo(models.Persona, { as: "persona", foreignKey: "id_persona", onDelete: "CASCADE" });
+models.ActionLog.belongsTo(models.Sesion, { as: "sesion", foreignKey: "id_sesion", onDelete: "RESTRICT" });
+models.RolPermiso.belongsTo(models.Permiso, { as: "permiso", foreignKey: "id_permiso", onDelete: "CASCADE" });
+models.RolPermiso.belongsTo(models.Rol, { as: "rol", foreignKey: "id_rol", onDelete: "CASCADE" });
+models.Sesion.belongsTo(models.PersonaUsuario, { as: "usuario", foreignKey: "id_persona" });
+models.UsuarioPermiso.belongsTo(models.Permiso, { as: "permiso", foreignKey: "id_permiso", onDelete: "CASCADE" });
+models.UsuarioPermiso.belongsTo(models.PersonaUsuario, { as: "usuario", foreignKey: "id_persona", onDelete: "CASCADE" });
+models.UsuarioRol.belongsTo(models.PersonaUsuario, { as: "usuario", foreignKey: "id_persona", onDelete: "CASCADE" });
+models.UsuarioRol.belongsTo(models.Rol, { as: "rol", foreignKey: "id_rol", onDelete: "CASCADE" });
+models.AsistenciaClaseCurso.belongsTo(models.ClaseCurso, { as: "claseCurso", foreignKey: "id_clase_curso", onDelete: "CASCADE" });
+models.AsistenciaClaseCurso.belongsTo(models.PersonaEstudiante, { as: "estudiante", foreignKey: "id_estudiante", onDelete: "RESTRICT" });
+models.ClaseCurso.belongsTo(models.Espacio, { as: "aula", foreignKey: "id_aula", onDelete: "SET NULL" });
+models.ClaseCurso.belongsTo(models.CursoVersion, { as: "cursoVersion", foreignKey: "id_curso_version", onDelete: "CASCADE" });
+models.ClaseCurso.belongsTo(models.Empleado, { as: "tutor", foreignKey: "id_tutor", onDelete: "SET NULL" });
+models.ClaseCurso.belongsTo(models.PersonaTutor, { as: "tutorPersonaTutor", foreignKey: "id_tutor", onDelete: "SET NULL" });
+models.ClasePorHora.belongsTo(models.Espacio, { as: "aula", foreignKey: "id_aula" });
+models.ClasePorHora.belongsTo(models.PersonaEstudiante, { as: "estudiante", foreignKey: "id_estudiante" });
+models.ClasePorHora.belongsTo(models.MateriaTree, { as: "materiaTree", foreignKey: "id_materia_tree" });
+models.ClasePorHora.belongsTo(models.PersonaTutor, { as: "tutor", foreignKey: "id_tutor" });
+models.CursoVersion.belongsTo(models.Horarios, { as: "horario", foreignKey: "id_horario" });
+models.CursoVersion.belongsTo(models.ProductoEducativo, { as: "productoEducativo", foreignKey: "id_producto_educativo", onDelete: "CASCADE" });
+models.ProductoEducativo.belongsTo(models.Bien, { as: "productoTienda", foreignKey: "id_producto_tienda" });
+models.Dividendo.belongsTo(models.ClaseTitulo, { as: "claseTitulo", foreignKey: "id_clase_titulo", onDelete: "RESTRICT" });
+models.DividendoPago.belongsTo(models.Dividendo, { as: "dividendo", foreignKey: "id_dividendo", onDelete: "CASCADE" });
+models.DividendoPago.belongsTo(models.Titular, { as: "titular", foreignKey: "id_titular", onDelete: "RESTRICT" });
+models.EmisionTitulo.belongsTo(models.ClaseTitulo, { as: "claseTitulo", foreignKey: "id_clase_titulo", onDelete: "CASCADE" });
+models.Tenencia.belongsTo(models.EmisionTitulo, { as: "emision", foreignKey: "id_emision", onDelete: "CASCADE" });
+models.Tenencia.belongsTo(models.Titular, { as: "titular", foreignKey: "id_titular", onDelete: "RESTRICT" });
+models.Titular.belongsTo(models.Persona, { as: "persona", foreignKey: "id_persona", onDelete: "RESTRICT" });
+models.TransferenciaTitulo.belongsTo(models.EmisionTitulo, { as: "emision", foreignKey: "id_emision", onDelete: "CASCADE" });
+models.TransferenciaTitulo.belongsTo(models.Titular, { as: "titularDestino", foreignKey: "id_titular_destino", onDelete: "RESTRICT" });
+models.TransferenciaTitulo.belongsTo(models.Titular, { as: "titularOrigen", foreignKey: "id_titular_origen", onDelete: "RESTRICT" });
+models.UsuarioTokenAccion.belongsTo(models.PersonaUsuario, {as: "usuario", foreignKey: "id_persona", onDelete: "RESTRICT", onUpdate: "CASCADE"});
+
+module.exports = models;
