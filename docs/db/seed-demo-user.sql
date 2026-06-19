@@ -1,0 +1,22 @@
+-- Referencia SQL del seed demo.
+--
+-- IMPORTANTE:
+-- La versión ejecutable y parametrizada por .env está en:
+--   scripts/demo-user-utils.js
+--
+-- Ejecuta:
+--   npm run db:seed:demo
+--
+-- Variables soportadas desde .env:
+--   TEST_USER_ID=900001
+--   TEST_USER_EMAIL=admin.demo@cpa.test
+--   TEST_USER_USERNAME=admin.demo
+--   TEST_USER_PASSWORD=DemoAdmin123!
+--
+-- Alias soportados:
+--   Email=admin.demo@cpa.test
+--   Usuario=admin.demo
+--   Password=DemoAdmin123!
+--
+-- Este archivo queda como documentación para recordar que el usuario inicial
+-- debe crearse desde base de datos/script interno y no desde signup público.

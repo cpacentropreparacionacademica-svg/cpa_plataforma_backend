@@ -1,0 +1,3935 @@
+{
+  "info": {
+    "name": "CPA Plataforma NestJS",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api"
+    },
+    {
+      "key": "sessionToken",
+      "value": ""
+    },
+    {
+      "key": "demoEmail",
+      "value": "admin.demo@cpa.test"
+    },
+    {
+      "key": "demoPassword",
+      "value": "DemoAdmin123!"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/health"
+      }
+    },
+    {
+      "name": "Auth - Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{demoEmail}}\",\n  \"password\": \"{{demoPassword}}\"\n}"
+        },
+        "url": "{{baseUrl}}/auth/publicAuth/login"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const json = pm.response.json();",
+              "const token = json?.data?.sessionToken || json?.data?.session?.sessionToken;",
+              "if (token) {",
+              "  pm.collectionVariables.set(\"sessionToken\", token);",
+              "}",
+              "pm.test(\"Login exitoso\", function () {",
+              "  pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+              "  pm.expect(json?.data?.user?.email).to.eql(pm.collectionVariables.get(\"demoEmail\"));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth - Me",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-Session-Token",
+            "value": "{{sessionToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/auth/privateAuth/me"
+      }
+    },
+    {
+      "name": "administracion",
+      "item": [
+        {
+          "name": "List departamento",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/administracion/departamento?limit=20&offset=0"
+          }
+        },
+        {
+          "name": "Get departamento",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/administracion/departamento/{{id_departamento}}"
+          }
+        },
+        {
+          "name": "Create departamento",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor\"\n}"
+            },
+            "url": "{{baseUrl}}/administracion/departamento"
+          }
+        },
+        {
+          "name": "Update departamento",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor actualizado\"\n}"
+            },
+            "url": "{{baseUrl}}/administracion/departamento/{{id_departamento}}"
+          }
+        },
+        {
+          "name": "List empleado",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/administracion/empleado?limit=20&offset=0"
+          }
+        },
+        {
+          "name": "Get empleado",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/administracion/empleado/{{id_empleado}}"
+          }
+        },
+        {
+          "name": "Create empleado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor\"\n}"
+            },
+            "url": "{{baseUrl}}/administracion/empleado"
+          }
+        },
+        {
+          "name": "Update empleado",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor actualizado\"\n}"
+            },
+            "url": "{{baseUrl}}/administracion/empleado/{{id_empleado}}"
+          }
+        },
+        {
+          "name": "List empleado-posicion-pago",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/administracion/empleado-posicion-pago?limit=20&offset=0"
+          }
+        },
+        {
+          "name": "Get empleado-posicion-pago",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/administracion/empleado-posicion-pago/{{id_empleado_posicion}}"
+          }
+        },
+        {
+          "name": "Create empleado-posicion-pago",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor\"\n}"
+            },
+            "url": "{{baseUrl}}/administracion/empleado-posicion-pago"
+          }
+        },
+        {
+          "name": "Update empleado-posicion-pago",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor actualizado\"\n}"
+            },
+            "url": "{{baseUrl}}/administracion/empleado-posicion-pago/{{id_empleado_posicion}}"
+          }
+        },
+        {
+          "name": "List empleado-registro-pago",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/administracion/empleado-registro-pago?limit=20&offset=0"
+          }
+        },
+        {
+          "name": "Get empleado-registro-pago",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/administracion/empleado-registro-pago/{{id_pago}}"
+          }
+        },
+        {
+          "name": "Create empleado-registro-pago",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor\"\n}"
+            },
+            "url": "{{baseUrl}}/administracion/empleado-registro-pago"
+          }
+        },
+        {
+          "name": "Update empleado-registro-pago",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor actualizado\"\n}"
+            },
+            "url": "{{baseUrl}}/administracion/empleado-registro-pago/{{id_pago}}"
+          }
+        },
+        {
+          "name": "List kpi",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/administracion/kpi?limit=20&offset=0"
+          }
+        },
+        {
+          "name": "Get kpi",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/administracion/kpi/{{id_kpi}}"
+          }
+        },
+        {
+          "name": "Create kpi",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor\"\n}"
+            },
+            "url": "{{baseUrl}}/administracion/kpi"
+          }
+        },
+        {
+          "name": "Update kpi",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor actualizado\"\n}"
+            },
+            "url": "{{baseUrl}}/administracion/kpi/{{id_kpi}}"
+          }
+        },
+        {
+          "name": "List objetivo-kpi",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/administracion/objetivo-kpi?limit=20&offset=0"
+          }
+        },
+        {
+          "name": "Get objetivo-kpi",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/administracion/objetivo-kpi/{{id_objetivo_kpi}}"
+          }
+        },
+        {
+          "name": "Create objetivo-kpi",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor\"\n}"
+            },
+            "url": "{{baseUrl}}/administracion/objetivo-kpi"
+          }
+        },
+        {
+          "name": "Update objetivo-kpi",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor actualizado\"\n}"
+            },
+            "url": "{{baseUrl}}/administracion/objetivo-kpi/{{id_objetivo_kpi}}"
+          }
+        },
+        {
+          "name": "List posicion",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/administracion/posicion?limit=20&offset=0"
+          }
+        },
+        {
+          "name": "Get posicion",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/administracion/posicion/{{id_posicion}}"
+          }
+        },
+        {
+          "name": "Create posicion",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor\"\n}"
+            },
+            "url": "{{baseUrl}}/administracion/posicion"
+          }
+        },
+        {
+          "name": "Update posicion",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor actualizado\"\n}"
+            },
+            "url": "{{baseUrl}}/administracion/posicion/{{id_posicion}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "contabilidad",
+      "item": [
+        {
+          "name": "List archivos-transaccion",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/contabilidad/archivos-transaccion?limit=20&offset=0"
+          }
+        },
+        {
+          "name": "Get archivos-transaccion",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/contabilidad/archivos-transaccion/{{id_archivo}}"
+          }
+        },
+        {
+          "name": "Create archivos-transaccion",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor\"\n}"
+            },
+            "url": "{{baseUrl}}/contabilidad/archivos-transaccion"
+          }
+        },
+        {
+          "name": "Update archivos-transaccion",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor actualizado\"\n}"
+            },
+            "url": "{{baseUrl}}/contabilidad/archivos-transaccion/{{id_archivo}}"
+          }
+        },
+        {
+          "name": "List centro-costo",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/contabilidad/centro-costo?limit=20&offset=0"
+          }
+        },
+        {
+          "name": "Get centro-costo",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/contabilidad/centro-costo/{{id_centro_costo}}"
+          }
+        },
+        {
+          "name": "Create centro-costo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor\"\n}"
+            },
+            "url": "{{baseUrl}}/contabilidad/centro-costo"
+          }
+        },
+        {
+          "name": "Update centro-costo",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor actualizado\"\n}"
+            },
+            "url": "{{baseUrl}}/contabilidad/centro-costo/{{id_centro_costo}}"
+          }
+        },
+        {
+          "name": "List centro-costo-mapa",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/contabilidad/centro-costo-mapa?limit=20&offset=0"
+          }
+        },
+        {
+          "name": "Get centro-costo-mapa",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/contabilidad/centro-costo-mapa/{{id_cc_mapa}}"
+          }
+        },
+        {
+          "name": "Create centro-costo-mapa",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor\"\n}"
+            },
+            "url": "{{baseUrl}}/contabilidad/centro-costo-mapa"
+          }
+        },
+        {
+          "name": "Update centro-costo-mapa",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor actualizado\"\n}"
+            },
+            "url": "{{baseUrl}}/contabilidad/centro-costo-mapa/{{id_cc_mapa}}"
+          }
+        },
+        {
+          "name": "List concepto-costo",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/contabilidad/concepto-costo?limit=20&offset=0"
+          }
+        },
+        {
+          "name": "Get concepto-costo",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/contabilidad/concepto-costo/{{id_concepto}}"
+          }
+        },
+        {
+          "name": "Create concepto-costo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor\"\n}"
+            },
+            "url": "{{baseUrl}}/contabilidad/concepto-costo"
+          }
+        },
+        {
+          "name": "Update concepto-costo",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor actualizado\"\n}"
+            },
+            "url": "{{baseUrl}}/contabilidad/concepto-costo/{{id_concepto}}"
+          }
+        },
+        {
+          "name": "List cuenta",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/contabilidad/cuenta?limit=20&offset=0"
+          }
+        },
+        {
+          "name": "Get cuenta",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/contabilidad/cuenta/{{id_cuenta}}"
+          }
+        },
+        {
+          "name": "Create cuenta",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor\"\n}"
+            },
+            "url": "{{baseUrl}}/contabilidad/cuenta"
+          }
+        },
+        {
+          "name": "Update cuenta",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor actualizado\"\n}"
+            },
+            "url": "{{baseUrl}}/contabilidad/cuenta/{{id_cuenta}}"
+          }
+        },
+        {
+          "name": "List cuenta-asignacion",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/contabilidad/cuenta-asignacion?limit=20&offset=0"
+          }
+        },
+        {
+          "name": "Get cuenta-asignacion",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/contabilidad/cuenta-asignacion/{{id_cuenta_asignacion}}"
+          }
+        },
+        {
+          "name": "Create cuenta-asignacion",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor\"\n}"
+            },
+            "url": "{{baseUrl}}/contabilidad/cuenta-asignacion"
+          }
+        },
+        {
+          "name": "Update cuenta-asignacion",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor actualizado\"\n}"
+            },
+            "url": "{{baseUrl}}/contabilidad/cuenta-asignacion/{{id_cuenta_asignacion}}"
+          }
+        },
+        {
+          "name": "List grupo-cuenta",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/contabilidad/grupo-cuenta?limit=20&offset=0"
+          }
+        },
+        {
+          "name": "Get grupo-cuenta",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/contabilidad/grupo-cuenta/{{id_grupo_cuenta}}"
+          }
+        },
+        {
+          "name": "Create grupo-cuenta",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor\"\n}"
+            },
+            "url": "{{baseUrl}}/contabilidad/grupo-cuenta"
+          }
+        },
+        {
+          "name": "Update grupo-cuenta",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor actualizado\"\n}"
+            },
+            "url": "{{baseUrl}}/contabilidad/grupo-cuenta/{{id_grupo_cuenta}}"
+          }
+        },
+        {
+          "name": "List pago-tutor",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/contabilidad/pago-tutor?limit=20&offset=0"
+          }
+        },
+        {
+          "name": "Get pago-tutor",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/contabilidad/pago-tutor/{{id_pago_tutor}}"
+          }
+        },
+        {
+          "name": "Create pago-tutor",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor\"\n}"
+            },
+            "url": "{{baseUrl}}/contabilidad/pago-tutor"
+          }
+        },
+        {
+          "name": "Update pago-tutor",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor actualizado\"\n}"
+            },
+            "url": "{{baseUrl}}/contabilidad/pago-tutor/{{id_pago_tutor}}"
+          }
+        },
+        {
+          "name": "List pago-tutor-detalle",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/contabilidad/pago-tutor-detalle?limit=20&offset=0"
+          }
+        },
+        {
+          "name": "Get pago-tutor-detalle",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/contabilidad/pago-tutor-detalle/{{id_pago_tutor_detalle}}"
+          }
+        },
+        {
+          "name": "Create pago-tutor-detalle",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor\"\n}"
+            },
+            "url": "{{baseUrl}}/contabilidad/pago-tutor-detalle"
+          }
+        },
+        {
+          "name": "Update pago-tutor-detalle",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor actualizado\"\n}"
+            },
+            "url": "{{baseUrl}}/contabilidad/pago-tutor-detalle/{{id_pago_tutor_detalle}}"
+          }
+        },
+        {
+          "name": "List transaccion",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/contabilidad/transaccion?limit=20&offset=0"
+          }
+        },
+        {
+          "name": "Get transaccion",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/contabilidad/transaccion/{{id_transaccion}}"
+          }
+        },
+        {
+          "name": "Create transaccion",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor\"\n}"
+            },
+            "url": "{{baseUrl}}/contabilidad/transaccion"
+          }
+        },
+        {
+          "name": "Update transaccion",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor actualizado\"\n}"
+            },
+            "url": "{{baseUrl}}/contabilidad/transaccion/{{id_transaccion}}"
+          }
+        },
+        {
+          "name": "List transaccion-movimiento-cuenta",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/contabilidad/transaccion-movimiento-cuenta?limit=20&offset=0"
+          }
+        },
+        {
+          "name": "Get transaccion-movimiento-cuenta",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/contabilidad/transaccion-movimiento-cuenta/{{id_movimiento}}"
+          }
+        },
+        {
+          "name": "Create transaccion-movimiento-cuenta",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor\"\n}"
+            },
+            "url": "{{baseUrl}}/contabilidad/transaccion-movimiento-cuenta"
+          }
+        },
+        {
+          "name": "Update transaccion-movimiento-cuenta",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor actualizado\"\n}"
+            },
+            "url": "{{baseUrl}}/contabilidad/transaccion-movimiento-cuenta/{{id_movimiento}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "deuda",
+      "item": [
+        {
+          "name": "List deuda",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/deuda/deuda?limit=20&offset=0"
+          }
+        },
+        {
+          "name": "Get deuda",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/deuda/deuda/{{id_deuda}}"
+          }
+        },
+        {
+          "name": "Create deuda",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor\"\n}"
+            },
+            "url": "{{baseUrl}}/deuda/deuda"
+          }
+        },
+        {
+          "name": "Update deuda",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor actualizado\"\n}"
+            },
+            "url": "{{baseUrl}}/deuda/deuda/{{id_deuda}}"
+          }
+        },
+        {
+          "name": "List pago",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/deuda/pago?limit=20&offset=0"
+          }
+        },
+        {
+          "name": "Get pago",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/deuda/pago/{{id_pago}}"
+          }
+        },
+        {
+          "name": "Create pago",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor\"\n}"
+            },
+            "url": "{{baseUrl}}/deuda/pago"
+          }
+        },
+        {
+          "name": "Update pago",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor actualizado\"\n}"
+            },
+            "url": "{{baseUrl}}/deuda/pago/{{id_pago}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "infraestructura",
+      "item": [
+        {
+          "name": "List edificio",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/infraestructura/edificio?limit=20&offset=0"
+          }
+        },
+        {
+          "name": "Get edificio",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/infraestructura/edificio/{{id_edificio}}"
+          }
+        },
+        {
+          "name": "Create edificio",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor\"\n}"
+            },
+            "url": "{{baseUrl}}/infraestructura/edificio"
+          }
+        },
+        {
+          "name": "Update edificio",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor actualizado\"\n}"
+            },
+            "url": "{{baseUrl}}/infraestructura/edificio/{{id_edificio}}"
+          }
+        },
+        {
+          "name": "List encargado",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/infraestructura/encargado?limit=20&offset=0"
+          }
+        },
+        {
+          "name": "Get encargado",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/infraestructura/encargado/{{id_asignacion}}"
+          }
+        },
+        {
+          "name": "Create encargado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor\"\n}"
+            },
+            "url": "{{baseUrl}}/infraestructura/encargado"
+          }
+        },
+        {
+          "name": "Update encargado",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor actualizado\"\n}"
+            },
+            "url": "{{baseUrl}}/infraestructura/encargado/{{id_asignacion}}"
+          }
+        },
+        {
+          "name": "List espacio",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/infraestructura/espacio?limit=20&offset=0"
+          }
+        },
+        {
+          "name": "Get espacio",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/infraestructura/espacio/{{id_espacio}}"
+          }
+        },
+        {
+          "name": "Create espacio",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor\"\n}"
+            },
+            "url": "{{baseUrl}}/infraestructura/espacio"
+          }
+        },
+        {
+          "name": "Update espacio",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor actualizado\"\n}"
+            },
+            "url": "{{baseUrl}}/infraestructura/espacio/{{id_espacio}}"
+          }
+        },
+        {
+          "name": "List sucursal",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/infraestructura/sucursal?limit=20&offset=0"
+          }
+        },
+        {
+          "name": "Get sucursal",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/infraestructura/sucursal/{{id_sucursal}}"
+          }
+        },
+        {
+          "name": "Create sucursal",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor\"\n}"
+            },
+            "url": "{{baseUrl}}/infraestructura/sucursal"
+          }
+        },
+        {
+          "name": "Update sucursal",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor actualizado\"\n}"
+            },
+            "url": "{{baseUrl}}/infraestructura/sucursal/{{id_sucursal}}"
+          }
+        },
+        {
+          "name": "List tienda",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/infraestructura/tienda?limit=20&offset=0"
+          }
+        },
+        {
+          "name": "Get tienda",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/infraestructura/tienda/{{id_tienda}}"
+          }
+        },
+        {
+          "name": "Create tienda",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor\"\n}"
+            },
+            "url": "{{baseUrl}}/infraestructura/tienda"
+          }
+        },
+        {
+          "name": "Update tienda",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor actualizado\"\n}"
+            },
+            "url": "{{baseUrl}}/infraestructura/tienda/{{id_tienda}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "inventario",
+      "item": [
+        {
+          "name": "List bien",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/inventario/bien?limit=20&offset=0"
+          }
+        },
+        {
+          "name": "Get bien",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/inventario/bien/{{id_bien}}"
+          }
+        },
+        {
+          "name": "Create bien",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor\"\n}"
+            },
+            "url": "{{baseUrl}}/inventario/bien"
+          }
+        },
+        {
+          "name": "Update bien",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor actualizado\"\n}"
+            },
+            "url": "{{baseUrl}}/inventario/bien/{{id_bien}}"
+          }
+        },
+        {
+          "name": "List bien-instancia",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/inventario/bien-instancia?limit=20&offset=0"
+          }
+        },
+        {
+          "name": "Get bien-instancia",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/inventario/bien-instancia/{{id_bien_instancia}}"
+          }
+        },
+        {
+          "name": "Create bien-instancia",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor\"\n}"
+            },
+            "url": "{{baseUrl}}/inventario/bien-instancia"
+          }
+        },
+        {
+          "name": "Update bien-instancia",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor actualizado\"\n}"
+            },
+            "url": "{{baseUrl}}/inventario/bien-instancia/{{id_bien_instancia}}"
+          }
+        },
+        {
+          "name": "List bien-lote",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/inventario/bien-lote?limit=20&offset=0"
+          }
+        },
+        {
+          "name": "Get bien-lote",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/inventario/bien-lote/{{id_lote}}"
+          }
+        },
+        {
+          "name": "Create bien-lote",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor\"\n}"
+            },
+            "url": "{{baseUrl}}/inventario/bien-lote"
+          }
+        },
+        {
+          "name": "Update bien-lote",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor actualizado\"\n}"
+            },
+            "url": "{{baseUrl}}/inventario/bien-lote/{{id_lote}}"
+          }
+        },
+        {
+          "name": "List movimiento-detalle",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/inventario/movimiento-detalle?limit=20&offset=0"
+          }
+        },
+        {
+          "name": "Get movimiento-detalle",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/inventario/movimiento-detalle/{{id_movimiento}}"
+          }
+        },
+        {
+          "name": "Create movimiento-detalle",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor\"\n}"
+            },
+            "url": "{{baseUrl}}/inventario/movimiento-detalle"
+          }
+        },
+        {
+          "name": "Update movimiento-detalle",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor actualizado\"\n}"
+            },
+            "url": "{{baseUrl}}/inventario/movimiento-detalle/{{id_movimiento}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "personas",
+      "item": [
+        {
+          "name": "List estudiante",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/personas/estudiante?limit=20&offset=0"
+          }
+        },
+        {
+          "name": "Get estudiante",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/personas/estudiante/{{id_persona}}"
+          }
+        },
+        {
+          "name": "Create estudiante",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor\"\n}"
+            },
+            "url": "{{baseUrl}}/personas/estudiante"
+          }
+        },
+        {
+          "name": "Update estudiante",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor actualizado\"\n}"
+            },
+            "url": "{{baseUrl}}/personas/estudiante/{{id_persona}}"
+          }
+        },
+        {
+          "name": "List estudiante-padre",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/personas/estudiante-padre?limit=20&offset=0"
+          }
+        },
+        {
+          "name": "Get estudiante-padre",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/personas/estudiante-padre/{{id_asociacion}}"
+          }
+        },
+        {
+          "name": "Create estudiante-padre",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor\"\n}"
+            },
+            "url": "{{baseUrl}}/personas/estudiante-padre"
+          }
+        },
+        {
+          "name": "Update estudiante-padre",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor actualizado\"\n}"
+            },
+            "url": "{{baseUrl}}/personas/estudiante-padre/{{id_asociacion}}"
+          }
+        },
+        {
+          "name": "List padre",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/personas/padre?limit=20&offset=0"
+          }
+        },
+        {
+          "name": "Get padre",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/personas/padre/{{id_padre}}"
+          }
+        },
+        {
+          "name": "Create padre",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor\"\n}"
+            },
+            "url": "{{baseUrl}}/personas/padre"
+          }
+        },
+        {
+          "name": "Update padre",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor actualizado\"\n}"
+            },
+            "url": "{{baseUrl}}/personas/padre/{{id_padre}}"
+          }
+        },
+        {
+          "name": "List proveedor",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/personas/proveedor?limit=20&offset=0"
+          }
+        },
+        {
+          "name": "Get proveedor",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/personas/proveedor/{{id_proveedor}}"
+          }
+        },
+        {
+          "name": "Create proveedor",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor\"\n}"
+            },
+            "url": "{{baseUrl}}/personas/proveedor"
+          }
+        },
+        {
+          "name": "Update proveedor",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor actualizado\"\n}"
+            },
+            "url": "{{baseUrl}}/personas/proveedor/{{id_proveedor}}"
+          }
+        },
+        {
+          "name": "List tutor",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/personas/tutor?limit=20&offset=0"
+          }
+        },
+        {
+          "name": "Get tutor",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/personas/tutor/{{id_tutor}}"
+          }
+        },
+        {
+          "name": "Create tutor",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor\"\n}"
+            },
+            "url": "{{baseUrl}}/personas/tutor"
+          }
+        },
+        {
+          "name": "Update tutor",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor actualizado\"\n}"
+            },
+            "url": "{{baseUrl}}/personas/tutor/{{id_tutor}}"
+          }
+        },
+        {
+          "name": "List unidad-educativa",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/personas/unidad-educativa?limit=20&offset=0"
+          }
+        },
+        {
+          "name": "Get unidad-educativa",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/personas/unidad-educativa/{{id_unidad_educativa}}"
+          }
+        },
+        {
+          "name": "Create unidad-educativa",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor\"\n}"
+            },
+            "url": "{{baseUrl}}/personas/unidad-educativa"
+          }
+        },
+        {
+          "name": "Update unidad-educativa",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor actualizado\"\n}"
+            },
+            "url": "{{baseUrl}}/personas/unidad-educativa/{{id_unidad_educativa}}"
+          }
+        },
+        {
+          "name": "List usuario",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/personas/usuario?limit=20&offset=0"
+          }
+        },
+        {
+          "name": "Get usuario",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/personas/usuario/{{id_persona}}"
+          }
+        },
+        {
+          "name": "Create usuario",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor\"\n}"
+            },
+            "url": "{{baseUrl}}/personas/usuario"
+          }
+        },
+        {
+          "name": "Update usuario",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor actualizado\"\n}"
+            },
+            "url": "{{baseUrl}}/personas/usuario/{{id_persona}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "seguridad",
+      "item": [
+        {
+          "name": "List permiso",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/seguridad/permiso?limit=20&offset=0"
+          }
+        },
+        {
+          "name": "Get permiso",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/seguridad/permiso/{{id_permiso}}"
+          }
+        },
+        {
+          "name": "Create permiso",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor\"\n}"
+            },
+            "url": "{{baseUrl}}/seguridad/permiso"
+          }
+        },
+        {
+          "name": "Update permiso",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor actualizado\"\n}"
+            },
+            "url": "{{baseUrl}}/seguridad/permiso/{{id_permiso}}"
+          }
+        },
+        {
+          "name": "List rol",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/seguridad/rol?limit=20&offset=0"
+          }
+        },
+        {
+          "name": "Get rol",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/seguridad/rol/{{id_rol}}"
+          }
+        },
+        {
+          "name": "Create rol",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor\"\n}"
+            },
+            "url": "{{baseUrl}}/seguridad/rol"
+          }
+        },
+        {
+          "name": "Update rol",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor actualizado\"\n}"
+            },
+            "url": "{{baseUrl}}/seguridad/rol/{{id_rol}}"
+          }
+        },
+        {
+          "name": "List rol-permiso",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/seguridad/rol-permiso?limit=20&offset=0"
+          }
+        },
+        {
+          "name": "Get rol-permiso",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/seguridad/rol-permiso/{{id_rol}}/{{id_permiso}}"
+          }
+        },
+        {
+          "name": "Create rol-permiso",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor\"\n}"
+            },
+            "url": "{{baseUrl}}/seguridad/rol-permiso"
+          }
+        },
+        {
+          "name": "Update rol-permiso",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor actualizado\"\n}"
+            },
+            "url": "{{baseUrl}}/seguridad/rol-permiso/{{id_rol}}/{{id_permiso}}"
+          }
+        },
+        {
+          "name": "List usuario-permiso",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/seguridad/usuario-permiso?limit=20&offset=0"
+          }
+        },
+        {
+          "name": "Get usuario-permiso",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/seguridad/usuario-permiso/{{id_persona}}/{{id_permiso}}"
+          }
+        },
+        {
+          "name": "Create usuario-permiso",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor\"\n}"
+            },
+            "url": "{{baseUrl}}/seguridad/usuario-permiso"
+          }
+        },
+        {
+          "name": "Update usuario-permiso",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor actualizado\"\n}"
+            },
+            "url": "{{baseUrl}}/seguridad/usuario-permiso/{{id_persona}}/{{id_permiso}}"
+          }
+        },
+        {
+          "name": "List usuario-rol",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/seguridad/usuario-rol?limit=20&offset=0"
+          }
+        },
+        {
+          "name": "Get usuario-rol",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/seguridad/usuario-rol/{{id_persona}}/{{id_rol}}"
+          }
+        },
+        {
+          "name": "Create usuario-rol",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor\"\n}"
+            },
+            "url": "{{baseUrl}}/seguridad/usuario-rol"
+          }
+        },
+        {
+          "name": "Update usuario-rol",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor actualizado\"\n}"
+            },
+            "url": "{{baseUrl}}/seguridad/usuario-rol/{{id_persona}}/{{id_rol}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "servicios_educativos",
+      "item": [
+        {
+          "name": "List asistencia-clase-curso",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/servicios_educativos/asistencia-clase-curso?limit=20&offset=0"
+          }
+        },
+        {
+          "name": "Get asistencia-clase-curso",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/servicios_educativos/asistencia-clase-curso/{{id_asistencia}}"
+          }
+        },
+        {
+          "name": "Create asistencia-clase-curso",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor\"\n}"
+            },
+            "url": "{{baseUrl}}/servicios_educativos/asistencia-clase-curso"
+          }
+        },
+        {
+          "name": "Update asistencia-clase-curso",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor actualizado\"\n}"
+            },
+            "url": "{{baseUrl}}/servicios_educativos/asistencia-clase-curso/{{id_asistencia}}"
+          }
+        },
+        {
+          "name": "List clase-curso",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/servicios_educativos/clase-curso?limit=20&offset=0"
+          }
+        },
+        {
+          "name": "Get clase-curso",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/servicios_educativos/clase-curso/{{id_clase_curso}}"
+          }
+        },
+        {
+          "name": "Create clase-curso",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor\"\n}"
+            },
+            "url": "{{baseUrl}}/servicios_educativos/clase-curso"
+          }
+        },
+        {
+          "name": "Update clase-curso",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor actualizado\"\n}"
+            },
+            "url": "{{baseUrl}}/servicios_educativos/clase-curso/{{id_clase_curso}}"
+          }
+        },
+        {
+          "name": "List clase-por-hora",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/servicios_educativos/clase-por-hora?limit=20&offset=0"
+          }
+        },
+        {
+          "name": "Get clase-por-hora",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/servicios_educativos/clase-por-hora/{{id_clase}}"
+          }
+        },
+        {
+          "name": "Create clase-por-hora",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor\"\n}"
+            },
+            "url": "{{baseUrl}}/servicios_educativos/clase-por-hora"
+          }
+        },
+        {
+          "name": "Update clase-por-hora",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor actualizado\"\n}"
+            },
+            "url": "{{baseUrl}}/servicios_educativos/clase-por-hora/{{id_clase}}"
+          }
+        },
+        {
+          "name": "List curso-version",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/servicios_educativos/curso-version?limit=20&offset=0"
+          }
+        },
+        {
+          "name": "Get curso-version",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/servicios_educativos/curso-version/{{id_curso_version}}"
+          }
+        },
+        {
+          "name": "Create curso-version",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor\"\n}"
+            },
+            "url": "{{baseUrl}}/servicios_educativos/curso-version"
+          }
+        },
+        {
+          "name": "Update curso-version",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor actualizado\"\n}"
+            },
+            "url": "{{baseUrl}}/servicios_educativos/curso-version/{{id_curso_version}}"
+          }
+        },
+        {
+          "name": "List horarios",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/servicios_educativos/horarios?limit=20&offset=0"
+          }
+        },
+        {
+          "name": "Get horarios",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/servicios_educativos/horarios/{{id_horario}}"
+          }
+        },
+        {
+          "name": "Create horarios",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor\"\n}"
+            },
+            "url": "{{baseUrl}}/servicios_educativos/horarios"
+          }
+        },
+        {
+          "name": "Update horarios",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor actualizado\"\n}"
+            },
+            "url": "{{baseUrl}}/servicios_educativos/horarios/{{id_horario}}"
+          }
+        },
+        {
+          "name": "List materia-tree",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/servicios_educativos/materia-tree?limit=20&offset=0"
+          }
+        },
+        {
+          "name": "Get materia-tree",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/servicios_educativos/materia-tree/{{id_tree}}"
+          }
+        },
+        {
+          "name": "Create materia-tree",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor\"\n}"
+            },
+            "url": "{{baseUrl}}/servicios_educativos/materia-tree"
+          }
+        },
+        {
+          "name": "Update materia-tree",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor actualizado\"\n}"
+            },
+            "url": "{{baseUrl}}/servicios_educativos/materia-tree/{{id_tree}}"
+          }
+        },
+        {
+          "name": "List paquetes-producto-educativo",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/servicios_educativos/paquetes-producto-educativo?limit=20&offset=0"
+          }
+        },
+        {
+          "name": "Get paquetes-producto-educativo",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/servicios_educativos/paquetes-producto-educativo/{{id_paquete}}"
+          }
+        },
+        {
+          "name": "Create paquetes-producto-educativo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor\"\n}"
+            },
+            "url": "{{baseUrl}}/servicios_educativos/paquetes-producto-educativo"
+          }
+        },
+        {
+          "name": "Update paquetes-producto-educativo",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor actualizado\"\n}"
+            },
+            "url": "{{baseUrl}}/servicios_educativos/paquetes-producto-educativo/{{id_paquete}}"
+          }
+        },
+        {
+          "name": "List producto-educativo",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/servicios_educativos/producto-educativo?limit=20&offset=0"
+          }
+        },
+        {
+          "name": "Get producto-educativo",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/servicios_educativos/producto-educativo/{{id_producto_educativo}}"
+          }
+        },
+        {
+          "name": "Create producto-educativo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor\"\n}"
+            },
+            "url": "{{baseUrl}}/servicios_educativos/producto-educativo"
+          }
+        },
+        {
+          "name": "Update producto-educativo",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor actualizado\"\n}"
+            },
+            "url": "{{baseUrl}}/servicios_educativos/producto-educativo/{{id_producto_educativo}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "societario",
+      "item": [
+        {
+          "name": "List clase-titulo",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/societario/clase-titulo?limit=20&offset=0"
+          }
+        },
+        {
+          "name": "Get clase-titulo",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/societario/clase-titulo/{{id_clase_titulo}}"
+          }
+        },
+        {
+          "name": "Create clase-titulo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor\"\n}"
+            },
+            "url": "{{baseUrl}}/societario/clase-titulo"
+          }
+        },
+        {
+          "name": "Update clase-titulo",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor actualizado\"\n}"
+            },
+            "url": "{{baseUrl}}/societario/clase-titulo/{{id_clase_titulo}}"
+          }
+        },
+        {
+          "name": "List dividendo",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/societario/dividendo?limit=20&offset=0"
+          }
+        },
+        {
+          "name": "Get dividendo",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/societario/dividendo/{{id_dividendo}}"
+          }
+        },
+        {
+          "name": "Create dividendo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor\"\n}"
+            },
+            "url": "{{baseUrl}}/societario/dividendo"
+          }
+        },
+        {
+          "name": "Update dividendo",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor actualizado\"\n}"
+            },
+            "url": "{{baseUrl}}/societario/dividendo/{{id_dividendo}}"
+          }
+        },
+        {
+          "name": "List dividendo-pago",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/societario/dividendo-pago?limit=20&offset=0"
+          }
+        },
+        {
+          "name": "Get dividendo-pago",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/societario/dividendo-pago/{{id_dividendo_pago}}"
+          }
+        },
+        {
+          "name": "Create dividendo-pago",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor\"\n}"
+            },
+            "url": "{{baseUrl}}/societario/dividendo-pago"
+          }
+        },
+        {
+          "name": "Update dividendo-pago",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor actualizado\"\n}"
+            },
+            "url": "{{baseUrl}}/societario/dividendo-pago/{{id_dividendo_pago}}"
+          }
+        },
+        {
+          "name": "List emision-titulo",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/societario/emision-titulo?limit=20&offset=0"
+          }
+        },
+        {
+          "name": "Get emision-titulo",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/societario/emision-titulo/{{id_emision}}"
+          }
+        },
+        {
+          "name": "Create emision-titulo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor\"\n}"
+            },
+            "url": "{{baseUrl}}/societario/emision-titulo"
+          }
+        },
+        {
+          "name": "Update emision-titulo",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor actualizado\"\n}"
+            },
+            "url": "{{baseUrl}}/societario/emision-titulo/{{id_emision}}"
+          }
+        },
+        {
+          "name": "List tenencia",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/societario/tenencia?limit=20&offset=0"
+          }
+        },
+        {
+          "name": "Get tenencia",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/societario/tenencia/{{id_tenencia}}"
+          }
+        },
+        {
+          "name": "Create tenencia",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor\"\n}"
+            },
+            "url": "{{baseUrl}}/societario/tenencia"
+          }
+        },
+        {
+          "name": "Update tenencia",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor actualizado\"\n}"
+            },
+            "url": "{{baseUrl}}/societario/tenencia/{{id_tenencia}}"
+          }
+        },
+        {
+          "name": "List titular",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/societario/titular?limit=20&offset=0"
+          }
+        },
+        {
+          "name": "Get titular",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/societario/titular/{{id_titular}}"
+          }
+        },
+        {
+          "name": "Create titular",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor\"\n}"
+            },
+            "url": "{{baseUrl}}/societario/titular"
+          }
+        },
+        {
+          "name": "Update titular",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor actualizado\"\n}"
+            },
+            "url": "{{baseUrl}}/societario/titular/{{id_titular}}"
+          }
+        },
+        {
+          "name": "List transferencia-titulo",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/societario/transferencia-titulo?limit=20&offset=0"
+          }
+        },
+        {
+          "name": "Get transferencia-titulo",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/societario/transferencia-titulo/{{id_transferencia}}"
+          }
+        },
+        {
+          "name": "Create transferencia-titulo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor\"\n}"
+            },
+            "url": "{{baseUrl}}/societario/transferencia-titulo"
+          }
+        },
+        {
+          "name": "Update transferencia-titulo",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Token",
+                "value": "{{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campo\": \"valor actualizado\"\n}"
+            },
+            "url": "{{baseUrl}}/societario/transferencia-titulo/{{id_transferencia}}"
+          }
+        }
+      ]
+    }
+  ]
+}

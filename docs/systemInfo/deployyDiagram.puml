@@ -1,0 +1,49 @@
+@startuml
+left to right direction
+
+title Diagrama de Despliegue Detallado - Contenedores
+
+node "Servidor / VM" {
+  node "Docker Host" {
+    node "nginx container" as NGINX
+    node "api-gateway container" as GW
+    node "nest-app container" as APP
+    node "worker-outbox container" as OUTBOX
+    node "worker-notifications container" as NOTIF
+    node "swagger-ui container" as SWAGGER
+  }
+}
+
+node "Servidor de Datos" {
+  database "postgresql container / service" as PG
+  queue "rabbitmq container / service" as MQ
+  node "minio / object-storage" as MINIO
+}
+
+node "Clientes" {
+  node "Portal Administrativo" as ADM
+  node "Portal Tutor" as TUTOR
+  node "Portal Estudiante / Padre" as CLIENTE
+}
+
+ADM --> NGINX
+TUTOR --> NGINX
+CLIENTE --> NGINX
+NGINX --> GW
+GW --> APP
+NGINX --> SWAGGER
+APP --> PG
+APP --> MQ
+APP --> MINIO
+OUTBOX --> PG
+OUTBOX --> MQ
+NOTIF --> MQ
+NOTIF --> PG
+
+note bottom of APP
+La aplicacion central puede iniciar
+como monolito modular en NestJS,
+preparado para evolucionar a microservicios.
+end note
+
+@enduml

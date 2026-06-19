@@ -1,0 +1,17 @@
+-- Referencia SQL de limpieza demo.
+--
+-- IMPORTANTE:
+-- La versión ejecutable y parametrizada por .env está en:
+--   scripts/demo-user-utils.js
+--
+-- Ejecuta:
+--   npm run db:clean:demo
+--
+-- La limpieza segura usa:
+--   TEST_USER_CLEAN_ID_FROM=900001
+--   TEST_USER_CLEAN_ID_TO=900099
+--   TEST_USER_EMAIL / Email
+--   TEST_USER_USERNAME / Usuario
+--   TEST_USER_TYPE
+--
+-- No usa TRUNCATE general para evitar borrar datos reales.
