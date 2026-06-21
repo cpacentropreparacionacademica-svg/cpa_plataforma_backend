@@ -185,3 +185,63 @@ TEST_USER_PASSWORD=DemoAdmin123!
 ```
 
 Los errores esperables de PostgreSQL como `NOT NULL`, `FOREIGN KEY`, `UNIQUE` o formatos inválidos se convierten en `400` o `409`, no en `500`. Un `500` en el smoke test sigue siendo falla real del backend.
+
+## Endpoints agregados: batch y contabilidad avanzada
+
+Esta versión agrega soporte para operaciones batch y asientos contables compuestos.
+
+### Batch genérico
+
+Todos los módulos CRUD ahora aceptan:
+
+```http
+POST /api/{modulo}/{recurso}/batch
+PATCH /api/{modulo}/{recurso}/batch
+PUT /api/{modulo}/{recurso}/batch
+```
+
+Formato recomendado:
+
+```json
+{
+  "items": [
+    { "campo": "valor" },
+    { "campo": "otro valor" }
+  ]
+}
+```
+
+Para actualizar:
+
+```json
+{
+  "items": [
+    {
+      "ids": { "id_departamento": 1 },
+      "data": { "descripcion": "Actualizado" }
+    }
+  ]
+}
+```
+
+### Transacción con movimientos en batch
+
+```http
+POST /api/contabilidad/transaccion/con-movimientos
+```
+
+Permite crear una transacción contable y todos sus movimientos en una sola operación atómica.
+
+### Revertir asiento
+
+```http
+POST /api/contabilidad/transaccion/{id_transaccion}/revert
+```
+
+Crea un nuevo asiento reverso con todos los movimientos invertidos: debe pasa a haber y haber pasa a debe.
+
+Más detalle en:
+
+```txt
+docs/endpoints/batch-y-contabilidad.md
+```

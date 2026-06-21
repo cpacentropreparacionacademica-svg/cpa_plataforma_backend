@@ -11,6 +11,34 @@ import { CrudService } from '../shared-crud/crud.service';
 export class AdministracionController {
   constructor(private readonly crud: CrudService) {}
 
+
+  @Post(':resourcePath/batch')
+  createBatch(
+    @Param('resourcePath') resourcePath: string,
+    @Body() body: unknown,
+    @Req() request: Request,
+  ) {
+    return this.crud.createBatch('administracion', resourcePath, body, request.user?.idPersona);
+  }
+
+  @Put(':resourcePath/batch')
+  updateBatch(
+    @Param('resourcePath') resourcePath: string,
+    @Body() body: unknown,
+    @Req() request: Request,
+  ) {
+    return this.crud.updateBatch('administracion', resourcePath, body, request.user?.idPersona);
+  }
+
+  @Patch(':resourcePath/batch')
+  patchBatch(
+    @Param('resourcePath') resourcePath: string,
+    @Body() body: unknown,
+    @Req() request: Request,
+  ) {
+    return this.crud.updateBatch('administracion', resourcePath, body, request.user?.idPersona);
+  }
+
   @Post(':resourcePath')
   create(
     @Param('resourcePath') resourcePath: string,

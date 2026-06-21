@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { DataSource } from 'typeorm';
+import { DataSource, EntityManager } from 'typeorm';
 import { ResourceConfig } from '../../modules/resource-registry';
 import { quoteIdentifier, quoteTable } from '../utils/sql.util';
 import { ResourceMetadataService } from '../services/resource-metadata.service';
@@ -31,30 +31,32 @@ export class CrudRepository {
   constructor(private readonly dataSource: DataSource, private readonly metadata: ResourceMetadataService) {}
 
   async create(resource: ResourceConfig, payload: Record<string, unknown>, authUserId?: string): Promise<Record<string, unknown>> {
-    const columnNames = await this.metadata.getColumnNames(resource);
-    const cleanPayload = this.cleanPayload(payload, columnNames, false);
+    try {
+      return await this.insertOne(this.dataSource.manager, resource, payload, authUserId);
+    } catch (error) {
+      const httpException = toHttpDatabaseException(error);
+      if (httpException) throw httpException;
+      throw error;
+    }
+  }
 
-    if (authUserId && columnNames.has('id_usuario_creador') && cleanPayload.id_usuario_creador === undefined) {
-      cleanPayload.id_usuario_creador = authUserId;
+  async createMany(resource: ResourceConfig, payloads: Record<string, unknown>[], authUserId?: string): Promise<Record<string, unknown>[]> {
+    if (!Array.isArray(payloads) || payloads.length === 0) {
+      throw new BadRequestException('El batch debe contener un arreglo items con al menos un registro.');
     }
 
-    if (Object.keys(cleanPayload).length === 0) {
-      throw new BadRequestException('No existen campos válidos para crear el registro.');
+    if (payloads.length > 200) {
+      throw new BadRequestException('El batch no puede superar 200 registros por solicitud.');
     }
-
-    const fields = Object.keys(cleanPayload);
-    const table = quoteTable(resource.schema, resource.tableName);
-    const columns = fields.map(quoteIdentifier).join(', ');
-    const placeholders = fields.map((_, index) => `$${index + 1}`).join(', ');
-    const values = fields.map((field) => cleanPayload[field]);
 
     try {
-      const rows = await this.dataSource.query(
-        `INSERT INTO ${table} (${columns}) VALUES (${placeholders}) RETURNING *`,
-        values,
-      ) as Record<string, unknown>[];
-
-      return rows[0];
+      return await this.dataSource.transaction(async (manager) => {
+        const rows: Record<string, unknown>[] = [];
+        for (const payload of payloads) {
+          rows.push(await this.insertOne(manager, resource, payload, authUserId));
+        }
+        return rows;
+      });
     } catch (error) {
       const httpException = toHttpDatabaseException(error);
       if (httpException) throw httpException;
@@ -63,38 +65,37 @@ export class CrudRepository {
   }
 
   async update(resource: ResourceConfig, idValues: Record<string, unknown>, payload: Record<string, unknown>, authUserId?: string): Promise<Record<string, unknown>> {
-    const columnNames = await this.metadata.getColumnNames(resource);
-    const cleanPayload = this.cleanPayload(payload, columnNames, true);
-
-    for (const primaryKey of resource.primaryKeys) {
-      delete cleanPayload[primaryKey];
-    }
-
-    if (authUserId && columnNames.has('id_usuario_modificacion') && cleanPayload.id_usuario_modificacion === undefined) {
-      cleanPayload.id_usuario_modificacion = authUserId;
-    }
-
-    if (columnNames.has('fecha_modificacion') && cleanPayload.fecha_modificacion === undefined) {
-      cleanPayload.fecha_modificacion = new Date();
-    }
-
-    if (Object.keys(cleanPayload).length === 0) {
-      throw new BadRequestException('No existen campos válidos para actualizar el registro.');
-    }
-
-    const fields = Object.keys(cleanPayload);
-    const table = quoteTable(resource.schema, resource.tableName);
-    const setSql = fields.map((field, index) => `${quoteIdentifier(field)} = $${index + 1}`).join(', ');
-    const values = fields.map((field) => cleanPayload[field]);
-    const where = this.buildWhereSql(resource, idValues, values.length + 1);
     try {
-      const rows = await this.dataSource.query(
-        `UPDATE ${table} SET ${setSql} WHERE ${where.sql} RETURNING *`,
-        [...values, ...where.values],
-      ) as Record<string, unknown>[];
+      return await this.updateOne(this.dataSource.manager, resource, idValues, payload, authUserId);
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      const httpException = toHttpDatabaseException(error);
+      if (httpException) throw httpException;
+      throw error;
+    }
+  }
 
-      if (!rows[0]) throw new NotFoundException(`No se encontró el registro de ${resource.entity}.`);
-      return rows[0];
+  async updateMany(
+    resource: ResourceConfig,
+    items: Array<{ ids: Record<string, unknown>; data: Record<string, unknown> }>,
+    authUserId?: string,
+  ): Promise<Record<string, unknown>[]> {
+    if (!Array.isArray(items) || items.length === 0) {
+      throw new BadRequestException('El batch debe contener un arreglo items con al menos un registro.');
+    }
+
+    if (items.length > 200) {
+      throw new BadRequestException('El batch no puede superar 200 registros por solicitud.');
+    }
+
+    try {
+      return await this.dataSource.transaction(async (manager) => {
+        const rows: Record<string, unknown>[] = [];
+        for (const item of items) {
+          rows.push(await this.updateOne(manager, resource, item.ids, item.data, authUserId));
+        }
+        return rows;
+      });
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
       const httpException = toHttpDatabaseException(error);
@@ -137,6 +138,78 @@ export class CrudRepository {
     ) as Record<string, unknown>[];
 
     return { count: countRows[0]?.count || 0, rows, limit, offset };
+  }
+
+  private async insertOne(
+    manager: EntityManager,
+    resource: ResourceConfig,
+    payload: Record<string, unknown>,
+    authUserId?: string,
+  ): Promise<Record<string, unknown>> {
+    const columnNames = await this.metadata.getColumnNames(resource);
+    const cleanPayload = this.cleanPayload(payload, columnNames, false);
+
+    if (authUserId && columnNames.has('id_usuario_creador') && cleanPayload.id_usuario_creador === undefined) {
+      cleanPayload.id_usuario_creador = authUserId;
+    }
+
+    if (Object.keys(cleanPayload).length === 0) {
+      throw new BadRequestException('No existen campos válidos para crear el registro.');
+    }
+
+    const fields = Object.keys(cleanPayload);
+    const table = quoteTable(resource.schema, resource.tableName);
+    const columns = fields.map(quoteIdentifier).join(', ');
+    const placeholders = fields.map((_, index) => `$${index + 1}`).join(', ');
+    const values = fields.map((field) => cleanPayload[field]);
+
+    const rows = await manager.query(
+      `INSERT INTO ${table} (${columns}) VALUES (${placeholders}) RETURNING *`,
+      values,
+    ) as Record<string, unknown>[];
+
+    return rows[0];
+  }
+
+  private async updateOne(
+    manager: EntityManager,
+    resource: ResourceConfig,
+    idValues: Record<string, unknown>,
+    payload: Record<string, unknown>,
+    authUserId?: string,
+  ): Promise<Record<string, unknown>> {
+    const columnNames = await this.metadata.getColumnNames(resource);
+    const cleanPayload = this.cleanPayload(payload, columnNames, true);
+
+    for (const primaryKey of resource.primaryKeys) {
+      delete cleanPayload[primaryKey];
+    }
+
+    if (authUserId && columnNames.has('id_usuario_modificacion') && cleanPayload.id_usuario_modificacion === undefined) {
+      cleanPayload.id_usuario_modificacion = authUserId;
+    }
+
+    if (columnNames.has('fecha_modificacion') && cleanPayload.fecha_modificacion === undefined) {
+      cleanPayload.fecha_modificacion = new Date();
+    }
+
+    if (Object.keys(cleanPayload).length === 0) {
+      throw new BadRequestException('No existen campos válidos para actualizar el registro.');
+    }
+
+    const fields = Object.keys(cleanPayload);
+    const table = quoteTable(resource.schema, resource.tableName);
+    const setSql = fields.map((field, index) => `${quoteIdentifier(field)} = $${index + 1}`).join(', ');
+    const values = fields.map((field) => cleanPayload[field]);
+    const where = this.buildWhereSql(resource, idValues, values.length + 1);
+
+    const rows = await manager.query(
+      `UPDATE ${table} SET ${setSql} WHERE ${where.sql} RETURNING *`,
+      [...values, ...where.values],
+    ) as Record<string, unknown>[];
+
+    if (!rows[0]) throw new NotFoundException(`No se encontró el registro de ${resource.entity}.`);
+    return rows[0];
   }
 
   private cleanPayload(payload: Record<string, unknown>, columnNames: Set<string>, stripProtected: boolean): Record<string, unknown> {

@@ -3,13 +3,69 @@ import { ApiCookieAuth, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import { ResourceModuleName } from '../../common/decorators/resource-module.decorator';
 import { CrudService } from '../shared-crud/crud.service';
+import { ContabilidadAccountingService } from './contabilidad-accounting.service';
 
 @ApiTags('contabilidad')
 @ApiCookieAuth()
 @ResourceModuleName('contabilidad')
 @Controller('contabilidad')
 export class ContabilidadController {
-  constructor(private readonly crud: CrudService) {}
+  constructor(
+    private readonly crud: CrudService,
+    private readonly accounting: ContabilidadAccountingService,
+  ) {}
+
+  @Post(':resourcePath/con-movimientos')
+  createTransaccionConMovimientos(
+    @Param('resourcePath') resourcePath: string,
+    @Body() body: Record<string, unknown>,
+    @Req() request: Request,
+  ) {
+    if (resourcePath !== 'transaccion') {
+      return this.crud.create('contabilidad', resourcePath, body, request.user?.idPersona);
+    }
+    return this.accounting.crearTransaccionConMovimientos(body, request.user?.idPersona);
+  }
+
+  @Post(':resourcePath/:id/revert')
+  revertirAsiento(
+    @Param('resourcePath') resourcePath: string,
+    @Param('id') id: string,
+    @Body() body: Record<string, unknown>,
+    @Req() request: Request,
+  ) {
+    if (resourcePath !== 'transaccion') {
+      return this.crud.create('contabilidad', resourcePath, body, request.user?.idPersona);
+    }
+    return this.accounting.revertirAsiento(id, body, request.user?.idPersona);
+  }
+
+  @Post(':resourcePath/batch')
+  createBatch(
+    @Param('resourcePath') resourcePath: string,
+    @Body() body: unknown,
+    @Req() request: Request,
+  ) {
+    return this.crud.createBatch('contabilidad', resourcePath, body, request.user?.idPersona);
+  }
+
+  @Put(':resourcePath/batch')
+  updateBatch(
+    @Param('resourcePath') resourcePath: string,
+    @Body() body: unknown,
+    @Req() request: Request,
+  ) {
+    return this.crud.updateBatch('contabilidad', resourcePath, body, request.user?.idPersona);
+  }
+
+  @Patch(':resourcePath/batch')
+  patchBatch(
+    @Param('resourcePath') resourcePath: string,
+    @Body() body: unknown,
+    @Req() request: Request,
+  ) {
+    return this.crud.updateBatch('contabilidad', resourcePath, body, request.user?.idPersona);
+  }
 
   @Post(':resourcePath')
   create(

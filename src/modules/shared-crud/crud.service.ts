@@ -22,12 +22,38 @@ export class CrudService {
     return { success: true, message: `${resource.entity} creado correctamente.`, data };
   }
 
+  async createBatch(moduleName: string, resourcePath: string, payload: unknown, authUserId?: string) {
+    const resource = this.findResource(moduleName, resourcePath);
+    this.assertWriteAllowedForSmoke('POST', resource);
+    const items = this.normalizeCreateBatchPayload(payload);
+    const data = await this.repository.createMany(resource, items, authUserId);
+    return {
+      success: true,
+      message: `${data.length} registro(s) de ${resource.entity} creados correctamente.`,
+      data,
+      count: data.length,
+    };
+  }
+
   async update(moduleName: string, resourcePath: string, ids: string[], payload: Record<string, unknown>, authUserId?: string) {
     const resource = this.findResource(moduleName, resourcePath);
     const idValues = this.mapIds(resource, ids);
     this.assertWriteAllowedForSmoke('UPDATE', resource);
     const data = await this.repository.update(resource, idValues, payload, authUserId);
     return { success: true, message: `${resource.entity} actualizado correctamente.`, data };
+  }
+
+  async updateBatch(moduleName: string, resourcePath: string, payload: unknown, authUserId?: string) {
+    const resource = this.findResource(moduleName, resourcePath);
+    this.assertWriteAllowedForSmoke('UPDATE', resource);
+    const items = this.normalizeUpdateBatchPayload(resource, payload);
+    const data = await this.repository.updateMany(resource, items, authUserId);
+    return {
+      success: true,
+      message: `${data.length} registro(s) de ${resource.entity} actualizados correctamente.`,
+      data,
+      count: data.length,
+    };
   }
 
   async get(moduleName: string, resourcePath: string, ids: string[]) {
@@ -46,6 +72,51 @@ export class CrudService {
       data,
       pagination: { count: data.count, limit: data.limit, offset: data.offset },
     };
+  }
+
+
+  private normalizeCreateBatchPayload(payload: unknown): Record<string, unknown>[] {
+    const candidate = Array.isArray(payload) ? payload : (payload as { items?: unknown })?.items;
+
+    if (!Array.isArray(candidate) || candidate.length === 0) {
+      throw new BadRequestException('El batch de creación debe enviarse como arreglo o como { items: [...] }.');
+    }
+
+    return candidate.map((item, index) => {
+      if (!item || typeof item !== 'object' || Array.isArray(item)) {
+        throw new BadRequestException(`El item ${index + 1} del batch debe ser un objeto JSON.`);
+      }
+      return item as Record<string, unknown>;
+    });
+  }
+
+  private normalizeUpdateBatchPayload(resource: ResourceConfig, payload: unknown): Array<{ ids: Record<string, unknown>; data: Record<string, unknown> }> {
+    const candidate = Array.isArray(payload) ? payload : (payload as { items?: unknown })?.items;
+
+    if (!Array.isArray(candidate) || candidate.length === 0) {
+      throw new BadRequestException('El batch de actualización debe enviarse como arreglo o como { items: [...] }.');
+    }
+
+    return candidate.map((item, index) => {
+      if (!item || typeof item !== 'object' || Array.isArray(item)) {
+        throw new BadRequestException(`El item ${index + 1} del batch debe ser un objeto JSON.`);
+      }
+
+      const source = item as Record<string, unknown>;
+      const idsSource = (source.ids && typeof source.ids === 'object' && !Array.isArray(source.ids))
+        ? source.ids as Record<string, unknown>
+        : source;
+      const dataSource = (source.data && typeof source.data === 'object' && !Array.isArray(source.data))
+        ? source.data as Record<string, unknown>
+        : source;
+
+      const ids = resource.primaryKeys.reduce<Record<string, unknown>>((acc, primaryKey) => {
+        acc[primaryKey] = idsSource[primaryKey];
+        return acc;
+      }, {});
+
+      return { ids, data: dataSource };
+    });
   }
 
 
