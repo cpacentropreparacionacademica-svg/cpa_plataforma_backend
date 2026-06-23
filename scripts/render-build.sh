@@ -1,16 +1,26 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Render sometimes runs global Yarn Classic (v1) even when the repository
-# contains a Yarn Berry lockfile. Corepack activates the Yarn version declared
-# in package.json: "packageManager": "yarn@4.9.2".
-corepack enable
-corepack prepare yarn@4.9.2 --activate
+echo "Node version: $(node --version)"
+echo "NPM version: $(npm --version)"
 
-# The project has changed dependencies several times during migration. This
-# allows Render to regenerate the lock data during the first corrected deploy.
-# After a successful deploy, run yarn install locally and commit yarn.lock;
-# then this can be changed back to: yarn install --immutable
-yarn install --immutable=false
+# Render's filesystem does not allow Corepack to create global shims in /usr/bin.
+# DO NOT run: corepack enable
+# Instead, keep Corepack/Yarn data inside the project workspace and invoke Yarn through Corepack.
+export COREPACK_HOME="${PWD}/.corepack"
+export YARN_ENABLE_GLOBAL_CACHE=false
 
-yarn build
+if command -v corepack >/dev/null 2>&1; then
+  echo "Using Corepack without global enable..."
+  corepack prepare yarn@4.9.2 --activate
+  corepack yarn --version
+
+  # First deploys after dependency changes may need lockfile regeneration.
+  # Once yarn.lock is updated locally and committed, this can be changed to --immutable.
+  corepack yarn install --immutable=false
+else
+  echo "Corepack not available. Falling back to npm install."
+  npm install --include=dev --no-audit --no-fund
+fi
+
+npm run build

@@ -2,16 +2,15 @@
 
 ## Error corregido
 
-Render estaba ejecutando:
+Render puede fallar con Yarn por dos motivos distintos:
 
-```bash
-yarn install --frozen-lockfile --production=false && yarn build
-```
+1. `yarn install --frozen-lockfile` falla si `package.json` y `yarn.lock` no están sincronizados.
+2. `corepack enable` falla en Render porque intenta crear/modificar shims globales en `/usr/bin`, pero ese directorio puede estar en modo solo lectura.
 
-pero el repositorio contiene un `yarn.lock` de Yarn Berry/Yarn 4, mientras que Render estaba usando Yarn Classic 1.22.22. Por eso aparece:
+El error típico del segundo caso es:
 
 ```txt
-error Your lockfile needs to be updated, but yarn was run with `--frozen-lockfile`.
+Internal Error: EROFS: read-only file system, unlink '/usr/bin/pnpm'
 ```
 
 ## Build Command recomendado
@@ -30,12 +29,13 @@ node dist/main.js
 
 ## Qué hace `scripts/render-build.sh`
 
-1. Activa Corepack.
-2. Fuerza Yarn 4.9.2, que coincide con el lockfile moderno.
-3. Instala dependencias permitiendo regenerar lock en este primer deploy corregido.
-4. Compila NestJS.
+1. No ejecuta `corepack enable`.
+2. Define `COREPACK_HOME` dentro del workspace del proyecto.
+3. Prepara Yarn 4.9.2 con Corepack sin modificar `/usr/bin`.
+4. Instala dependencias con `corepack yarn install --immutable=false`.
+5. Compila con `npm run build`.
 
-## Después del primer deploy exitoso
+## Después del deploy exitoso
 
 En local, ejecutar:
 
@@ -44,20 +44,20 @@ corepack enable
 corepack prepare yarn@4.9.2 --activate
 yarn install
 git add package.json yarn.lock .yarnrc.yml scripts/render-build.sh render.yaml docs/deploy/render.md
-git commit -m "fix: align Render build with Yarn Berry lockfile"
+git commit -m "fix: make Render build avoid global corepack shims"
 git push
 ```
 
-Luego, para un modo más estricto en CI, se puede cambiar en `scripts/render-build.sh`:
+Luego puedes cambiar en `scripts/render-build.sh`:
 
 ```bash
-yarn install --immutable=false
+corepack yarn install --immutable=false
 ```
 
 por:
 
 ```bash
-yarn install --immutable
+corepack yarn install --immutable
 ```
 
-siempre que `yarn.lock` ya esté actualizado y committeado.
+solo cuando `yarn.lock` ya esté actualizado y committeado.
