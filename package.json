@@ -22,7 +22,9 @@
     "db:migrate:production": "node scripts/migrate-prod.js",
     "db:migrate:prod:fresh": "node scripts/migrate-prod.js --fresh",
     "db:migrate:production:fresh": "node scripts/migrate-prod.js --fresh",
-    "db:reset:prod": "node scripts/migrate-prod.js --fresh"
+    "db:reset:prod": "node scripts/migrate-prod.js --fresh",
+    "render:build": "bash scripts/render-build.sh",
+    "render:start": "node dist/main.js"
   },
   "dependencies": {
     "@nestjs/common": "^10.4.15",
@@ -80,5 +82,6 @@
   },
   "engines": {
     "node": ">=20 <27"
-  }
+  },
+  "packageManager": "yarn@4.9.2"
 }
