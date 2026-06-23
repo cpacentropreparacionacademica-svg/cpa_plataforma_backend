@@ -17,7 +17,12 @@
     "start:dev:trace": "node --trace-deprecation ./node_modules/@nestjs/cli/bin/nest.js start --watch",
     "db:seed:demo": "node scripts/seed-demo-user.js",
     "db:clean:demo": "node scripts/clean-demo-data.js",
-    "test:smoke:summary": "node -e \"process.env.SMOKE_PRINT_SUMMARY='true'; require('jest/bin/jest');\" --runTestsByPath test/smoke.spec.ts --runInBand"
+    "test:smoke:summary": "node -e \"process.env.SMOKE_PRINT_SUMMARY='true'; require('jest/bin/jest');\" --runTestsByPath test/smoke.spec.ts --runInBand",
+    "db:migrate:prod": "node scripts/migrate-prod.js",
+    "db:migrate:production": "node scripts/migrate-prod.js",
+    "db:migrate:prod:fresh": "node scripts/migrate-prod.js --fresh",
+    "db:migrate:production:fresh": "node scripts/migrate-prod.js --fresh",
+    "db:reset:prod": "node scripts/migrate-prod.js --fresh"
   },
   "dependencies": {
     "@nestjs/common": "^10.4.15",
@@ -38,7 +43,7 @@
     "typeorm": "^0.3.20"
   },
   "devDependencies": {
-    "@nestjs/cli": "^10.4.8",
+    "@nestjs/cli": "^11.0.23",
     "@nestjs/schematics": "^10.2.3",
     "@nestjs/testing": "^10.4.15",
     "@types/compression": "^1.7.5",
@@ -46,15 +51,15 @@
     "@types/express": "^4.17.21",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.10.2",
+    "@types/pg": "^8.11.10",
+    "@types/supertest": "^6.0.2",
     "eslint": "^9.17.0",
     "jest": "^29.7.0",
     "prettier": "^3.4.2",
     "supertest": "^7.0.0",
     "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",
-    "typescript": "^5.7.2",
-    "@types/pg": "^8.11.10",
-    "@types/supertest": "^6.0.2"
+    "typescript": "^5.7.2"
   },
   "jest": {
     "moduleFileExtensions": [

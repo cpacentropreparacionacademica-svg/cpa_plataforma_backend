@@ -245,3 +245,80 @@ Más detalle en:
 ```txt
 docs/endpoints/batch-y-contabilidad.md
 ```
+
+## Producción: migración inicial, plan de cuentas y usuarios internos
+
+Para levantar una base PostgreSQL limpia en producción, configura `.env` con las credenciales de conexión y ejecuta:
+
+```bash
+yarn db:migrate:prod
+```
+
+Esto aplica las migraciones de `docs/db/migrations/` y registra el historial en `public.schema_migrations`.
+
+Incluye:
+
+1. creación del esquema completo de base de datos;
+2. plan de cuentas fundamental para operación educativa privada;
+3. usuarios iniciales internos:
+
+```txt
+Administrador:
+Email: pablo.arauz@cpa.test
+Usuario: pablo.admin
+Password: PabloAdmin2026!
+
+Contador:
+Email: maria.sonia.caballero@cpa.test
+Usuario: maria.contador
+Password: MariaContador2026!
+```
+
+Más detalle en:
+
+```txt
+docs/db/production-bootstrap.md
+```
+
+En producción real, cambia estas contraseñas después del primer acceso.
+
+
+## Migración productiva fresca
+
+Para reconstruir una base existente desde cero, primero borrando tablas/schemas del sistema CPA y luego aplicando migraciones:
+
+```bash
+yarn db:migrate:prod:fresh
+```
+
+El reset destructivo usa `DROP TABLE IF EXISTS ... CASCADE` y después `DROP SCHEMA IF EXISTS ... CASCADE` para evitar errores por tipos ENUM, funciones o secuencias ya existentes.
+
+No uses este comando si necesitas conservar datos reales.
+
+
+## Seeds productivos ampliados
+
+Este paquete incluye seeds productivos generados desde los JSON entregados:
+
+- `docs/db/seed-source/plan_cuentas_ultradetallado_bolivia_servicios_educativos_tienda.json`
+- `docs/db/seed-source/seed_rbac_roles_permisos_entidades_base_cpa.json`
+
+Comando recomendado para base limpia:
+
+```bash
+yarn db:migrate:prod:fresh
+```
+
+Credenciales iniciales:
+
+```txt
+Pablo Arauz Caballero
+Usuario: pablo.admin
+Email: pablo.arauz@cpa.test
+Password: PabloAdmin2026!
+
+Maria Sonia Caballero
+Usuario: maria.contador
+Email: maria.sonia.caballero@cpa.test
+Password: MariaContador2026!
+```
