@@ -8,7 +8,7 @@
     "start": "nest start",
     "start:dev": "nest start --watch",
     "build": "nest build",
-    "start:prod": "node dist/main.js",
+    "start:prod": "node scripts/render-start.js",
     "type-check": "tsc --noEmit",
     "lint": "eslint \"src/**/*.ts\" \"test/**/*.ts\"",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\" \"docs/**/*.md\"",
@@ -24,7 +24,7 @@
     "db:migrate:production:fresh": "node scripts/migrate-prod.js --fresh",
     "db:reset:prod": "node scripts/migrate-prod.js --fresh",
     "render:build": "bash scripts/render-build.sh",
-    "render:start": "node dist/main.js"
+    "render:start": "node scripts/render-start.js"
   },
   "dependencies": {
     "@nestjs/common": "^10.4.15",

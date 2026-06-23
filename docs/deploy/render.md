@@ -1,68 +1,43 @@
 # Deploy en Render
 
-## Error corregido
-
-Render puede fallar con Yarn por dos motivos distintos:
-
-1. `yarn install --frozen-lockfile` falla si `package.json` y `yarn.lock` no están sincronizados.
-2. `corepack enable` falla en Render porque intenta crear/modificar shims globales en `/usr/bin`, pero ese directorio puede estar en modo solo lectura.
-
-El error típico del segundo caso es:
-
-```txt
-Internal Error: EROFS: read-only file system, unlink '/usr/bin/pnpm'
-```
-
-## Build Command recomendado
-
-En Render, usar:
+## Build Command
 
 ```bash
 bash scripts/render-build.sh
 ```
 
-## Start Command recomendado
+## Start Command
 
 ```bash
-node dist/main.js
+node scripts/render-start.js
 ```
 
-## Qué hace `scripts/render-build.sh`
+## Por qué no usar `node dist/main.js` directamente
 
-1. No ejecuta `corepack enable`.
-2. Define `COREPACK_HOME` dentro del workspace del proyecto.
-3. Prepara Yarn 4.9.2 con Corepack sin modificar `/usr/bin`.
-4. Instala dependencias con `corepack yarn install`.
-5. Compila con `npm run build`.
+Dependiendo de la configuración de TypeScript/Nest, el archivo de entrada compilado puede quedar en:
 
-## Después del deploy exitoso
+- `dist/main.js`
+- `dist/src/main.js`
 
-En local, ejecutar:
+El script `scripts/render-start.js` detecta automáticamente cualquiera de esas dos rutas y arranca la aplicación desde la que exista.
 
-```bash
-corepack enable
-corepack prepare yarn@4.9.2 --activate
-yarn install
-git add package.json yarn.lock .yarnrc.yml scripts/render-build.sh render.yaml docs/deploy/render.md
-git commit -m "fix: make Render build avoid global corepack shims"
-git push
+## Variables mínimas recomendadas
+
+Configura en Render las variables de conexión a PostgreSQL que use tu backend, por ejemplo:
+
+```env
+NODE_ENV=production
+AUTH_REQUIRED=true
+ENABLE_PUBLIC_SIGNUP=false
+DATABASE_URL=<connection string de PostgreSQL>
 ```
 
-Luego puedes cambiar en `scripts/render-build.sh`:
+Si tu proyecto usa variables separadas, configura también:
 
-```bash
-corepack yarn install
+```env
+DB_HOST=
+DB_PORT=5432
+DB_USERNAME=
+DB_PASSWORD=
+DB_DATABASE=
 ```
-
-por:
-
-```bash
-corepack yarn install --immutable
-```
-
-solo cuando `yarn.lock` ya esté actualizado y committeado.
-
-
-## Nota importante Yarn 4
-
-Yarn 4 no acepta `--immutable=false`. En Render/CI se desactiva el modo immutable usando `YARN_ENABLE_IMMUTABLE_INSTALLS=false` y luego se ejecuta `corepack yarn install`.

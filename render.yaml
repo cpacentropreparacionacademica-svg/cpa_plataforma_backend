@@ -3,7 +3,7 @@ services:
     name: cpa-plataforma-backend
     env: node
     buildCommand: bash scripts/render-build.sh
-    startCommand: node dist/main.js
+    startCommand: node scripts/render-start.js
     envVars:
       - key: NODE_ENV
         value: production

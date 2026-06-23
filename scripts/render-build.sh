@@ -16,10 +16,6 @@ if command -v corepack >/dev/null 2>&1; then
   echo "Using Corepack without global enable..."
   corepack prepare yarn@4.9.2 --activate
   corepack yarn --version
-
-  # Yarn 4 does not support --immutable=false.
-  # On CI, Yarn enables immutable installs by default, so we disable it through
-  # YARN_ENABLE_IMMUTABLE_INSTALLS=false above and run a normal install.
   corepack yarn install
 else
   echo "Corepack not available. Falling back to npm install."
@@ -27,3 +23,15 @@ else
 fi
 
 npm run build
+
+echo "Verificando salida del build..."
+if [ -f "dist/main.js" ]; then
+  echo "OK: dist/main.js generado."
+elif [ -f "dist/src/main.js" ]; then
+  echo "OK: dist/src/main.js generado. El start script lo detectará automáticamente."
+else
+  echo "ERROR: no se encontró dist/main.js ni dist/src/main.js."
+  echo "Contenido de dist:"
+  find dist -maxdepth 4 -type f | sort || true
+  exit 1
+fi
