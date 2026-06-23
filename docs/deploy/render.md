@@ -32,7 +32,7 @@ node dist/main.js
 1. No ejecuta `corepack enable`.
 2. Define `COREPACK_HOME` dentro del workspace del proyecto.
 3. Prepara Yarn 4.9.2 con Corepack sin modificar `/usr/bin`.
-4. Instala dependencias con `corepack yarn install --immutable=false`.
+4. Instala dependencias con `corepack yarn install`.
 5. Compila con `npm run build`.
 
 ## Después del deploy exitoso
@@ -51,7 +51,7 @@ git push
 Luego puedes cambiar en `scripts/render-build.sh`:
 
 ```bash
-corepack yarn install --immutable=false
+corepack yarn install
 ```
 
 por:
@@ -61,3 +61,8 @@ corepack yarn install --immutable
 ```
 
 solo cuando `yarn.lock` ya esté actualizado y committeado.
+
+
+## Nota importante Yarn 4
+
+Yarn 4 no acepta `--immutable=false`. En Render/CI se desactiva el modo immutable usando `YARN_ENABLE_IMMUTABLE_INSTALLS=false` y luego se ejecuta `corepack yarn install`.
