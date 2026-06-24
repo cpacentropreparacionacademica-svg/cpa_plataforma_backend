@@ -65,34 +65,52 @@ export class CrudService {
 
   async list(moduleName: string, resourcePath: string, query: Record<string, unknown>) {
     const resource = this.findResource(moduleName, resourcePath);
-    const data = await this.repository.list(resource, query);
-    const page = data.limit > 0 ? Math.floor(data.offset / data.limit) + 1 : 1;
-    const rows = data.rows;
+    const result = await this.repository.list(resource, query);
+    const page = result.limit > 0 ? Math.floor(result.offset / result.limit) + 1 : 1;
+    const rows = result.rows;
     const pagination = {
-      count: data.count,
-      total: data.count,
-      limit: data.limit,
-      offset: data.offset,
+      count: result.count,
+      total: result.count,
+      limit: result.limit,
+      offset: result.offset,
       page,
-      pages: data.limit > 0 ? Math.ceil(data.count / data.limit) : 1,
+      pages: result.limit > 0 ? Math.ceil(result.count / result.limit) : 1,
     };
 
-    const flatResponse = String(query.flat || query.format || '').toLowerCase();
-    const shouldReturnFlatData = flatResponse === 'true' || flatResponse === 'array' || flatResponse === 'flat';
+    /**
+     * Contrato corregido para el frontend:
+     * - Por defecto `data` vuelve a ser directamente el arreglo de registros.
+     *   Esto permite que el front haga `response.data.data.map(...)` sin romperse.
+     * - Para compatibilidad técnica, también se mantienen `rows`, `items`, `records`,
+     *   `count`, `total`, `pagination` y `meta` en la raíz de la respuesta.
+     * - Si alguna herramienta vieja necesita el objeto anterior `{ count, rows, limit, offset }`,
+     *   puede pedirlo con `?dataShape=legacy` o `?format=legacy`.
+     */
+    const dataShape = String(query.dataShape || query.format || '').toLowerCase();
+    const legacyData = {
+      count: result.count,
+      rows,
+      items: rows,
+      records: rows,
+      limit: result.limit,
+      offset: result.offset,
+      page,
+      total: result.count,
+      pagination,
+    };
+    const shouldReturnLegacyData = dataShape === 'legacy' || dataShape === 'object' || dataShape === 'rows';
 
     return {
       success: true,
       message: `${resource.entity} listado correctamente.`,
-      // Compatibilidad hacia atrás: el contrato original conserva data.count/data.rows.
-      data: shouldReturnFlatData ? rows : data,
-      // Compatibilidad hacia frontend: muchas tablas esperan rows/items directamente.
+      data: shouldReturnLegacyData ? legacyData : rows,
       rows,
       items: rows,
       records: rows,
-      count: data.count,
-      total: data.count,
-      limit: data.limit,
-      offset: data.offset,
+      count: result.count,
+      total: result.count,
+      limit: result.limit,
+      offset: result.offset,
       page,
       pagination,
       meta: pagination,
