@@ -66,11 +66,36 @@ export class CrudService {
   async list(moduleName: string, resourcePath: string, query: Record<string, unknown>) {
     const resource = this.findResource(moduleName, resourcePath);
     const data = await this.repository.list(resource, query);
+    const page = data.limit > 0 ? Math.floor(data.offset / data.limit) + 1 : 1;
+    const rows = data.rows;
+    const pagination = {
+      count: data.count,
+      total: data.count,
+      limit: data.limit,
+      offset: data.offset,
+      page,
+      pages: data.limit > 0 ? Math.ceil(data.count / data.limit) : 1,
+    };
+
+    const flatResponse = String(query.flat || query.format || '').toLowerCase();
+    const shouldReturnFlatData = flatResponse === 'true' || flatResponse === 'array' || flatResponse === 'flat';
+
     return {
       success: true,
       message: `${resource.entity} listado correctamente.`,
-      data,
-      pagination: { count: data.count, limit: data.limit, offset: data.offset },
+      // Compatibilidad hacia atrás: el contrato original conserva data.count/data.rows.
+      data: shouldReturnFlatData ? rows : data,
+      // Compatibilidad hacia frontend: muchas tablas esperan rows/items directamente.
+      rows,
+      items: rows,
+      records: rows,
+      count: data.count,
+      total: data.count,
+      limit: data.limit,
+      offset: data.offset,
+      page,
+      pagination,
+      meta: pagination,
     };
   }
 

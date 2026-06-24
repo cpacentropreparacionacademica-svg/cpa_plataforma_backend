@@ -124,8 +124,18 @@ export class CrudRepository {
     for (const [key, value] of Object.entries(query)) {
       if (CONTROL_QUERY_FIELDS.has(key) || value === undefined || value === null || value === '') continue;
       if (!columnNames.has(key)) continue;
+
       values.push(value);
-      filters.push(`${quoteIdentifier(key)} = $${values.length}`);
+      const paramIndex = values.length;
+
+      // estado_registro históricamente se guardó como 'Activo', 'ACTIVO' o 'activo'.
+      // El frontend puede enviar cualquiera; el listado no debe ocultar registros por mayúsculas/minúsculas.
+      if (key === 'estado_registro' && typeof value === 'string') {
+        filters.push(`LOWER(${quoteIdentifier(key)}) = LOWER($${paramIndex})`);
+        continue;
+      }
+
+      filters.push(`${quoteIdentifier(key)} = $${paramIndex}`);
     }
 
     const whereSql = filters.length > 0 ? `WHERE ${filters.join(' AND ')}` : '';
