@@ -319,6 +319,57 @@ export const RESOURCES: ResourceConfig[] = [
     }
   },
   {
+    "key": "venta_clase_registro",
+    "entity": "venta_clase_registro",
+    "domainFolder": "contabilidad",
+    "routeModule": "contabilidad",
+    "routePath": "venta-clase-registro",
+    "schema": "contabilidad",
+    "tableName": "venta_clase_registro",
+    "primaryKeys": [
+      "id_venta_clase_registro"
+    ],
+    "permissions": {
+      "create": "CONTABILIDAD.VENTA_CLASE_REGISTRO.CREATE",
+      "read": "CONTABILIDAD.VENTA_CLASE_REGISTRO.READ",
+      "update": "CONTABILIDAD.VENTA_CLASE_REGISTRO.UPDATE"
+    }
+  },
+  {
+    "key": "transaccion_detalle_venta",
+    "entity": "transaccion_detalle_venta",
+    "domainFolder": "contabilidad",
+    "routeModule": "contabilidad",
+    "routePath": "transaccion-detalle-venta",
+    "schema": "contabilidad",
+    "tableName": "transaccion_detalle_venta",
+    "primaryKeys": [
+      "id_detalle_venta"
+    ],
+    "permissions": {
+      "create": "CONTABILIDAD.TRANSACCION_DETALLE_VENTA.CREATE",
+      "read": "CONTABILIDAD.TRANSACCION_DETALLE_VENTA.READ",
+      "update": "CONTABILIDAD.TRANSACCION_DETALLE_VENTA.UPDATE"
+    }
+  },
+  {
+    "key": "transaccion_detalle_costo",
+    "entity": "transaccion_detalle_costo",
+    "domainFolder": "contabilidad",
+    "routeModule": "contabilidad",
+    "routePath": "transaccion-detalle-costo",
+    "schema": "contabilidad",
+    "tableName": "transaccion_detalle_costo",
+    "primaryKeys": [
+      "id_detalle_costo"
+    ],
+    "permissions": {
+      "create": "CONTABILIDAD.TRANSACCION_DETALLE_COSTO.CREATE",
+      "read": "CONTABILIDAD.TRANSACCION_DETALLE_COSTO.READ",
+      "update": "CONTABILIDAD.TRANSACCION_DETALLE_COSTO.UPDATE"
+    }
+  },
+  {
     "key": "deuda",
     "entity": "deuda",
     "domainFolder": "deuda",

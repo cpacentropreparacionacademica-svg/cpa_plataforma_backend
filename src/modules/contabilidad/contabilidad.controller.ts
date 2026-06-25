@@ -15,6 +15,22 @@ export class ContabilidadController {
     private readonly accounting: ContabilidadAccountingService,
   ) {}
 
+  @Post('venta-clase/registrar')
+  registrarVentaClase(
+    @Body() body: Record<string, unknown>,
+    @Req() request: Request,
+  ) {
+    return this.accounting.registrarVentaClase(body, request.user?.idPersona);
+  }
+
+  @Post('venta-clase/registrar-batch')
+  registrarVentaClaseBatch(
+    @Body() body: Record<string, unknown>,
+    @Req() request: Request,
+  ) {
+    return this.accounting.registrarVentaClaseBatch(body, request.user?.idPersona);
+  }
+
   @Post(':resourcePath/con-movimientos')
   createTransaccionConMovimientos(
     @Param('resourcePath') resourcePath: string,
