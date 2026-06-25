@@ -322,3 +322,17 @@ Usuario: maria.contador
 Email: maria.sonia.caballero@cpa.test
 Password: MariaContador2026!
 ```
+
+## Frontend - Parte de clases pasadas
+
+Para integrar la tabla editable del formulario físico **PARTE DE CLASES PASADAS**, revisar:
+
+```txt
+docs/endpoints/venta-clase-frontend-contract.md
+```
+
+Endpoint principal:
+
+```http
+POST /api/contabilidad/venta-clase/registrar-batch
+```

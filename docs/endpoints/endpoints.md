@@ -490,3 +490,101 @@ Notas:
 - Mantiene referencias contextuales del asiento original cuando existan.
 - Valida que el asiento original tenga movimientos activos.
 - Valida que la reversión quede balanceada.
+
+---
+
+# Endpoint especializado: Parte de clases pasadas a venta contable
+
+Este bloque es el contrato recomendado para ajustar el frontend a la pantalla tipo tabla del formulario físico **PARTE DE CLASES PASADAS**.
+
+## Registrar una sola fila
+
+```http
+POST /api/contabilidad/venta-clase/registrar
+```
+
+## Registrar varias filas desde tabla frontend
+
+```http
+POST /api/contabilidad/venta-clase/registrar-batch
+```
+
+## Headers
+
+```http
+Content-Type: application/json
+X-Session-Token: <sessionToken>
+```
+
+## Payload batch recomendado
+
+```json
+{
+  "fecha": "2026-06-25",
+  "items": [
+    {
+      "hora_ingreso": "08:00",
+      "hora_salida": "10:00",
+      "id_estudiante": 15,
+      "nombre_estudiante": "Juan Perez",
+      "id_tutor": 3,
+      "nombre_tutor": "Tutor Demo",
+      "id_aula": 1,
+      "id_materia_tree": 7,
+      "id_producto_educativo": 2,
+      "materia": "Matemáticas",
+      "tema": "Funciones",
+      "subtema": "Función cuadrática",
+      "motivo_clase": "Nivelación",
+      "efectivo": 50,
+      "qr": 0,
+      "cxc": 0,
+      "paquete": 0,
+      "situacion_base": "CLASE_PASADA"
+    }
+  ]
+}
+```
+
+## Respuesta exitosa
+
+```json
+{
+  "success": true,
+  "message": "1 venta(s) de clase registradas correctamente con detalle y asiento contable.",
+  "data": {
+    "count": 1,
+    "monto_total": 50,
+    "registros": [
+      {
+        "venta_clase_registro": {},
+        "clase_por_hora": {},
+        "transaccion": {},
+        "detalle_venta": {},
+        "movimientos": [],
+        "totales": {
+          "debe": 50,
+          "haber": 50
+        },
+        "warnings": []
+      }
+    ]
+  }
+}
+```
+
+## CRUD de historial
+
+```http
+GET /api/contabilidad/venta-clase-registro?page=1&limit=20&orderBy=id_venta_clase_registro&orderDir=DESC
+GET /api/contabilidad/venta-clase-registro/:id_venta_clase_registro
+PATCH /api/contabilidad/venta-clase-registro/:id_venta_clase_registro
+```
+
+## Documento completo
+
+Ver también:
+
+```txt
+docs/endpoints/venta-clase-frontend-contract.md
+```
