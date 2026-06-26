@@ -57,3 +57,16 @@ tipo = AULA
 
 Por tanto, el frontend puede seguir usando `infraestructura/aula` sin romper.
 
+
+
+## Credenciales base reales para frontend
+
+El login debe aceptar correo o nombre de usuario. Para producción base usa estos valores:
+
+| Persona | Email principal | Usuario alternativo | Password provisional | Rol |
+|---|---|---|---|---|
+| Pablo Arauz Caballero | `pablo.admin@cpa.com` | `pablo.admin` | `PabloAdmin2026!` | Super admin |
+| Maria Sonia Caballero | `maria.contador@cpa.com` | `maria.contador` | `MariaContador2026!` | Contador |
+| Katia Caballero Ardaya | `katia.admin@cpa.com` | `katia.admin` | `KatiaAdmin2026!` | Super admin |
+
+Formato oficial de correo interno: `nombre.usuario@cpa.com`.

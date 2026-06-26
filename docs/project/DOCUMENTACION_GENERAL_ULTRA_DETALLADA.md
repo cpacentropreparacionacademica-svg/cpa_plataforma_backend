@@ -151,8 +151,8 @@ Login recomendado por usuario:
 
 ```txt
 pablo.admin
-maria.contador
-katia.admin
+maria.contador@cpa.com / maria.contador@cpa.com / maria.contador
+katia.admin@cpa.com / katia.admin@cpa.com / katia.admin
 ```
 
 Los correos reales deben cargarse manualmente cuando existan.

@@ -38,7 +38,7 @@ Por compatibilidad histórica, el campo puede seguir llamándose `email`, aunque
 
 ```json
 {
-  "email": "pablo.admin",
+  "email": "pablo.admin@cpa.com",
   "password": "PabloAdmin2026!"
 }
 ```
@@ -65,9 +65,9 @@ O:
 
 | Nombre | Usuario | Password provisional | Rol |
 |---|---|---|---|
-| Pablo Arauz Caballero | `pablo.admin` | `PabloAdmin2026!` | Super admin |
-| Maria Sonia Caballero | `maria.contador` | `MariaContador2026!` | Contador |
-| Katia Caballero Ardaya | `katia.admin` | `KatiaAdmin2026!` | Super admin |
+| Pablo Arauz Caballero | `pablo.admin@cpa.com` o `pablo.admin` | `PabloAdmin2026!` | Super admin |
+| Maria Sonia Caballero | `maria.contador@cpa.com` o `maria.contador` | `MariaContador2026!` | Contador |
+| Katia Caballero Ardaya | `katia.admin@cpa.com` o `katia.admin` | `KatiaAdmin2026!` | Super admin |
 
 Notas:
 

@@ -31,7 +31,7 @@ yarn db:migrate:prod
 ### Pablo Arauz Caballero
 
 - Usuario: `pablo.admin`
-- Email: pendiente de cargar correo real. Login recomendado: `pablo.admin`.
+- Email: `pablo.admin@cpa.com`. También puede iniciar sesión con `pablo.admin`.
 - Password temporal: `PabloAdmin2026!`
 - Roles: `SUPER_ADMIN`, `ADMIN_GENERAL`
 - Super usuario: `true`
@@ -39,7 +39,7 @@ yarn db:migrate:prod
 ### Maria Sonia Caballero
 
 - Usuario: `maria.contador`
-- Email: pendiente de cargar correo real. Login recomendado: `maria.contador`.
+- Email: `maria.contador@cpa.com`. También puede iniciar sesión con `maria.contador`.
 - Password temporal: `MariaContador2026!`
 - Roles: `CONTADOR_GENERAL`, `CONTADOR`
 - Super usuario: `false`
@@ -53,4 +53,4 @@ yarn db:migrate:prod
 - Usuario: `katia.admin`
 - Password provisional: `KatiaAdmin2026!`
 - Rol: Super admin / administrador general
-- Email: pendiente de cargar correo real. No se inventó un correo con dominio ficticio.
+- Email: `katia.admin@cpa.com`. También puede iniciar sesión con `katia.admin`.

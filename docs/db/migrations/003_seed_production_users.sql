@@ -535,8 +535,8 @@ ON CONFLICT (codigo) DO UPDATE SET
 -- Personas base
 INSERT INTO persona.persona (id_persona, nombres, apellidos, telefono, fecha_nacimiento, email, estado_registro)
 VALUES
-  (900001, 'Pablo', 'Arauz Caballero', NULL, NULL, NULL, 'Activo'),
-  (900002, 'Maria Sonia', 'Caballero', NULL, NULL, NULL, 'Activo')
+  (900001, 'Pablo', 'Arauz Caballero', NULL, NULL, 'pablo.admin@cpa.com', 'Activo'),
+  (900002, 'Maria Sonia', 'Caballero', NULL, NULL, 'maria.contador@cpa.com', 'Activo')
 ON CONFLICT (id_persona) DO UPDATE SET
   nombres = EXCLUDED.nombres,
   apellidos = EXCLUDED.apellidos,

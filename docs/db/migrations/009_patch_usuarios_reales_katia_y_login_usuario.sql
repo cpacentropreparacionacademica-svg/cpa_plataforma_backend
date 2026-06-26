@@ -1,21 +1,16 @@
 -- 009_patch_usuarios_reales_katia_y_login_usuario.sql
 -- Objetivo:
--- 1) Eliminar correos ficticios .test de usuarios base.
+-- 1) Reemplazar correos ficticios .test/NULL por correos operativos @cpa.com.
 -- 2) Agregar una administradora adicional: Katia Caballero Ardaya.
--- 3) Mantener login operativo por nombre_usuario, porque no se deben inventar correos reales.
---
--- IMPORTANTE:
--- - Este SQL NO inventa dominios reales.
--- - Los correos quedan NULL hasta que administración cargue correos reales desde el frontend/backend.
--- - El backend fue ajustado para login por email real o por nombre_usuario.
+-- 3) Mantener login operativo por email o por nombre_usuario.
 
 BEGIN;
 
 INSERT INTO persona.persona (id_persona, nombres, apellidos, telefono, fecha_nacimiento, email, estado_registro)
 VALUES
-  (900001, 'Pablo', 'Arauz Caballero', NULL, NULL, NULL, 'Activo'),
-  (900002, 'Maria Sonia', 'Caballero', NULL, NULL, NULL, 'Activo'),
-  (900003, 'Katia', 'Caballero Ardaya', NULL, NULL, NULL, 'Activo')
+  (900001, 'Pablo', 'Arauz Caballero', NULL, NULL, 'pablo.admin@cpa.com', 'Activo'),
+  (900002, 'Maria Sonia', 'Caballero', NULL, NULL, 'maria.contador@cpa.com', 'Activo'),
+  (900003, 'Katia', 'Caballero Ardaya', NULL, NULL, 'katia.admin@cpa.com', 'Activo')
 ON CONFLICT (id_persona) DO UPDATE SET
   nombres = EXCLUDED.nombres,
   apellidos = EXCLUDED.apellidos,
@@ -44,17 +39,22 @@ ON CONFLICT (id_persona) DO UPDATE SET
   fecha_modificacion = NOW(),
   version_registro = COALESCE(persona.persona_usuario.version_registro, 1) + 1;
 
--- Eliminar .test de email_corporativo para usuarios base; no se inventan correos reales.
-UPDATE administracion.empleado
-SET email_corporativo = NULL,
+-- Correos corporativos reales base.
+UPDATE administracion.empleado e
+SET email_corporativo = v.email_corporativo,
     fecha_modificacion = NOW(),
-    version_registro = COALESCE(version_registro, 1) + 1
-WHERE id_persona IN (900001, 900002, 900003)
-  AND (email_corporativo IS NULL OR email_corporativo ILIKE '%.test');
+    version_registro = COALESCE(e.version_registro, 1) + 1
+FROM (
+  VALUES
+    (900001::bigint, 'pablo.admin@cpa.com'),
+    (900002::bigint, 'maria.contador@cpa.com'),
+    (900003::bigint, 'katia.admin@cpa.com')
+) AS v(id_persona, email_corporativo)
+WHERE e.id_persona = v.id_persona;
 
 -- Katia como empleada administrativa base.
 INSERT INTO administracion.empleado (id_persona, fecha_ingreso, tipo_contrato, jornada, email_corporativo, id_sucursal, estado_registro)
-VALUES (900003, '2026-01-01', 'INDEFINIDO'::administracion.tipo_contrato, 'FULL_TIME'::administracion.jornada_laboral, NULL, (SELECT id_sucursal FROM infraestructura.sucursal WHERE codigo='SCZ-CENTRO'), 'Activo')
+VALUES (900003, '2026-01-01', 'INDEFINIDO'::administracion.tipo_contrato, 'FULL_TIME'::administracion.jornada_laboral, 'katia.admin@cpa.com', (SELECT id_sucursal FROM infraestructura.sucursal WHERE codigo='SCZ-CENTRO'), 'Activo')
 ON CONFLICT (id_persona) DO UPDATE SET
   fecha_ingreso = EXCLUDED.fecha_ingreso,
   tipo_contrato = EXCLUDED.tipo_contrato,
