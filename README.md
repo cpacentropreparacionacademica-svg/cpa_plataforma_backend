@@ -94,3 +94,24 @@ Documento detallado:
 ```txt
 docs/testing/SMOKE_IMPORTS_BUSINESS_BACKUP.md
 ```
+
+
+## Backup programado Render -> Neon backup
+
+El proyecto incluye `scripts/backup-postgres.js` y un cron en `render.yaml`.
+
+El link/conexión del otro proyecto Neon se configura en `.env.example` y en Render como variable de entorno:
+
+```env
+BACKUP_TARGET_DATABASE_URL=postgresql://usuario:password@host-backup.neon.tech/neondb?sslmode=require
+BACKUP_RESTORE_TO_TARGET=true
+BACKUP_TARGET_CONFIRM=I_UNDERSTAND_TARGET_WILL_BE_REPLACED
+```
+
+`DATABASE_URL` es la base principal. `BACKUP_TARGET_DATABASE_URL` es la base destino de respaldo. Deben ser distintas.
+
+Para ejecutar manualmente:
+
+```bash
+yarn backup:postgres
+```

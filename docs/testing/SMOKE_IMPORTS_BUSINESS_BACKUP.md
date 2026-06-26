@@ -182,6 +182,32 @@ BACKUP_UPLOAD_URL=https://tu-host.com/api/backups/cpa
 
 para guardar archivo y además restaurar en Neon.
 
+
+## 5.2 Dónde colocar el link/conexión del otro Neon
+
+El espacio formal está en `.env.example`. Copia esas variables a tu `.env` local o a las Environment Variables de Render.
+
+Variable principal para el otro proyecto/branch/base de Neon:
+
+```env
+BACKUP_TARGET_DATABASE_URL=postgresql://usuario:password@host-backup.neon.tech/neondb?sslmode=require
+```
+
+Para que el cron realmente restaure ahí, activa también:
+
+```env
+BACKUP_RESTORE_TO_TARGET=true
+BACKUP_TARGET_CONFIRM=I_UNDERSTAND_TARGET_WILL_BE_REPLACED
+```
+
+Si solo quieres generar/subir archivo pero no restaurar en Neon, deja:
+
+```env
+BACKUP_RESTORE_TO_TARGET=false
+```
+
+Regla crítica: `BACKUP_TARGET_DATABASE_URL` debe apuntar a una base distinta a `DATABASE_URL`. No uses la misma base de producción como destino.
+
 ## 6. Render Cron Job
 
 En `render.yaml` se agrega un servicio tipo cron:
