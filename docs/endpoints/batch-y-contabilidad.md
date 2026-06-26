@@ -227,3 +227,57 @@ Notas:
 - Mantiene referencias contextuales del asiento original cuando existan.
 - Valida que el asiento original tenga movimientos activos.
 - Valida que la reversión quede balanceada.
+
+## Compatibilidad con frontend Excel/CSV
+
+Además del batch JSON genérico, todos los recursos registrados en `resource-registry` exponen endpoints compatibles con la pantalla de importación del frontend público `cpa_plataforma_frontend`:
+
+```http
+POST /api/{modulo}/{recurso}/batch/validate
+POST /api/{modulo}/{recurso}/batch/process
+```
+
+Ambos aceptan dos formas:
+
+### JSON
+
+```json
+{
+  "mode": "create",
+  "items": [
+    {
+      "codigo": "DEMO-001",
+      "nombre": "Registro demo"
+    }
+  ]
+}
+```
+
+### Multipart form-data
+
+Campos esperados:
+
+```txt
+file: archivo .xlsx, .xls o .csv
+mode: create | update | upsert
+```
+
+Modos admitidos:
+
+```txt
+create / crear
+update / actualizar
+upsert / crear_actualizar / crear-actualizar / crear/actualizar
+```
+
+`validate` no escribe en la base. Devuelve columnas válidas, filas válidas, filas con error y advertencias.
+
+`process` escribe en la base solamente si la validación no contiene errores.
+
+Límite genérico: 200 filas por solicitud.
+
+Para `venta-clase`, usar siempre el endpoint especializado:
+
+```http
+POST /api/contabilidad/venta-clase/registrar-batch
+```

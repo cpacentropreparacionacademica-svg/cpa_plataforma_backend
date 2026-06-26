@@ -1,5 +1,6 @@
-import { Body, Controller, Get, Param, Patch, Post, Put, Query, Req } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Put, Query, Req, UploadedFiles, UseInterceptors } from '@nestjs/common';
 import { ApiCookieAuth, ApiTags } from '@nestjs/swagger';
+import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { Request } from 'express';
 import { ResourceModuleName } from '../../common/decorators/resource-module.decorator';
 import { CrudService } from '../shared-crud/crud.service';
@@ -54,6 +55,28 @@ export class ContabilidadController {
       return this.crud.create('contabilidad', resourcePath, body, request.user?.idPersona);
     }
     return this.accounting.revertirAsiento(id, body, request.user?.idPersona);
+  }
+
+
+  @Post(':resourcePath/batch/validate')
+  @UseInterceptors(AnyFilesInterceptor())
+  validateBatchImport(
+    @Param('resourcePath') resourcePath: string,
+    @UploadedFiles() files: Array<{ buffer: Buffer; originalname?: string; mimetype?: string; size?: number }> | undefined,
+    @Body() body: Record<string, unknown>,
+  ) {
+    return this.crud.validateImportBatch('contabilidad', resourcePath, { body, files });
+  }
+
+  @Post(':resourcePath/batch/process')
+  @UseInterceptors(AnyFilesInterceptor())
+  processBatchImport(
+    @Param('resourcePath') resourcePath: string,
+    @UploadedFiles() files: Array<{ buffer: Buffer; originalname?: string; mimetype?: string; size?: number }> | undefined,
+    @Body() body: Record<string, unknown>,
+    @Req() request: Request,
+  ) {
+    return this.crud.processImportBatch('contabilidad', resourcePath, { body, files }, request.user?.idPersona);
   }
 
   @Post(':resourcePath/batch')

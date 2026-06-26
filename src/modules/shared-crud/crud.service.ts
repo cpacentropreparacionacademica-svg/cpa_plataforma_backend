@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DataSource, EntityManager } from 'typeorm';
+import * as XLSX from 'xlsx';
 import { CrudRepository } from '../../common/repositories/crud.repository';
 import { getResourceConfig, ResourceConfig } from '../resource-registry';
 
@@ -123,6 +124,198 @@ export class CrudService {
       page,
       pagination,
       meta: pagination,
+    };
+  }
+
+
+  async validateImportBatch(
+    moduleName: string,
+    resourcePath: string,
+    payload: { body?: Record<string, unknown>; files?: Array<{ buffer: Buffer; originalname?: string; mimetype?: string; size?: number }> },
+  ) {
+    const resource = this.findResource(moduleName, resourcePath);
+    const rows = this.extractImportRows(payload);
+    const validation = await this.validateRowsForResource(resource, rows, String(payload.body?.mode || payload.body?.modo || payload.body?.operation || 'create'));
+    return {
+      success: true,
+      message: `Validación de importación para ${resource.entity} completada.`,
+      data: validation,
+      ...validation,
+    };
+  }
+
+  async processImportBatch(
+    moduleName: string,
+    resourcePath: string,
+    payload: { body?: Record<string, unknown>; files?: Array<{ buffer: Buffer; originalname?: string; mimetype?: string; size?: number }> },
+    authUserId?: string,
+  ) {
+    const resource = this.findResource(moduleName, resourcePath);
+    const rows = this.extractImportRows(payload);
+    const mode = this.normalizeImportMode(String(payload.body?.mode || payload.body?.modo || payload.body?.operation || 'create'));
+    const validation = await this.validateRowsForResource(resource, rows, mode);
+
+    if (validation.errorRows > 0) {
+      throw new BadRequestException(`La importación contiene ${validation.errorRows} fila(s) con error. Corrige el archivo antes de procesar.`);
+    }
+
+    if (mode === 'update') {
+      const data = await this.updateBatch(moduleName, resourcePath, { items: rows }, authUserId);
+      return {
+        ...data,
+        message: `Importación de actualización procesada para ${resource.entity}.`,
+        validation,
+      };
+    }
+
+    if (mode === 'upsert') {
+      const createRows: Record<string, unknown>[] = [];
+      const updateRows: Record<string, unknown>[] = [];
+      for (const row of rows) {
+        const hasAllPrimaryKeys = resource.primaryKeys.every((primaryKey) => row[primaryKey] !== undefined && row[primaryKey] !== null && row[primaryKey] !== '');
+        if (hasAllPrimaryKeys) updateRows.push(row);
+        else createRows.push(row);
+      }
+      const created = createRows.length ? (await this.createBatch(moduleName, resourcePath, { items: createRows }, authUserId)).data as Record<string, unknown>[] : [];
+      const updated = updateRows.length ? (await this.updateBatch(moduleName, resourcePath, { items: updateRows }, authUserId)).data as Record<string, unknown>[] : [];
+      return {
+        success: true,
+        message: `Importación crear/actualizar procesada para ${resource.entity}.`,
+        data: { created, updated },
+        count: created.length + updated.length,
+        validation,
+      };
+    }
+
+    const data = await this.createBatch(moduleName, resourcePath, { items: rows }, authUserId);
+    return {
+      ...data,
+      message: `Importación de creación procesada para ${resource.entity}.`,
+      validation,
+    };
+  }
+
+  private extractImportRows(payload: { body?: Record<string, unknown>; files?: Array<{ buffer: Buffer; originalname?: string; mimetype?: string; size?: number }> }): Record<string, unknown>[] {
+    const body = payload.body || {};
+    const file = payload.files?.[0];
+
+    if (file?.buffer?.length) {
+      const workbook = XLSX.read(file.buffer, { type: 'buffer', cellDates: false });
+      const sheetName = workbook.SheetNames[0];
+      if (!sheetName) throw new BadRequestException('El archivo no contiene hojas para importar.');
+      const sheet = workbook.Sheets[sheetName];
+      const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { defval: '', raw: false });
+      return this.cleanImportRows(rows);
+    }
+
+    const candidate = body.items ?? body.rows ?? body.data ?? body.registros;
+    if (typeof candidate === 'string') {
+      try {
+        const parsed = JSON.parse(candidate) as unknown;
+        if (Array.isArray(parsed)) return this.cleanImportRows(parsed as Record<string, unknown>[]);
+        if (parsed && typeof parsed === 'object' && Array.isArray((parsed as { items?: unknown[] }).items)) {
+          return this.cleanImportRows((parsed as { items: Record<string, unknown>[] }).items);
+        }
+      } catch {
+        throw new BadRequestException('El campo items/rows/data no contiene JSON válido.');
+      }
+    }
+
+    if (Array.isArray(candidate)) return this.cleanImportRows(candidate as Record<string, unknown>[]);
+    if (Array.isArray(body)) return this.cleanImportRows(body as Record<string, unknown>[]);
+    throw new BadRequestException('La importación debe enviarse como archivo Excel/CSV o como JSON { items: [...] }.');
+  }
+
+  private cleanImportRows(rows: Record<string, unknown>[]): Record<string, unknown>[] {
+    const cleanRows = rows
+      .filter((row) => row && typeof row === 'object' && !Array.isArray(row))
+      .map((row) => {
+        const clean: Record<string, unknown> = {};
+        for (const [rawKey, rawValue] of Object.entries(row)) {
+          const key = String(rawKey).trim();
+          if (!key || key.startsWith('__EMPTY')) continue;
+          const value = typeof rawValue === 'string' ? rawValue.trim() : rawValue;
+          clean[key] = value === '' ? null : value;
+        }
+        return clean;
+      })
+      .filter((row) => Object.values(row).some((value) => value !== null && value !== undefined && value !== ''));
+
+    if (cleanRows.length === 0) throw new BadRequestException('La importación no contiene filas con datos.');
+    if (cleanRows.length > 200) throw new BadRequestException('La importación genérica no puede superar 200 filas por solicitud.');
+    return cleanRows;
+  }
+
+  private normalizeImportMode(mode: string): 'create' | 'update' | 'upsert' {
+    const normalized = mode.trim().toLowerCase();
+    if (['update', 'actualizar', 'patch', 'put'].includes(normalized)) return 'update';
+    if (['upsert', 'crear_actualizar', 'crear-actualizar', 'create_update', 'crear/actualizar'].includes(normalized)) return 'upsert';
+    return 'create';
+  }
+
+  private async validateRowsForResource(resource: ResourceConfig, rows: Record<string, unknown>[], rawMode: string) {
+    const mode = this.normalizeImportMode(rawMode);
+    const columns = await this.dataSource.query(
+      `SELECT column_name AS "columnName", is_nullable AS "isNullable", column_default AS "columnDefault"
+         FROM information_schema.columns
+        WHERE table_schema = $1 AND table_name = $2`,
+      [resource.schema, resource.tableName],
+    ) as Array<{ columnName: string; isNullable: string; columnDefault: string | null }>;
+    const columnNames = new Set(columns.map((column) => column.columnName));
+    const requiredColumns = columns
+      .filter((column) => column.isNullable === 'NO'
+        && !column.columnDefault
+        && !resource.primaryKeys.includes(column.columnName)
+        && !['fecha_registro', 'version_registro', 'estado_registro'].includes(column.columnName))
+      .map((column) => column.columnName);
+
+    const errors: Array<{ row: number; field?: string; message: string }> = [];
+    const warnings: Array<{ row?: number; field?: string; message: string }> = [];
+
+    rows.forEach((row, index) => {
+      const rowNumber = index + 1;
+      const validKeys = Object.keys(row).filter((key) => columnNames.has(key));
+      if (validKeys.length === 0) {
+        errors.push({ row: rowNumber, message: 'La fila no contiene columnas válidas para este recurso.' });
+      }
+
+      for (const key of Object.keys(row)) {
+        if (!columnNames.has(key)) warnings.push({ row: rowNumber, field: key, message: 'Columna ignorada: no existe en la tabla destino.' });
+      }
+
+      if (mode === 'update') {
+        for (const primaryKey of resource.primaryKeys) {
+          if (row[primaryKey] === undefined || row[primaryKey] === null || row[primaryKey] === '') {
+            errors.push({ row: rowNumber, field: primaryKey, message: 'Campo llave requerido para actualizar.' });
+          }
+        }
+      }
+
+      if (mode === 'create') {
+        for (const requiredColumn of requiredColumns) {
+          const hasDefaultCreateValue = resource.defaultCreateValues && resource.defaultCreateValues[requiredColumn] !== undefined;
+          if (!hasDefaultCreateValue && (row[requiredColumn] === undefined || row[requiredColumn] === null || row[requiredColumn] === '')) {
+            errors.push({ row: rowNumber, field: requiredColumn, message: 'Campo obligatorio para crear.' });
+          }
+        }
+      }
+    });
+
+    const rowsWithErrors = new Set(errors.map((error) => error.row));
+    return {
+      resource: `${resource.routeModule}/${resource.routePath}`,
+      schema: resource.schema,
+      tableName: resource.tableName,
+      mode,
+      totalRows: rows.length,
+      validRows: rows.length - rowsWithErrors.size,
+      errorRows: rowsWithErrors.size,
+      columns: Array.from(columnNames).sort(),
+      primaryKeys: resource.primaryKeys,
+      requiredColumns,
+      sampleRows: rows.slice(0, 5),
+      errors,
+      warnings,
     };
   }
 

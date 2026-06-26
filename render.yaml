@@ -7,3 +7,28 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
+
+
+  - type: cron
+    name: cpa-plataforma-backup
+    env: node
+    schedule: "0 7 * * *"
+    buildCommand: bash scripts/render-build.sh
+    startCommand: node scripts/backup-postgres.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: BACKUP_DELETE_LOCAL_AFTER_UPLOAD
+        value: "true"
+      - key: DATABASE_URL
+        sync: false
+      - key: BACKUP_TARGET_DATABASE_URL
+        sync: false
+      - key: BACKUP_RESTORE_TO_TARGET
+        value: "false"
+      - key: BACKUP_TARGET_CONFIRM
+        sync: false
+      - key: BACKUP_UPLOAD_URL
+        sync: false
+      - key: BACKUP_UPLOAD_TOKEN
+        sync: false

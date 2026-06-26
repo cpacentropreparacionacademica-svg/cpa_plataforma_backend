@@ -47,3 +47,50 @@ docs/endpoints/venta-clase-frontend-contract.md
 docs/endpoints/cuentas-operativas-persona.md
 docs/db/production-bootstrap.md
 ```
+
+
+## Smoke test FULL antes de producción
+
+Para validar el backend completo antes de desplegar o después de un reset productivo en blanco:
+
+```bash
+yarn db:migrate:prod:fresh
+yarn test:smoke:all
+```
+
+Para probar un backend ya desplegado:
+
+```bash
+SMOKE_BASE_URL=https://TU_BACKEND_RENDER.onrender.com SMOKE_LOGIN=pablo.admin@cpa.com SMOKE_PASSWORD=PabloAdmin2026! yarn smoke:live
+```
+
+Documento detallado: `docs/testing/SMOKE_FULL_CONTRATO_10.md`.
+
+Documento que debes pasar al frontend: `docs/frontend/FRONTEND_CONTRATO_CPA_ULTRA_DETALLADO.md`.
+
+## QA avanzado: importaciones, errores de negocio y backup
+
+Smoke completo:
+
+```bash
+yarn db:migrate:prod:fresh
+yarn test:smoke:all
+```
+
+Smoke específico de importaciones y errores de negocio:
+
+```bash
+yarn test:smoke:imports-business
+```
+
+Backup PostgreSQL manual:
+
+```bash
+yarn backup:postgres
+```
+
+Documento detallado:
+
+```txt
+docs/testing/SMOKE_IMPORTS_BUSINESS_BACKUP.md
+```

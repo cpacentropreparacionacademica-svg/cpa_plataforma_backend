@@ -550,7 +550,7 @@ export class ContabilidadAccountingService {
 
     const rows = await manager.query(
       `INSERT INTO servicios_educativos.clase_por_hora
-        (id_aula, id_estudiante, id_tutor, id_materia_tree, hora_llegada, hora_salida, motivo, modalidad, estado_operativo, estado_registro, id_usuario)
+        (id_aula, id_estudiante, id_tutor, id_materia_tree, hora_llegada, hora_salida, motivo, modalidad, estado_operativo, estado_registro, id_usuario_creador)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'CERRADA', 'Activo', $9)
        RETURNING *`,
       [
