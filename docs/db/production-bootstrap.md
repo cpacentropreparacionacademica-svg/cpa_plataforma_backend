@@ -54,3 +54,13 @@ yarn db:migrate:prod
 - Password provisional: `KatiaAdmin2026!`
 - Rol: Super admin / administrador general
 - Email: `katia.admin@cpa.com`. También puede iniciar sesión con `katia.admin`.
+
+## Patch 010 - usuarios reales obligatorios
+
+La migración `010_patch_ensure_real_users_maria_katia.sql` garantiza que existan los usuarios reales base del sistema interno:
+
+- `pablo.admin` / `pablo.admin@cpa.com`
+- `maria.contador` / `maria.contador@cpa.com`
+- `katia.admin` / `katia.admin@cpa.com`
+
+Este patch es idempotente y puede ejecutarse sobre bases donde solo exista `pablo.admin` por pruebas locales previas.

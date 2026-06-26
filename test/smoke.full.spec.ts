@@ -24,6 +24,10 @@ type CriticalRoute = {
   minRows?: number;
 };
 
+const SMOKE_ID_BASE = 991000 + Math.floor(Date.now() % 100000);
+const SMOKE_STUDENT_PERSON_ID = SMOKE_ID_BASE;
+const SMOKE_TUTOR_PERSON_ID = SMOKE_ID_BASE + 1;
+
 function configureEnvForSmokeFull(): void {
   demoUtils.loadProjectEnv();
   process.env.NODE_ENV = process.env.NODE_ENV || 'test';
@@ -71,6 +75,63 @@ function unwrapRows(body: any): unknown[] {
   return [];
 }
 
+
+async function ensureRealProductionUsers(dataSource: DataSource): Promise<void> {
+  await dataSource.query(`
+    INSERT INTO persona.persona (id_persona, nombres, apellidos, telefono, fecha_nacimiento, email, estado_registro)
+    VALUES
+      (900001, 'Pablo', 'Arauz Caballero', NULL, NULL, 'pablo.admin@cpa.com', 'Activo'),
+      (900002, 'Maria Sonia', 'Caballero', NULL, NULL, 'maria.contador@cpa.com', 'Activo'),
+      (900003, 'Katia', 'Caballero Ardaya', NULL, NULL, 'katia.admin@cpa.com', 'Activo')
+    ON CONFLICT (id_persona) DO UPDATE SET
+      nombres = EXCLUDED.nombres,
+      apellidos = EXCLUDED.apellidos,
+      email = EXCLUDED.email,
+      estado_registro = 'Activo',
+      fecha_modificacion = NOW(),
+      version_registro = COALESCE(persona.persona.version_registro, 1) + 1;
+
+    INSERT INTO persona.persona_usuario (id_persona, nombre_usuario, contrasena_hash, tipo_usuario, estado_registro, es_super_usuario)
+    VALUES
+      (900001, 'pablo.admin', '89e5c3c5101fe178aace4586f09da37648ac3b21bd57135ca3e99b6ace9cfd63', 'SUPER_ADMIN', 'Activo', TRUE),
+      (900002, 'maria.contador', 'a531e5f8d7ae8b3b6649c76d729621e879d4eb4c3b4b57b0a4f61b35bdba4b6e', 'CONTADOR', 'Activo', FALSE),
+      (900003, 'katia.admin', '6e97d5a01ae1afc34261511da5d51b7a94016be1f70d547680fee6f3ff48edc6', 'SUPER_ADMIN', 'Activo', TRUE)
+    ON CONFLICT (id_persona) DO UPDATE SET
+      nombre_usuario = EXCLUDED.nombre_usuario,
+      contrasena_hash = EXCLUDED.contrasena_hash,
+      tipo_usuario = EXCLUDED.tipo_usuario,
+      estado_registro = 'Activo',
+      es_super_usuario = EXCLUDED.es_super_usuario,
+      fecha_modificacion = NOW(),
+      version_registro = COALESCE(persona.persona_usuario.version_registro, 1) + 1;
+
+    INSERT INTO seguridad.rol (codigo, nombre, descripcion, estado_registro)
+    VALUES
+      ('SUPER_ADMIN', 'Super administrador', 'Acceso total al sistema interno CPA.', 'Activo'),
+      ('ADMIN_GENERAL', 'Administrador general', 'Administración general del sistema interno CPA.', 'Activo'),
+      ('CONTADOR_GENERAL', 'Contador general', 'Gestión contable y financiera.', 'Activo'),
+      ('CONTADOR', 'Contador', 'Rol alias operativo para contabilidad.', 'Activo')
+    ON CONFLICT (codigo) DO UPDATE SET
+      nombre = EXCLUDED.nombre,
+      descripcion = EXCLUDED.descripcion,
+      estado_registro = 'Activo',
+      fecha_modificacion = NOW(),
+      version_registro = COALESCE(seguridad.rol.version_registro, 1) + 1;
+
+    INSERT INTO seguridad.usuario_rol (id_persona, id_rol, estado_registro)
+    SELECT u.id_persona, r.id_rol, 'Activo'
+    FROM (VALUES (900001), (900003)) AS u(id_persona)
+    JOIN seguridad.rol r ON r.codigo IN ('SUPER_ADMIN', 'ADMIN_GENERAL')
+    ON CONFLICT (id_persona, id_rol) DO UPDATE SET estado_registro = 'Activo';
+
+    INSERT INTO seguridad.usuario_rol (id_persona, id_rol, estado_registro)
+    SELECT 900002, r.id_rol, 'Activo'
+    FROM seguridad.rol r
+    WHERE r.codigo IN ('CONTADOR_GENERAL', 'CONTADOR')
+    ON CONFLICT (id_persona, id_rol) DO UPDATE SET estado_registro = 'Activo';
+  `);
+}
+
 async function tableExists(dataSource: DataSource, schema: string, tableName: string): Promise<boolean> {
   const rows = await dataSource.query(
     `SELECT EXISTS (
@@ -96,15 +157,16 @@ describe('CPA Plataforma - smoke FULL sistema interno', () => {
     await app.init();
     agent = request.agent(app.getHttpServer());
     dataSource = app.get(DataSource);
+    await ensureRealProductionUsers(dataSource);
   }, 90000);
 
   afterAll(async () => {
     if (dataSource?.isInitialized) {
       await dataSource.query(`DELETE FROM contabilidad.venta_clase_registro WHERE estudiante_texto LIKE 'SMOKE FULL%' OR tutor_texto LIKE 'SMOKE FULL%'`).catch(() => undefined);
-      await dataSource.query(`DELETE FROM contabilidad.cuenta_asignacion WHERE id_persona_estudiante BETWEEN 990001 AND 990099 OR id_persona_tutor BETWEEN 990001 AND 990099`).catch(() => undefined);
-      await dataSource.query(`DELETE FROM persona.persona_tutor WHERE id_persona BETWEEN 990001 AND 990099`).catch(() => undefined);
-      await dataSource.query(`DELETE FROM persona.persona_estudiante WHERE id_persona BETWEEN 990001 AND 990099`).catch(() => undefined);
-      await dataSource.query(`DELETE FROM persona.persona WHERE id_persona BETWEEN 990001 AND 990099`).catch(() => undefined);
+      await dataSource.query(`DELETE FROM contabilidad.cuenta_asignacion WHERE id_persona_estudiante IN (${SMOKE_STUDENT_PERSON_ID}, ${SMOKE_TUTOR_PERSON_ID}) OR id_persona_tutor IN (${SMOKE_STUDENT_PERSON_ID}, ${SMOKE_TUTOR_PERSON_ID})`).catch(() => undefined);
+      await dataSource.query(`DELETE FROM persona.persona_tutor WHERE id_persona IN (${SMOKE_STUDENT_PERSON_ID}, ${SMOKE_TUTOR_PERSON_ID})`).catch(() => undefined);
+      await dataSource.query(`DELETE FROM persona.persona_estudiante WHERE id_persona IN (${SMOKE_STUDENT_PERSON_ID}, ${SMOKE_TUTOR_PERSON_ID})`).catch(() => undefined);
+      await dataSource.query(`DELETE FROM persona.persona WHERE id_persona IN (${SMOKE_STUDENT_PERSON_ID}, ${SMOKE_TUTOR_PERSON_ID})`).catch(() => undefined);
     }
     if (app) await app.close();
   });
@@ -221,33 +283,33 @@ describe('CPA Plataforma - smoke FULL sistema interno', () => {
   });
 
   it('valida creación estudiante/tutor y generación automática de cuentas asociadas', async () => {
-    await dataSource.query(`DELETE FROM contabilidad.cuenta_asignacion WHERE id_persona_estudiante IN (990011, 990012) OR id_persona_tutor IN (990011, 990012)`).catch(() => undefined);
-    await dataSource.query(`DELETE FROM persona.persona_tutor WHERE id_persona IN (990011, 990012)`).catch(() => undefined);
-    await dataSource.query(`DELETE FROM persona.persona_estudiante WHERE id_persona IN (990011, 990012)`).catch(() => undefined);
-    await dataSource.query(`DELETE FROM persona.persona WHERE id_persona IN (990011, 990012)`).catch(() => undefined);
+    await dataSource.query(`DELETE FROM contabilidad.cuenta_asignacion WHERE id_persona_estudiante IN (${SMOKE_STUDENT_PERSON_ID}, ${SMOKE_TUTOR_PERSON_ID}) OR id_persona_tutor IN (${SMOKE_STUDENT_PERSON_ID}, ${SMOKE_TUTOR_PERSON_ID})`).catch(() => undefined);
+    await dataSource.query(`DELETE FROM persona.persona_tutor WHERE id_persona IN (${SMOKE_STUDENT_PERSON_ID}, ${SMOKE_TUTOR_PERSON_ID})`).catch(() => undefined);
+    await dataSource.query(`DELETE FROM persona.persona_estudiante WHERE id_persona IN (${SMOKE_STUDENT_PERSON_ID}, ${SMOKE_TUTOR_PERSON_ID})`).catch(() => undefined);
+    await dataSource.query(`DELETE FROM persona.persona WHERE id_persona IN (${SMOKE_STUDENT_PERSON_ID}, ${SMOKE_TUTOR_PERSON_ID})`).catch(() => undefined);
     await dataSource.query(
       `INSERT INTO persona.persona (id_persona, nombres, apellidos, telefono, email, estado_registro)
        VALUES
-       (990011, 'SMOKE FULL', 'ESTUDIANTE', '70000001', 'smoke.estudiante@cpa.com', 'Activo'),
-       (990012, 'SMOKE FULL', 'TUTOR', '70000002', 'smoke.tutor@cpa.com', 'Activo')`,
+       (${SMOKE_STUDENT_PERSON_ID}, 'SMOKE FULL', 'ESTUDIANTE', '70000001', 'smoke.estudiante@cpa.com', 'Activo'),
+       (${SMOKE_TUTOR_PERSON_ID}, 'SMOKE FULL', 'TUTOR', '70000002', 'smoke.tutor@cpa.com', 'Activo')`,
     );
 
     const estudiante = await agent.post('/api/personas/estudiante')
       .set('X-Session-Token', sessionToken)
-      .send({ id_persona: 990011, tipo: 'COLEGIAL', nivel_actual: 'SECUNDARIA', curso_actual: 'SEXTO', turno_actual: 'MAÑANA' });
+      .send({ id_persona: SMOKE_STUDENT_PERSON_ID, tipo: 'COLEGIAL', nivel_actual: 'SECUNDARIA', curso_actual: 'SEXTO', turno_actual: 'MAÑANA' });
     expectReached(estudiante, 'crear estudiante smoke');
     expect([201, 200]).toContain(estudiante.status);
 
     const tutor = await agent.post('/api/personas/tutor')
       .set('X-Session-Token', sessionToken)
-      .send({ id_persona: 990012, pago_por_hora: 45, nivel_experiencia: 'SENIOR', tipo_estudiante_especialidad: 'COLEGIAL', nivel_estudiante_especialidad: 'SECUNDARIA' });
+      .send({ id_persona: SMOKE_TUTOR_PERSON_ID, pago_por_hora: 45, nivel_experiencia: 'SENIOR', tipo_estudiante_especialidad: 'COLEGIAL', nivel_estudiante_especialidad: 'SECUNDARIA' });
     expectReached(tutor, 'crear tutor smoke');
     expect([201, 200]).toContain(tutor.status);
 
     const rows = await dataSource.query(
       `SELECT entidad_tipo, COUNT(*)::int AS count
          FROM contabilidad.cuenta_asignacion
-        WHERE (id_persona_estudiante = 990011 OR id_persona_tutor = $1)
+        WHERE (id_persona_estudiante = ${SMOKE_STUDENT_PERSON_ID} OR id_persona_tutor = $1)
           AND entidad_tipo IN ('ESTUDIANTE_CXC','ESTUDIANTE_PAQUETE_DIFERIDO','TUTOR_CXP')
         GROUP BY entidad_tipo`,
       [Number(tutor.body?.data?.id_tutor)],
@@ -259,7 +321,7 @@ describe('CPA Plataforma - smoke FULL sistema interno', () => {
   }, 60000);
 
   it('valida flujo completo venta-clase: clase + venta + detalle + asiento balanceado', async () => {
-    const tutorRows = await dataSource.query(`SELECT id_tutor FROM persona.persona_tutor WHERE id_persona = 990012 LIMIT 1`) as Array<{ id_tutor: number }>;
+    const tutorRows = await dataSource.query(`SELECT id_tutor FROM persona.persona_tutor WHERE id_persona = ${SMOKE_TUTOR_PERSON_ID} LIMIT 1`) as Array<{ id_tutor: number }>;
     const materiaRows = await dataSource.query(`SELECT id_tree FROM servicios_educativos.materia_tree ORDER BY id_tree LIMIT 1`) as Array<{ id_tree: number }>;
     const productoRows = await dataSource.query(`SELECT id_producto_educativo FROM servicios_educativos.producto_educativo ORDER BY id_producto_educativo LIMIT 1`) as Array<{ id_producto_educativo: number }>;
     const suffix = Date.now();
@@ -288,7 +350,7 @@ describe('CPA Plataforma - smoke FULL sistema interno', () => {
         items: [{
           hora_ingreso: '08:00',
           hora_salida: '09:00',
-          id_estudiante: 990011,
+          id_estudiante: SMOKE_STUDENT_PERSON_ID,
           nombre_estudiante: 'SMOKE FULL ESTUDIANTE',
           id_tutor: Number(tutorRows[0].id_tutor),
           nombre_tutor: 'SMOKE FULL TUTOR',
