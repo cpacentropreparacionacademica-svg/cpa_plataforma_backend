@@ -536,7 +536,8 @@ ON CONFLICT (codigo) DO UPDATE SET
 INSERT INTO persona.persona (id_persona, nombres, apellidos, telefono, fecha_nacimiento, email, estado_registro)
 VALUES
   (900001, 'Pablo', 'Arauz Caballero', NULL, NULL, 'pablo.admin@cpa.com', 'Activo'),
-  (900002, 'Maria Sonia', 'Caballero', NULL, NULL, 'maria.contador@cpa.com', 'Activo')
+  (900002, 'Maria Sonia', 'Caballero', NULL, NULL, 'maria.contador@cpa.com', 'Activo'),
+  (900003, 'Katia', 'Caballero Ardaya', NULL, NULL, 'katia.admin@cpa.com', 'Activo')
 ON CONFLICT (id_persona) DO UPDATE SET
   nombres = EXCLUDED.nombres,
   apellidos = EXCLUDED.apellidos,
@@ -551,7 +552,8 @@ ON CONFLICT (id_persona) DO UPDATE SET
 INSERT INTO persona.persona_usuario (id_persona, nombre_usuario, contrasena_hash, tipo_usuario, estado_registro, es_super_usuario)
 VALUES
   (900001, 'pablo.admin', '89e5c3c5101fe178aace4586f09da37648ac3b21bd57135ca3e99b6ace9cfd63', 'SUPER_ADMIN', 'Activo', TRUE),
-  (900002, 'maria.contador', 'a531e5f8d7ae8b3b6649c76d729621e879d4eb4c3b4b57b0a4f61b35bdba4b6e', 'CONTADOR', 'Activo', FALSE)
+  (900002, 'maria.contador', 'a531e5f8d7ae8b3b6649c76d729621e879d4eb4c3b4b57b0a4f61b35bdba4b6e', 'CONTADOR', 'Activo', FALSE),
+  (900003, 'katia.admin', '6e97d5a01ae1afc34261511da5d51b7a94016be1f70d547680fee6f3ff48edc6', 'SUPER_ADMIN', 'Activo', TRUE)
 ON CONFLICT (id_persona) DO UPDATE SET
   nombre_usuario = EXCLUDED.nombre_usuario,
   contrasena_hash = EXCLUDED.contrasena_hash,
@@ -858,7 +860,7 @@ INSERT INTO seguridad.usuario_rol (id_persona, id_rol, estado_registro)
 SELECT pu.id_persona, r.id_rol, 'Activo'
 FROM persona.persona_usuario pu
 JOIN seguridad.rol r ON r.codigo = ANY(ARRAY['SUPER_ADMIN','ADMIN_GENERAL'])
-WHERE pu.nombre_usuario = 'pablo.admin'
+WHERE pu.nombre_usuario IN ('pablo.admin', 'katia.admin')
 ON CONFLICT (id_persona, id_rol) DO UPDATE SET estado_registro='Activo', fecha_modificacion=NOW(), version_registro=COALESCE(seguridad.usuario_rol.version_registro,1)+1;
 INSERT INTO seguridad.usuario_rol (id_persona, id_rol, estado_registro)
 SELECT pu.id_persona, r.id_rol, 'Activo'

@@ -29,7 +29,12 @@
     "test:smoke:all": "yarn test:smoke && yarn test:smoke:full && yarn test:smoke:imports-business",
     "smoke:live": "node scripts/smoke-live.js",
     "test:smoke:imports-business": "jest --runTestsByPath test/smoke.imports-business.spec.ts --runInBand",
-    "backup:postgres": "node scripts/backup-postgres.js"
+    "backup:postgres": "node scripts/backup-postgres.js",
+    "dev": "nest start --watch",
+    "dev:watch": "nest start --watch",
+    "serve": "nest start",
+    "serve:prod": "node scripts/render-start.js",
+    "test:smoke:all:local": "yarn test:smoke:all"
   },
   "dependencies": {
     "@nestjs/common": "^10.4.15",

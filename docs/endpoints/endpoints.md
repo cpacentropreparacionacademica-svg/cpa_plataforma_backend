@@ -28,7 +28,7 @@ Usa `data.sessionToken` en el header:
 ```http
 X-Session-Token: <sessionToken>
 ```
-`POST /api/auth/publicAuth/signup` existe solo por compatibilidad y queda bloqueado por defecto con `ENABLE_PUBLIC_SIGNUP=false`.
+`POST /api/auth/publicAuth/signup` NO existe como flujo público. CPA es sistema interno: usuarios se crean por seed o por flujo interno autorizado de administración.
 ## Smoke test E2E
 El smoke test funcional ejecuta seed, hace login con el admin demo y recorre todos los recursos registrados con `GET list`, `GET by id`, `POST`, `PUT` y `PATCH`.
 ```bash

@@ -3,7 +3,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { Request, Response } from 'express';
 import { Public } from '../../common/decorators/public.decorator';
 import { AuthService } from './auth.service';
-import { ActivateUserDto, ChangePasswordDto, LoginDto, RequestPasswordTokenDto, SignupDto } from './dto/auth.dto';
+import { ActivateUserDto, ChangePasswordDto, LoginDto, RequestPasswordTokenDto } from './dto/auth.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -16,11 +16,8 @@ export class AuthController {
     return this.auth.login(body, { ip: request.ip, userAgent: request.header('user-agent') }, response);
   }
 
-  @Public()
-  @Post('publicAuth/signup')
-  signup(@Body() body: SignupDto) {
-    return this.auth.signup(body);
-  }
+  // No existe endpoint público de signup.
+  // CPA Plataforma es un sistema interno: los usuarios se crean por seed o por flujo interno autorizado de administración.
 
   @Public()
   @Post('publicAuth/change-password')
