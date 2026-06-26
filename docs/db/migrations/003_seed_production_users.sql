@@ -535,8 +535,8 @@ ON CONFLICT (codigo) DO UPDATE SET
 -- Personas base
 INSERT INTO persona.persona (id_persona, nombres, apellidos, telefono, fecha_nacimiento, email, estado_registro)
 VALUES
-  (900001, 'Pablo', 'Arauz Caballero', NULL, NULL, 'pablo.arauz@cpa.test', 'Activo'),
-  (900002, 'Maria Sonia', 'Caballero', NULL, NULL, 'maria.sonia.caballero@cpa.test', 'Activo')
+  (900001, 'Pablo', 'Arauz Caballero', NULL, NULL, NULL, 'Activo'),
+  (900002, 'Maria Sonia', 'Caballero', NULL, NULL, NULL, 'Activo')
 ON CONFLICT (id_persona) DO UPDATE SET
   nombres = EXCLUDED.nombres,
   apellidos = EXCLUDED.apellidos,
@@ -564,9 +564,9 @@ ON CONFLICT (id_persona) DO UPDATE SET
 -- Sucursales base
 INSERT INTO infraestructura.sucursal (codigo, nombre, telefono, email, direccion_linea1, ciudad, departamento, pais, horario_texto, largo_m, ancho_m, estado_registro)
 VALUES
-  ('SCZ-CENTRO', 'Sucursal Santa Cruz Centro', NULL, 'centro@cpa.test', 'Zona Centro, Santa Cruz de la Sierra', 'Santa Cruz de la Sierra', 'Santa Cruz', 'Bolivia', 'Lunes a viernes 08:00-21:00; sábado 08:00-13:00', 25, 18, 'Activo'),
-  ('SCZ-NORTE', 'Sucursal Santa Cruz Norte', NULL, 'norte@cpa.test', 'Zona Norte, Santa Cruz de la Sierra', 'Santa Cruz de la Sierra', 'Santa Cruz', 'Bolivia', 'Lunes a viernes 08:00-21:00; sábado 08:00-13:00', 22, 16, 'Activo'),
-  ('SCZ-SUR', 'Sucursal Santa Cruz Sur', NULL, 'sur@cpa.test', 'Zona Sur, Santa Cruz de la Sierra', 'Santa Cruz de la Sierra', 'Santa Cruz', 'Bolivia', 'Lunes a viernes 08:00-21:00; sábado 08:00-13:00', 20, 14, 'Activo')
+  ('SCZ-CENTRO', 'Sucursal Santa Cruz Centro', NULL, NULL, 'Zona Centro, Santa Cruz de la Sierra', 'Santa Cruz de la Sierra', 'Santa Cruz', 'Bolivia', 'Lunes a viernes 08:00-21:00; sábado 08:00-13:00', 25, 18, 'Activo'),
+  ('SCZ-NORTE', 'Sucursal Santa Cruz Norte', NULL, NULL, 'Zona Norte, Santa Cruz de la Sierra', 'Santa Cruz de la Sierra', 'Santa Cruz', 'Bolivia', 'Lunes a viernes 08:00-21:00; sábado 08:00-13:00', 22, 16, 'Activo'),
+  ('SCZ-SUR', 'Sucursal Santa Cruz Sur', NULL, NULL, 'Zona Sur, Santa Cruz de la Sierra', 'Santa Cruz de la Sierra', 'Santa Cruz', 'Bolivia', 'Lunes a viernes 08:00-21:00; sábado 08:00-13:00', 20, 14, 'Activo')
 ON CONFLICT (codigo) DO UPDATE SET nombre=EXCLUDED.nombre, telefono=EXCLUDED.telefono, email=EXCLUDED.email, direccion_linea1=EXCLUDED.direccion_linea1, ciudad=EXCLUDED.ciudad, departamento=EXCLUDED.departamento, pais=EXCLUDED.pais, horario_texto=EXCLUDED.horario_texto, largo_m=EXCLUDED.largo_m, ancho_m=EXCLUDED.ancho_m, estado_registro=EXCLUDED.estado_registro, fecha_modificacion=NOW(), version_registro=COALESCE(infraestructura.sucursal.version_registro,1)+1;
 
 -- Edificios base
@@ -677,10 +677,10 @@ VALUES ('LEGAL', 'Responsable Legal Societario', (SELECT id_posicion FROM admini
 ON CONFLICT (codigo) DO UPDATE SET nombre=EXCLUDED.nombre, id_posicion_parent=EXCLUDED.id_posicion_parent, descripcion=EXCLUDED.descripcion, estado_registro='Activo', fecha_modificacion=NOW(), version_registro=COALESCE(administracion.posicion.version_registro,1)+1;
 
 INSERT INTO administracion.empleado (id_persona, fecha_ingreso, tipo_contrato, jornada, email_corporativo, id_sucursal, estado_registro)
-VALUES (900001, '2026-01-01', 'INDEFINIDO'::administracion.tipo_contrato, 'FULL_TIME'::administracion.jornada_laboral, 'pablo.arauz@cpa.test', (SELECT id_sucursal FROM infraestructura.sucursal WHERE codigo='SCZ-CENTRO'), 'Activo')
+VALUES (900001, '2026-01-01', 'INDEFINIDO'::administracion.tipo_contrato, 'FULL_TIME'::administracion.jornada_laboral, NULL, (SELECT id_sucursal FROM infraestructura.sucursal WHERE codigo='SCZ-CENTRO'), 'Activo')
 ON CONFLICT (id_persona) DO UPDATE SET fecha_ingreso=EXCLUDED.fecha_ingreso, tipo_contrato=EXCLUDED.tipo_contrato, jornada=EXCLUDED.jornada, email_corporativo=EXCLUDED.email_corporativo, id_sucursal=EXCLUDED.id_sucursal, estado_registro='Activo', fecha_modificacion=NOW(), version_registro=COALESCE(administracion.empleado.version_registro,1)+1;
 INSERT INTO administracion.empleado (id_persona, fecha_ingreso, tipo_contrato, jornada, email_corporativo, id_sucursal, estado_registro)
-VALUES (900002, '2026-01-01', 'INDEFINIDO'::administracion.tipo_contrato, 'FULL_TIME'::administracion.jornada_laboral, 'maria.sonia.caballero@cpa.test', (SELECT id_sucursal FROM infraestructura.sucursal WHERE codigo='SCZ-CENTRO'), 'Activo')
+VALUES (900002, '2026-01-01', 'INDEFINIDO'::administracion.tipo_contrato, 'FULL_TIME'::administracion.jornada_laboral, NULL, (SELECT id_sucursal FROM infraestructura.sucursal WHERE codigo='SCZ-CENTRO'), 'Activo')
 ON CONFLICT (id_persona) DO UPDATE SET fecha_ingreso=EXCLUDED.fecha_ingreso, tipo_contrato=EXCLUDED.tipo_contrato, jornada=EXCLUDED.jornada, email_corporativo=EXCLUDED.email_corporativo, id_sucursal=EXCLUDED.id_sucursal, estado_registro='Activo', fecha_modificacion=NOW(), version_registro=COALESCE(administracion.empleado.version_registro,1)+1;
 
 INSERT INTO administracion.kpi (nombre, descripcion, unidad_medida, frecuencia, estado_registro)

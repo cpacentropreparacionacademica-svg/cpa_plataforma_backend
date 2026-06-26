@@ -115,13 +115,16 @@ export class CrudRepository {
   async list(resource: ResourceConfig, query: Record<string, unknown>): Promise<ListResult> {
     const columnNames = await this.metadata.getColumnNames(resource);
     const table = quoteTable(resource.schema, resource.tableName);
-    const limit = Math.min(Math.max(Number(query.limit || 20), 1), 100);
-    const page = Number(query.page || 1);
-    const offset = query.offset !== undefined ? Math.max(Number(query.offset), 0) : Math.max(page - 1, 0) * limit;
+    // Los aliases lógicos, por ejemplo infraestructura/aula, pueden imponer filtros
+    // no editables por frontend. Esto evita exponer salas cuando la pantalla pide aulas.
+    const effectiveQuery: Record<string, unknown> = { ...query, ...(resource.defaultFilters || {}) };
+    const limit = Math.min(Math.max(Number(effectiveQuery.limit || 20), 1), 100);
+    const page = Number(effectiveQuery.page || 1);
+    const offset = effectiveQuery.offset !== undefined ? Math.max(Number(effectiveQuery.offset), 0) : Math.max(page - 1, 0) * limit;
     const filters: string[] = [];
     const values: unknown[] = [];
 
-    for (const [key, value] of Object.entries(query)) {
+    for (const [key, value] of Object.entries(effectiveQuery)) {
       if (CONTROL_QUERY_FIELDS.has(key) || value === undefined || value === null || value === '') continue;
       if (!columnNames.has(key)) continue;
 
@@ -139,8 +142,8 @@ export class CrudRepository {
     }
 
     const whereSql = filters.length > 0 ? `WHERE ${filters.join(' AND ')}` : '';
-    const orderBy = typeof query.orderBy === 'string' && columnNames.has(query.orderBy) ? query.orderBy : resource.primaryKeys[0];
-    const orderDir = String(query.orderDir || 'DESC').toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
+    const orderBy = typeof effectiveQuery.orderBy === 'string' && columnNames.has(effectiveQuery.orderBy) ? effectiveQuery.orderBy : resource.primaryKeys[0];
+    const orderDir = String(effectiveQuery.orderDir || 'DESC').toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
     const countRows = await this.dataSource.query(`SELECT COUNT(*)::int AS count FROM ${table} ${whereSql}`, values) as Array<{ count: number }>;
     const rows = await this.dataSource.query(
       `SELECT * FROM ${table} ${whereSql} ORDER BY ${quoteIdentifier(orderBy)} ${orderDir} LIMIT $${values.length + 1} OFFSET $${values.length + 2}`,
@@ -157,7 +160,7 @@ export class CrudRepository {
     authUserId?: string,
   ): Promise<Record<string, unknown>> {
     const columnNames = await this.metadata.getColumnNames(resource);
-    const cleanPayload = this.cleanPayload(payload, columnNames, false);
+    const cleanPayload = this.cleanPayload({ ...payload, ...(resource.defaultCreateValues || {}) }, columnNames, false);
 
     if (authUserId && columnNames.has('id_usuario_creador') && cleanPayload.id_usuario_creador === undefined) {
       cleanPayload.id_usuario_creador = authUserId;

@@ -31,7 +31,7 @@ yarn db:migrate:prod
 ### Pablo Arauz Caballero
 
 - Usuario: `pablo.admin`
-- Email: `pablo.arauz@cpa.test`
+- Email: pendiente de cargar correo real. Login recomendado: `pablo.admin`.
 - Password temporal: `PabloAdmin2026!`
 - Roles: `SUPER_ADMIN`, `ADMIN_GENERAL`
 - Super usuario: `true`
@@ -39,9 +39,18 @@ yarn db:migrate:prod
 ### Maria Sonia Caballero
 
 - Usuario: `maria.contador`
-- Email: `maria.sonia.caballero@cpa.test`
+- Email: pendiente de cargar correo real. Login recomendado: `maria.contador`.
 - Password temporal: `MariaContador2026!`
 - Roles: `CONTADOR_GENERAL`, `CONTADOR`
 - Super usuario: `false`
 
 > Cambia estas contraseñas después del primer ingreso. El backend actual valida contraseñas con SHA-256, por eso el seed almacena hashes SHA-256 precomputados.
+
+
+## Usuario adicional agregado
+
+- Nombre: Katia Caballero Ardaya
+- Usuario: `katia.admin`
+- Password provisional: `KatiaAdmin2026!`
+- Rol: Super admin / administrador general
+- Email: pendiente de cargar correo real. No se inventó un correo con dominio ficticio.

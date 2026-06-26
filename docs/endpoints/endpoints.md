@@ -655,3 +655,34 @@ GET /api/servicios_educativos/producto-educativo?tipo_producto=CURSO
 ```
 
 Nota: `materia_tree` ahora permite varias filas por materia, usando unicidad por `(nombre, tema, subtema)`.
+
+---
+
+# Corrección frontend: alias de aulas
+
+El frontend puede usar directamente:
+
+```http
+GET /api/infraestructura/aula
+```
+
+Este endpoint es un alias lógico de:
+
+```http
+GET /api/infraestructura/espacio?tipo=AULA
+```
+
+La tabla real sigue siendo:
+
+```sql
+infraestructura.espacio
+```
+
+El alias fuerza `tipo=AULA`, por lo que no devuelve salas.
+
+Documento principal para frontend:
+
+```txt
+docs/frontend/FRONTEND_CONTRATO_CPA_ULTRA_DETALLADO.md
+```
+

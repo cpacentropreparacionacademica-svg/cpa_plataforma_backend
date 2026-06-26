@@ -31,6 +31,21 @@ export class AuthRepository {
     return rows[0] || null;
   }
 
+
+  async getUserByLoginIdentifier(identifier: string): Promise<DbUser | null> {
+    const normalized = identifier.trim();
+    const rows = await this.dataSource.query(
+      `SELECT u.id_persona, u.nombre_usuario, u.contrasena_hash, u.tipo_usuario, u.es_super_usuario,
+              p.email, p.nombres, p.apellidos, p.telefono
+       FROM persona.persona_usuario u
+       INNER JOIN persona.persona p ON p.id_persona = u.id_persona
+       WHERE LOWER(COALESCE(p.email, '')) = LOWER($1)
+          OR LOWER(u.nombre_usuario) = LOWER($1)
+       LIMIT 1`,
+      [normalized],
+    ) as DbUser[];
+    return rows[0] || null;
+  }
   async getUserByIdPersona(idPersona: string): Promise<DbUser | null> {
     const rows = await this.dataSource.query(
       `SELECT u.id_persona, u.nombre_usuario, u.contrasena_hash, u.tipo_usuario, u.es_super_usuario,

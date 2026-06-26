@@ -15,7 +15,11 @@ export class AuthService {
   ) {}
 
   async login(dto: LoginDto, params: { ip?: string | null; userAgent?: string | null }, response: Response) {
-    const user = await this.repository.getUserByEmail(dto.email);
+    const identifier = String(dto.email || dto.nombre_usuario || dto.usuario || '').trim();
+    if (!identifier) {
+      throw new UnauthorizedException('Debes enviar email, nombre_usuario o usuario.');
+    }
+    const user = await this.repository.getUserByLoginIdentifier(identifier);
     if (!user || !safeCompare(sha256(dto.password), user.contrasena_hash)) {
       throw new UnauthorizedException('Credenciales inválidas.');
     }

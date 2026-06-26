@@ -9,7 +9,12 @@ export interface ResourceConfig {
   tableName: string;
   primaryKeys: string[];
   permissions?: Partial<Record<'create' | 'read' | 'update', string>>;
+  /** Filtros forzados para aliases lógicos; se aplican siempre en GET list. */
+  defaultFilters?: Record<string, unknown>;
+  /** Valores forzados al crear por un alias lógico; sobreescriben el payload si existe conflicto. */
+  defaultCreateValues?: Record<string, unknown>;
 }
+
 
 export const RESOURCES: ResourceConfig[] = [
   {
@@ -469,6 +474,30 @@ export const RESOURCES: ResourceConfig[] = [
       "create": "INFRAESTRUCTURA.ESPACIO.CREATE",
       "read": "INFRAESTRUCTURA.ESPACIO.READ",
       "update": "INFRAESTRUCTURA.ESPACIO.UPDATE"
+    }
+  },
+  {
+    "key": "aula",
+    "entity": "aula",
+    "domainFolder": "infraestructura",
+    "routeModule": "infraestructura",
+    "routePath": "aula",
+    "schema": "infraestructura",
+    "tableName": "espacio",
+    "primaryKeys": [
+      "id_espacio"
+    ],
+    "permissions": {
+      "create": "INFRAESTRUCTURA.ESPACIO.CREATE",
+      "read": "INFRAESTRUCTURA.ESPACIO.READ",
+      "update": "INFRAESTRUCTURA.ESPACIO.UPDATE"
+    },
+    "defaultFilters": {
+      "tipo": "AULA"
+    },
+    "defaultCreateValues": {
+      "tipo": "AULA",
+      "categoria_sala": null
     }
   },
   {
