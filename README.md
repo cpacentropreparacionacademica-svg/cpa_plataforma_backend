@@ -336,3 +336,18 @@ Endpoint principal:
 ```http
 POST /api/contabilidad/venta-clase/registrar-batch
 ```
+
+## Patch contable: cuentas operativas y cuentas por estudiante/tutor
+
+Ver contrato frontend en:
+
+```txt
+docs/endpoints/cuentas-operativas-persona.md
+```
+
+Este patch agrega:
+
+- `contabilidad.configuracion_cuenta_operativa`
+- creación automática de CxC y paquete diferido al crear estudiante
+- creación automática de CxP al crear tutor
+- resolución automática de cuentas por estudiante en `POST /api/contabilidad/venta-clase/registrar-batch`

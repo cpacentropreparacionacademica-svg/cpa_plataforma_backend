@@ -234,6 +234,23 @@ export const RESOURCES: ResourceConfig[] = [
     }
   },
   {
+    "key": "configuracion_cuenta_operativa",
+    "entity": "configuracion_cuenta_operativa",
+    "domainFolder": "contabilidad",
+    "routeModule": "contabilidad",
+    "routePath": "configuracion-cuenta-operativa",
+    "schema": "contabilidad",
+    "tableName": "configuracion_cuenta_operativa",
+    "primaryKeys": [
+      "id_configuracion_cuenta"
+    ],
+    "permissions": {
+      "create": "CONTABILIDAD.CONFIGURACION_CUENTA_OPERATIVA.CREATE",
+      "read": "CONTABILIDAD.CONFIGURACION_CUENTA_OPERATIVA.READ",
+      "update": "CONTABILIDAD.CONFIGURACION_CUENTA_OPERATIVA.UPDATE"
+    }
+  },
+  {
     "key": "grupo_cuenta",
     "entity": "grupo_cuenta",
     "domainFolder": "contabilidad",

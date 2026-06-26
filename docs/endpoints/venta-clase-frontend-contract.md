@@ -492,3 +492,74 @@ export async function registrarParteClasesPasadas(token: string, fecha: string, 
    - `/api/contabilidad/transaccion`
    - `/api/contabilidad/transaccion-detalle-venta`
    - `/api/contabilidad/transaccion-movimiento-cuenta`
+
+## Actualización: cuentas contables por estudiante y configuración manual
+
+El endpoint `venta-clase` ya no debe depender de cuentas fijas quemadas en código para CxC ni para paquetes.
+
+### Reglas vigentes
+
+| Forma de pago | Cuenta usada |
+|---|---|
+| `efectivo` | `contabilidad.configuracion_cuenta_operativa.codigo = CANAL_COBRO_EFECTIVO` |
+| `qr` | `contabilidad.configuracion_cuenta_operativa.codigo = CANAL_COBRO_QR` |
+| `cxc` | `contabilidad.cuenta_asignacion.entidad_tipo = ESTUDIANTE_CXC` para el `id_estudiante` seleccionado |
+| `paquete` | `contabilidad.cuenta_asignacion.entidad_tipo = ESTUDIANTE_PAQUETE_DIFERIDO` para el `id_estudiante` seleccionado |
+
+Si una fila usa `cxc` o `paquete`, el frontend debe enviar `id_estudiante`. El nombre del estudiante puede mostrarse para UX, pero contablemente no es suficiente.
+
+### Configuración manual de efectivo y QR
+
+El frontend puede listar y modificar las cuentas operativas en:
+
+```http
+GET /api/contabilidad/configuracion-cuenta-operativa
+PATCH /api/contabilidad/configuracion-cuenta-operativa/:id_configuracion_cuenta
+```
+
+Ejemplo para cambiar la cuenta QR:
+
+```json
+{
+  "id_cuenta": 13
+}
+```
+
+### Creación automática de cuentas
+
+Cuando se crea un estudiante con:
+
+```http
+POST /api/personas/estudiante
+```
+
+o por batch:
+
+```http
+POST /api/personas/estudiante/batch
+```
+
+el backend crea automáticamente:
+
+```txt
+ESTUDIANTE_CXC
+ESTUDIANTE_PAQUETE_DIFERIDO
+```
+
+Cuando se crea un tutor con:
+
+```http
+POST /api/personas/tutor
+```
+
+o por batch:
+
+```http
+POST /api/personas/tutor/batch
+```
+
+el backend crea automáticamente:
+
+```txt
+TUTOR_CXP
+```

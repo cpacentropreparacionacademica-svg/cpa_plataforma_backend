@@ -418,21 +418,28 @@ export class ContabilidadAccountingService {
   ): Promise<Record<string, unknown>> {
     const warnings: string[] = [];
 
-    const idCuentaIngreso = await this.resolveCuentaId(manager, item.cuentaIngreso, item.cuentaIngresoCodigo, '4.1.01.001', 'cuenta de ingreso por clases por hora');
+    const idCuentaIngreso = await this.resolveCuentaOperativaId(
+      manager,
+      'INGRESO_CLASE_POR_HORA',
+      item.cuentaIngreso,
+      item.cuentaIngresoCodigo,
+      '4.1.01.001',
+      'cuenta de ingreso por clases por hora',
+    );
     const idCuentaEfectivo = item.montoEfectivo > 0
-      ? await this.resolveCuentaId(manager, item.cuentaEfectivo, item.cuentaEfectivoCodigo, '1.1.01.001', 'cuenta de caja efectivo')
+      ? await this.resolveCuentaOperativaId(manager, 'CANAL_COBRO_EFECTIVO', item.cuentaEfectivo, item.cuentaEfectivoCodigo, '1.1.01.001', 'cuenta de caja efectivo')
       : undefined;
     const idCuentaQr = item.montoQr > 0
-      ? await this.resolveCuentaId(manager, item.cuentaQr, item.cuentaQrCodigo, '1.1.01.013', 'cuenta de QR / pagos móviles')
+      ? await this.resolveCuentaOperativaId(manager, 'CANAL_COBRO_QR', item.cuentaQr, item.cuentaQrCodigo, '1.1.01.013', 'cuenta de QR / pagos móviles')
       : undefined;
     const idCuentaCxc = item.montoCxc > 0
-      ? await this.resolveCuentaId(manager, item.cuentaCxc, item.cuentaCxcCodigo, '1.1.03.001', 'cuenta por cobrar estudiantes')
+      ? await this.resolveCuentaEstudianteId(manager, item.idEstudiante, 'ESTUDIANTE_CXC', item.cuentaCxc, item.cuentaCxcCodigo, 'cuenta por cobrar del estudiante')
       : undefined;
     const idCuentaPaqueteDiferido = item.montoPaquete > 0
-      ? await this.resolveCuentaId(manager, item.cuentaPaqueteDiferido, item.cuentaPaqueteDiferidoCodigo, '2.1.06.003', 'ingresos diferidos por paquetes de horas')
+      ? await this.resolveCuentaEstudianteId(manager, item.idEstudiante, 'ESTUDIANTE_PAQUETE_DIFERIDO', item.cuentaPaqueteDiferido, item.cuentaPaqueteDiferidoCodigo, 'cuenta de paquete/ingreso diferido del estudiante')
       : undefined;
     const idCuentaImpuesto = (item.porcentajeImpuesto > 0 || item.montoImpuesto > 0)
-      ? await this.resolveCuentaId(manager, item.cuentaImpuesto, item.cuentaImpuestoCodigo, '2.1.05.001', 'IVA débito fiscal')
+      ? await this.resolveCuentaOperativaId(manager, 'IVA_DEBITO_FISCAL', item.cuentaImpuesto, item.cuentaImpuestoCodigo, '2.1.05.001', 'IVA débito fiscal')
       : undefined;
 
     const clase = await this.ensureClasePorHora(manager, item, warnings, authUserId);
@@ -479,7 +486,7 @@ export class ContabilidadAccountingService {
     if (montoEfectivo > 0 && idCuentaEfectivo) movimientos.push({ id_cuenta: idCuentaEfectivo, debe: montoEfectivo, haber: 0 });
     if (montoQr > 0 && idCuentaQr) movimientos.push({ id_cuenta: idCuentaQr, debe: montoQr, haber: 0 });
     if (montoCxc > 0) {
-      const cuenta = idCuentaCxc ?? await this.resolveCuentaId(manager, undefined, undefined, '1.1.03.001', 'cuenta por cobrar estudiantes');
+      const cuenta = idCuentaCxc ?? await this.resolveCuentaEstudianteId(manager, item.idEstudiante, 'ESTUDIANTE_CXC', undefined, undefined, 'cuenta por cobrar del estudiante');
       movimientos.push({ id_cuenta: cuenta, debe: montoCxc, haber: 0 });
     }
     if (montoPaquete > 0 && idCuentaPaqueteDiferido) movimientos.push({ id_cuenta: idCuentaPaqueteDiferido, debe: montoPaquete, haber: 0 });
@@ -670,6 +677,153 @@ export class ContabilidadAccountingService {
 
     return rows[0];
   }
+
+  private async resolveCuentaOperativaId(
+    manager: EntityManager,
+    codigoConfiguracion: string,
+    explicitId: unknown,
+    explicitCode: unknown,
+    defaultCode: string,
+    label: string,
+  ): Promise<number> {
+    const id = this.toOptionalPositiveInt(explicitId);
+    if (id) return id;
+
+    const code = this.toOptionalString(explicitCode);
+    if (code) return this.resolveCuentaId(manager, undefined, code, defaultCode, label);
+
+    const configRows = await manager.query(
+      `SELECT cco.id_cuenta, c.codigo AS codigo_cuenta
+         FROM contabilidad.configuracion_cuenta_operativa cco
+         JOIN contabilidad.cuenta c ON c.id_cuenta = cco.id_cuenta
+        WHERE cco.codigo = $1
+          AND COALESCE(cco.estado_registro, 'Activo') IN ('Activo', 'ACTIVO', 'activo')
+        LIMIT 1`,
+      [codigoConfiguracion],
+    ) as Array<{ id_cuenta: unknown; codigo_cuenta: unknown }>;
+
+    const configuredId = this.toOptionalPositiveInt(configRows[0]?.id_cuenta);
+    if (configuredId) return configuredId;
+
+    return this.resolveCuentaId(manager, undefined, undefined, defaultCode, `${label}. No hay configuración activa ${codigoConfiguracion}; se usó fallback por código`);
+  }
+
+  private async resolveCuentaEstudianteId(
+    manager: EntityManager,
+    idEstudiante: number | undefined,
+    entidadTipo: 'ESTUDIANTE_CXC' | 'ESTUDIANTE_PAQUETE_DIFERIDO',
+    explicitId: unknown,
+    explicitCode: unknown,
+    label: string,
+  ): Promise<number> {
+    const id = this.toOptionalPositiveInt(explicitId);
+    if (id) return id;
+
+    const code = this.toOptionalString(explicitCode);
+    if (code) return this.resolveCuentaId(manager, undefined, code, code, label);
+
+    if (!idEstudiante) {
+      throw new BadRequestException(`${label} requiere id_estudiante. No se debe usar una cuenta genérica para CxC o paquete.`);
+    }
+
+    await this.ensureStudentAccountingAccounts(manager, idEstudiante);
+
+    const rows = await manager.query(
+      `SELECT ca.id_cuenta
+         FROM contabilidad.cuenta_asignacion ca
+         JOIN contabilidad.cuenta c ON c.id_cuenta = ca.id_cuenta
+        WHERE ca.entidad_tipo = $1
+          AND ca.id_persona_estudiante = $2
+          AND COALESCE(ca.estado_registro, 'Activo') IN ('Activo', 'ACTIVO', 'activo')
+          AND COALESCE(c.estado_registro, 'Activo') IN ('Activo', 'ACTIVO', 'activo')
+          AND (ca.vigente_hasta IS NULL OR ca.vigente_hasta >= CURRENT_DATE)
+        ORDER BY ca.prioridad ASC, ca.id_cuenta_asignacion ASC
+        LIMIT 1`,
+      [entidadTipo, idEstudiante],
+    ) as Array<{ id_cuenta: unknown }>;
+
+    const resolved = this.toOptionalPositiveInt(rows[0]?.id_cuenta);
+    if (!resolved) {
+      throw new BadRequestException(`No se encontró ${label} para id_estudiante=${idEstudiante}.`);
+    }
+    return resolved;
+  }
+
+  private async ensureStudentAccountingAccounts(manager: EntityManager, idEstudiante: number, authUserId?: string): Promise<void> {
+    const estudianteRows = await manager.query(
+      `SELECT pe.id_persona,
+              COALESCE(NULLIF(TRIM(CONCAT_WS(' ', p.nombres, p.apellidos)), ''), 'Estudiante ' || pe.id_persona::text) AS nombre_completo
+         FROM persona.persona_estudiante pe
+         LEFT JOIN persona.persona p ON p.id_persona = pe.id_persona
+        WHERE pe.id_persona = $1
+        LIMIT 1`,
+      [idEstudiante],
+    ) as Array<{ id_persona: unknown; nombre_completo: unknown }>;
+
+    if (!estudianteRows[0]) {
+      throw new BadRequestException(`No existe persona.persona_estudiante con id_persona=${idEstudiante}.`);
+    }
+
+    const nombre = String(estudianteRows[0].nombre_completo || `Estudiante ${idEstudiante}`).slice(0, 120);
+    const idCuentaCxc = await this.ensureCuentaByGroupCode(manager, '1.1.03', `1.1.03.E${idEstudiante}`, `CxC estudiante ${idEstudiante} - ${nombre}`, authUserId);
+    await this.ensureCuentaAsignacion(manager, 'ESTUDIANTE_CXC', idCuentaCxc, { id_persona_estudiante: idEstudiante }, authUserId);
+
+    const idCuentaPaquete = await this.ensureCuentaByGroupCode(manager, '2.1.06', `2.1.06.E${idEstudiante}`, `Paquetes cobrados por anticipado estudiante ${idEstudiante} - ${nombre}`, authUserId);
+    await this.ensureCuentaAsignacion(manager, 'ESTUDIANTE_PAQUETE_DIFERIDO', idCuentaPaquete, { id_persona_estudiante: idEstudiante }, authUserId);
+  }
+
+  private async ensureCuentaByGroupCode(
+    manager: EntityManager,
+    codigoGrupo: string,
+    codigoCuenta: string,
+    nombreCuenta: string,
+    authUserId?: string,
+  ): Promise<number> {
+    const existing = await manager.query(`SELECT id_cuenta FROM contabilidad.cuenta WHERE codigo = $1 LIMIT 1`, [codigoCuenta]) as Array<{ id_cuenta: unknown }>;
+    const existingId = this.toOptionalPositiveInt(existing[0]?.id_cuenta);
+    if (existingId) return existingId;
+
+    const groupRows = await manager.query(`SELECT id_grupo_cuenta FROM contabilidad.grupo_cuenta WHERE codigo = $1 LIMIT 1`, [codigoGrupo]) as Array<{ id_grupo_cuenta: unknown }>;
+    const idGrupo = this.toOptionalPositiveInt(groupRows[0]?.id_grupo_cuenta);
+    if (!idGrupo) throw new BadRequestException(`No existe grupo contable ${codigoGrupo}.`);
+
+    const rows = await manager.query(
+      `INSERT INTO contabilidad.cuenta (codigo, nombre_cuenta, id_grupo_cuenta, estado_registro, id_usuario_creador)
+       VALUES ($1, $2, $3, 'Activo', $4)
+       ON CONFLICT (codigo) DO UPDATE SET nombre_cuenta = EXCLUDED.nombre_cuenta
+       RETURNING id_cuenta`,
+      [codigoCuenta, nombreCuenta.slice(0, 180), idGrupo, authUserId || null],
+    ) as Array<{ id_cuenta: unknown }>;
+    return Number(rows[0].id_cuenta);
+  }
+
+  private async ensureCuentaAsignacion(
+    manager: EntityManager,
+    entidadTipo: string,
+    idCuenta: number,
+    ids: { id_persona_estudiante?: number; id_persona_tutor?: number },
+    authUserId?: string,
+  ): Promise<void> {
+    const existing = await manager.query(
+      `SELECT id_cuenta_asignacion
+         FROM contabilidad.cuenta_asignacion
+        WHERE entidad_tipo = $1
+          AND COALESCE(id_persona_estudiante, -1) = COALESCE($2::bigint, -1)
+          AND COALESCE(id_persona_tutor, -1) = COALESCE($3::bigint, -1)
+          AND COALESCE(estado_registro, 'Activo') IN ('Activo', 'ACTIVO', 'activo')
+        LIMIT 1`,
+      [entidadTipo, ids.id_persona_estudiante || null, ids.id_persona_tutor || null],
+    ) as Array<{ id_cuenta_asignacion: unknown }>;
+    if (existing[0]) return;
+
+    await manager.query(
+      `INSERT INTO contabilidad.cuenta_asignacion
+        (entidad_tipo, id_persona_estudiante, id_persona_tutor, id_cuenta, prioridad, vigente_desde, estado_registro, id_usuario_creador)
+       VALUES ($1, $2, $3, $4, 1, CURRENT_DATE, 'Activo', $5)`,
+      [entidadTipo, ids.id_persona_estudiante || null, ids.id_persona_tutor || null, idCuenta, authUserId || null],
+    );
+  }
+
 
   private async resolveCuentaId(
     manager: EntityManager,

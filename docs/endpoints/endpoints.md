@@ -588,3 +588,32 @@ Ver también:
 ```txt
 docs/endpoints/venta-clase-frontend-contract.md
 ```
+
+---
+
+## Cuentas operativas y cuentas por estudiante/tutor
+
+Documento de contrato frontend:
+
+```txt
+docs/endpoints/cuentas-operativas-persona.md
+```
+
+Endpoints nuevos:
+
+```http
+GET   /api/contabilidad/configuracion-cuenta-operativa
+POST  /api/contabilidad/configuracion-cuenta-operativa
+PATCH /api/contabilidad/configuracion-cuenta-operativa/:id_configuracion_cuenta
+POST  /api/contabilidad/configuracion-cuenta-operativa/batch
+PATCH /api/contabilidad/configuracion-cuenta-operativa/batch
+```
+
+Regla nueva para `venta-clase`:
+
+```txt
+efectivo -> cuenta configurada CANAL_COBRO_EFECTIVO
+qr       -> cuenta configurada CANAL_COBRO_QR
+cxc      -> cuenta asignada ESTUDIANTE_CXC del estudiante
+paquete  -> cuenta asignada ESTUDIANTE_PAQUETE_DIFERIDO del estudiante
+```

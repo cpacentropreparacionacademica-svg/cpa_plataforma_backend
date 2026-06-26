@@ -1,11 +1,16 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { DataSource, EntityManager } from 'typeorm';
 import { CrudRepository } from '../../common/repositories/crud.repository';
 import { getResourceConfig, ResourceConfig } from '../resource-registry';
 
 @Injectable()
 export class CrudService {
-  constructor(private readonly repository: CrudRepository, private readonly config: ConfigService) {}
+  constructor(
+    private readonly repository: CrudRepository,
+    private readonly config: ConfigService,
+    private readonly dataSource: DataSource,
+  ) {}
 
   findResource(moduleName: string, resourcePath: string): ResourceConfig {
     const resource = getResourceConfig(moduleName, resourcePath);
@@ -19,6 +24,7 @@ export class CrudService {
     const resource = this.findResource(moduleName, resourcePath);
     this.assertWriteAllowedForSmoke('POST', resource);
     const data = await this.repository.create(resource, payload, authUserId);
+    await this.provisionAccountingAccountsAfterCreate(resource, data, authUserId);
     return { success: true, message: `${resource.entity} creado correctamente.`, data };
   }
 
@@ -27,6 +33,9 @@ export class CrudService {
     this.assertWriteAllowedForSmoke('POST', resource);
     const items = this.normalizeCreateBatchPayload(payload);
     const data = await this.repository.createMany(resource, items, authUserId);
+    for (const row of data) {
+      await this.provisionAccountingAccountsAfterCreate(resource, row, authUserId);
+    }
     return {
       success: true,
       message: `${data.length} registro(s) de ${resource.entity} creados correctamente.`,
@@ -160,6 +169,156 @@ export class CrudService {
 
       return { ids, data: dataSource };
     });
+  }
+
+
+  private async provisionAccountingAccountsAfterCreate(
+    resource: ResourceConfig,
+    row: Record<string, unknown>,
+    authUserId?: string,
+  ): Promise<void> {
+    if (resource.schema === 'persona' && resource.tableName === 'persona_estudiante') {
+      const idEstudiante = this.toOptionalPositiveInt(row.id_persona);
+      if (idEstudiante) await this.ensureStudentAccountingAccounts(idEstudiante, authUserId);
+      return;
+    }
+
+    if (resource.schema === 'persona' && resource.tableName === 'persona_tutor') {
+      const idTutor = this.toOptionalPositiveInt(row.id_tutor);
+      if (idTutor) await this.ensureTutorAccountingAccounts(idTutor, authUserId);
+    }
+  }
+
+  private async ensureStudentAccountingAccounts(idEstudiante: number, authUserId?: string): Promise<void> {
+    await this.dataSource.transaction(async (manager) => {
+      const estudianteRows = await manager.query(
+        `SELECT pe.id_persona,
+                COALESCE(NULLIF(TRIM(CONCAT_WS(' ', p.nombres, p.apellidos)), ''), 'Estudiante ' || pe.id_persona::text) AS nombre_completo
+           FROM persona.persona_estudiante pe
+           LEFT JOIN persona.persona p ON p.id_persona = pe.id_persona
+          WHERE pe.id_persona = $1
+          LIMIT 1`,
+        [idEstudiante],
+      ) as Array<{ id_persona: unknown; nombre_completo: unknown }>;
+
+      if (!estudianteRows[0]) return;
+      const nombre = String(estudianteRows[0].nombre_completo || `Estudiante ${idEstudiante}`).slice(0, 120);
+
+      const idCuentaCxc = await this.ensureCuentaByGroupCode(
+        manager,
+        '1.1.03',
+        `1.1.03.E${idEstudiante}`,
+        `CxC estudiante ${idEstudiante} - ${nombre}`,
+        authUserId,
+      );
+      await this.ensureCuentaAsignacion(manager, 'ESTUDIANTE_CXC', idCuentaCxc, { id_persona_estudiante: idEstudiante }, authUserId);
+
+      const idCuentaPaquete = await this.ensureCuentaByGroupCode(
+        manager,
+        '2.1.06',
+        `2.1.06.E${idEstudiante}`,
+        `Paquetes cobrados por anticipado estudiante ${idEstudiante} - ${nombre}`,
+        authUserId,
+      );
+      await this.ensureCuentaAsignacion(manager, 'ESTUDIANTE_PAQUETE_DIFERIDO', idCuentaPaquete, { id_persona_estudiante: idEstudiante }, authUserId);
+    });
+  }
+
+  private async ensureTutorAccountingAccounts(idTutor: number, authUserId?: string): Promise<void> {
+    await this.dataSource.transaction(async (manager) => {
+      const tutorRows = await manager.query(
+        `SELECT pt.id_tutor,
+                COALESCE(NULLIF(TRIM(CONCAT_WS(' ', p.nombres, p.apellidos)), ''), 'Tutor ' || pt.id_tutor::text) AS nombre_completo
+           FROM persona.persona_tutor pt
+           LEFT JOIN persona.persona p ON p.id_persona = pt.id_persona
+          WHERE pt.id_tutor = $1
+          LIMIT 1`,
+        [idTutor],
+      ) as Array<{ id_tutor: unknown; nombre_completo: unknown }>;
+
+      if (!tutorRows[0]) return;
+      const nombre = String(tutorRows[0].nombre_completo || `Tutor ${idTutor}`).slice(0, 120);
+      const idCuentaTutor = await this.ensureCuentaByGroupCode(
+        manager,
+        '2.1.03',
+        `2.1.03.T${idTutor}`,
+        `CxP tutor ${idTutor} - ${nombre}`,
+        authUserId,
+      );
+      await this.ensureCuentaAsignacion(manager, 'TUTOR_CXP', idCuentaTutor, { id_persona_tutor: idTutor }, authUserId);
+    });
+  }
+
+  private async ensureCuentaByGroupCode(
+    manager: EntityManager,
+    codigoGrupo: string,
+    codigoCuenta: string,
+    nombreCuenta: string,
+    authUserId?: string,
+  ): Promise<number> {
+    const existing = await manager.query(
+      `SELECT id_cuenta FROM contabilidad.cuenta WHERE codigo = $1 LIMIT 1`,
+      [codigoCuenta],
+    ) as Array<{ id_cuenta: unknown }>;
+    const existingId = this.toOptionalPositiveInt(existing[0]?.id_cuenta);
+    if (existingId) return existingId;
+
+    const groupRows = await manager.query(
+      `SELECT id_grupo_cuenta FROM contabilidad.grupo_cuenta WHERE codigo = $1 LIMIT 1`,
+      [codigoGrupo],
+    ) as Array<{ id_grupo_cuenta: unknown }>;
+    const idGrupo = this.toOptionalPositiveInt(groupRows[0]?.id_grupo_cuenta);
+    if (!idGrupo) {
+      throw new BadRequestException(`No existe el grupo contable ${codigoGrupo}; no se pudo crear la cuenta ${codigoCuenta}.`);
+    }
+
+    const rows = await manager.query(
+      `INSERT INTO contabilidad.cuenta
+        (codigo, nombre_cuenta, id_grupo_cuenta, estado_registro, id_usuario_creador)
+       VALUES ($1, $2, $3, 'Activo', $4)
+       ON CONFLICT (codigo) DO UPDATE
+         SET nombre_cuenta = EXCLUDED.nombre_cuenta
+       RETURNING id_cuenta`,
+      [codigoCuenta, nombreCuenta.slice(0, 180), idGrupo, authUserId || null],
+    ) as Array<{ id_cuenta: unknown }>;
+
+    return Number(rows[0].id_cuenta);
+  }
+
+  private async ensureCuentaAsignacion(
+    manager: EntityManager,
+    entidadTipo: string,
+    idCuenta: number,
+    ids: { id_persona_estudiante?: number; id_persona_tutor?: number },
+    authUserId?: string,
+  ): Promise<void> {
+    const rows = await manager.query(
+      `SELECT id_cuenta_asignacion
+         FROM contabilidad.cuenta_asignacion
+        WHERE entidad_tipo = $1
+          AND id_cuenta = $2
+          AND COALESCE(id_persona_estudiante, -1) = COALESCE($3::bigint, -1)
+          AND COALESCE(id_persona_tutor, -1) = COALESCE($4::bigint, -1)
+          AND COALESCE(estado_registro, 'Activo') IN ('Activo', 'ACTIVO', 'activo')
+        LIMIT 1`,
+      [entidadTipo, idCuenta, ids.id_persona_estudiante || null, ids.id_persona_tutor || null],
+    ) as Array<{ id_cuenta_asignacion: unknown }>;
+
+    if (rows[0]) return;
+
+    await manager.query(
+      `INSERT INTO contabilidad.cuenta_asignacion
+        (entidad_tipo, id_persona_estudiante, id_persona_tutor, id_cuenta, prioridad, vigente_desde, estado_registro, id_usuario_creador)
+       VALUES ($1, $2, $3, $4, 1, CURRENT_DATE, 'Activo', $5)`,
+      [entidadTipo, ids.id_persona_estudiante || null, ids.id_persona_tutor || null, idCuenta, authUserId || null],
+    );
+  }
+
+  private toOptionalPositiveInt(value: unknown): number | undefined {
+    if (value === undefined || value === null || value === '') return undefined;
+    const parsed = Number(value);
+    if (!Number.isInteger(parsed) || parsed <= 0) return undefined;
+    return parsed;
   }
 
 
