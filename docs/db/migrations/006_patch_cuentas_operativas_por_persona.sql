@@ -23,6 +23,21 @@ CREATE TABLE IF NOT EXISTS contabilidad.configuracion_cuenta_operativa (
 CREATE INDEX IF NOT EXISTS ix_configuracion_cuenta_operativa_estado
   ON contabilidad.configuracion_cuenta_operativa (estado_registro);
 
+-- Función de auditoría mínima requerida por esta migración.
+-- No estaba presente en el schema base 001, por eso fresh fallaba en 006.
+CREATE OR REPLACE FUNCTION seguridad.fn_set_audit_update()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  NEW.fecha_modificacion := now();
+  NEW.version_registro := COALESCE(OLD.version_registro, NEW.version_registro, 1) + 1;
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS bu_configuracion_cuenta_operativa ON contabilidad.configuracion_cuenta_operativa;
+
 CREATE TRIGGER bu_configuracion_cuenta_operativa
   BEFORE UPDATE ON contabilidad.configuracion_cuenta_operativa
   FOR EACH ROW EXECUTE FUNCTION seguridad.fn_set_audit_update();
