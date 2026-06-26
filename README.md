@@ -351,3 +351,7 @@ Este patch agrega:
 - creación automática de CxC y paquete diferido al crear estudiante
 - creación automática de CxP al crear tutor
 - resolución automática de cuentas por estudiante en `POST /api/contabilidad/venta-clase/registrar-batch`
+
+## Seed académico Santa Cruz
+
+Se agregó `docs/db/migrations/007_seed_catalogos_academicos_scz.sql` para cargar materias, temas, subtemas, unidades educativas principales de Santa Cruz y productos educativos base. Ver `docs/db/seed-catalogos-academicos-scz.md`.

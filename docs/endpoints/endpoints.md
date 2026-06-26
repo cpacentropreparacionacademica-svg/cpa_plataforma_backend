@@ -617,3 +617,41 @@ qr       -> cuenta configurada CANAL_COBRO_QR
 cxc      -> cuenta asignada ESTUDIANTE_CXC del estudiante
 paquete  -> cuenta asignada ESTUDIANTE_PAQUETE_DIFERIDO del estudiante
 ```
+
+---
+
+## Seed académico para frontend
+
+Documento de referencia:
+
+```txt
+docs/db/seed-catalogos-academicos-scz.md
+```
+
+Migración agregada:
+
+```txt
+docs/db/migrations/007_seed_catalogos_academicos_scz.sql
+```
+
+Endpoints que quedan alimentados por este seed:
+
+```http
+GET /api/servicios_educativos/materia-tree
+GET /api/personas/unidad-educativa
+GET /api/servicios_educativos/producto-educativo
+```
+
+Filtros útiles:
+
+```http
+GET /api/servicios_educativos/materia-tree?nombre=Matemáticas
+GET /api/servicios_educativos/materia-tree?nombre=Física
+GET /api/servicios_educativos/materia-tree?nombre=Química
+GET /api/personas/unidad-educativa?categoria=privada
+GET /api/personas/unidad-educativa?categoria=fiscal
+GET /api/servicios_educativos/producto-educativo?tipo_producto=CLASE_POR_HORA
+GET /api/servicios_educativos/producto-educativo?tipo_producto=CURSO
+```
+
+Nota: `materia_tree` ahora permite varias filas por materia, usando unicidad por `(nombre, tema, subtema)`.
