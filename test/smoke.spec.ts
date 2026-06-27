@@ -115,7 +115,7 @@ describe('CPA Plataforma NestJS - smoke E2E de endpoints', () => {
     expect(response.body?.success).toBe(true);
   });
 
-  it('prepara el usuario admin demo desde env y valida que no exista signup público', async () => {
+  it('prepara el usuario admin demo desde env y bloquea el signup público', async () => {
     const testUser = demoUtils.getTestUserFromEnv();
 
     expect(testUser.email).toBeTruthy();
@@ -126,8 +126,8 @@ describe('CPA Plataforma NestJS - smoke E2E de endpoints', () => {
       .post('/api/auth/publicAuth/signup')
       .send({ id_persona: String(testUser.idPersona), nombre_usuario: testUser.username, password: testUser.password });
 
-    results.push({ name: 'signup público no disponible', method: 'POST', url: '/api/auth/publicAuth/signup', status: response.status, message: response.body?.message });
-    expect([400, 403, 404, 405]).toContain(response.status);
+    results.push({ name: 'signup público bloqueado', method: 'POST', url: '/api/auth/publicAuth/signup', status: response.status, message: response.body?.message });
+    expect([400, 403]).toContain(response.status);
   });
 
   it('hace login real con el admin demo y obtiene sessionToken', async () => {

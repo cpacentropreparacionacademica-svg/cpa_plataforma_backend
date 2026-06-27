@@ -18,12 +18,6 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-      - key: BACKUP_LOCAL_DIR
-        value: /tmp/cpa-backups
-      - key: BACKUP_PREFIX
-        value: cpa-postgres
-      - key: BACKUP_SOURCE_NAME
-        value: cpa-plataforma-backend
       - key: BACKUP_DELETE_LOCAL_AFTER_UPLOAD
         value: "true"
       - key: DATABASE_URL

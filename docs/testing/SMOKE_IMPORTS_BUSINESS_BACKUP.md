@@ -236,15 +236,3 @@ Si Render Native Node no lo trae disponible, hay tres opciones profesionales:
 ```
 
 No conviene simular backup completo sin `pg_dump`, porque un backup incompleto da una falsa sensación de seguridad.
-
-
-## Configuración Render recomendada para backup temporal
-
-```env
-BACKUP_LOCAL_DIR=/tmp/cpa-backups
-BACKUP_PREFIX=cpa-postgres
-BACKUP_SOURCE_NAME=cpa-plataforma-backend
-BACKUP_DELETE_LOCAL_AFTER_UPLOAD=true
-```
-
-Estos valores están pensados para Render: `/tmp` es almacenamiento temporal, el archivo se genera como `.sql.gz` y luego se sube/restaura según las variables `BACKUP_UPLOAD_URL` o `BACKUP_TARGET_DATABASE_URL`.

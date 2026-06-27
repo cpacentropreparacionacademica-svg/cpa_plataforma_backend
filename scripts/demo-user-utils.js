@@ -75,7 +75,8 @@ function createPgClient() {
 async function cleanDemoData(client, testUser = getTestUserFromEnv()) {
   const cleanIdFrom = Number(firstEnv('TEST_USER_CLEAN_ID_FROM') || 900001);
   const cleanIdTo = Number(firstEnv('TEST_USER_CLEAN_ID_TO') || 900099);
-  const emailDomain = testUser.email.includes('@') ? `%@${testUser.email.split('@').pop().toLowerCase()}` : '%@cpa.test';
+  // No limpiar por dominio completo. En Neon/Render el mismo dominio puede contener usuarios reales
+  // (@cpa.com), y borrar por LIKE %@dominio vuelve el smoke peligroso y no idempotente.
   const demoUsernames = [testUser.username, 'admin.demo', 'demo', 'test', 'usuario.demo'];
   const demoTypes = [testUser.userType, 'ADMIN_DEMO', 'DEMO', 'TEST'];
 
@@ -88,22 +89,19 @@ async function cleanDemoData(client, testUser = getTestUserFromEnv()) {
      FROM (
        SELECT p.id_persona
        FROM persona.persona p
-       WHERE p.id_persona BETWEEN $1 AND $2
-          OR LOWER(COALESCE(p.email, '')) = LOWER($3)
-          OR LOWER(COALESCE(p.email, '')) LIKE LOWER($4)
+       WHERE p.id_persona = $1
+          OR LOWER(COALESCE(p.email, '')) = LOWER($2)
        UNION
        SELECT u.id_persona
        FROM persona.persona_usuario u
-       WHERE u.id_persona BETWEEN $1 AND $2
-          OR LOWER(u.nombre_usuario) = ANY($5::text[])
-          OR UPPER(COALESCE(u.tipo_usuario, '')) = ANY($6::text[])
+       WHERE u.id_persona = $1
+          OR LOWER(u.nombre_usuario) = ANY($3::text[])
+          OR UPPER(COALESCE(u.tipo_usuario, '')) = ANY($4::text[])
      ) demo_scope
      ON CONFLICT (id_persona) DO NOTHING`,
     [
-      cleanIdFrom,
-      cleanIdTo,
+      testUser.idPersona,
       testUser.email,
-      emailDomain,
       demoUsernames.map((value) => value.toLowerCase()),
       demoTypes.map((value) => value.toUpperCase()),
     ],
@@ -150,6 +148,8 @@ async function cleanDemoData(client, testUser = getTestUserFromEnv()) {
     `DELETE FROM persona.persona p
      USING tmp_demo_personas d
      WHERE p.id_persona = d.id_persona
+       AND NOT EXISTS (SELECT 1 FROM persona.persona_estudiante pe WHERE pe.id_persona = p.id_persona)
+       AND NOT EXISTS (SELECT 1 FROM persona.persona_tutor pt WHERE pt.id_persona = p.id_persona)
        AND NOT EXISTS (SELECT 1 FROM administracion.empleado e WHERE e.id_persona = p.id_persona)
        AND NOT EXISTS (SELECT 1 FROM contabilidad.transaccion t WHERE t.id_cliente = p.id_persona)
        AND NOT EXISTS (SELECT 1 FROM infraestructura.tienda ti WHERE ti.id_responsable = p.id_persona)

@@ -345,10 +345,6 @@ export class ContabilidadAccountingService {
         ? this.toMoneyNumber(montoPagoDeclarado / cantidad)
         : this.toMoneyNumber(precioUnitarioRaw);
 
-      if (precioUnitario <= 0 && montoPagoDeclarado <= 0) {
-        throw new BadRequestException(`La fila ${index + 1} debe tener importe positivo en efectivo, QR, CxC, paquete o precio_unitario.`);
-      }
-
       for (const [label, value] of [
         ['monto_efectivo', montoEfectivo],
         ['monto_qr', montoQr],
@@ -357,6 +353,10 @@ export class ContabilidadAccountingService {
         ['precio_unitario', precioUnitario],
       ] as const) {
         if (value < 0) throw new BadRequestException(`items[${index}].${label} no puede ser negativo.`);
+      }
+
+      if (precioUnitario <= 0 && montoPagoDeclarado <= 0) {
+        throw new BadRequestException(`La fila ${index + 1} debe tener importe positivo en efectivo, QR, CxC, paquete o precio_unitario.`);
       }
 
       return {
