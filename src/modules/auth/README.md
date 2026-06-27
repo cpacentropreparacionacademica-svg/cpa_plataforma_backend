@@ -5,7 +5,7 @@ La sesión usa un token opaco guardado en cookie HttpOnly y validado contra `seg
 
 Rutas conservadas:
 
-> `POST /api/auth/publicAuth/signup` existe por compatibilidad, pero queda bloqueada por defecto con `ENABLE_PUBLIC_SIGNUP=false`. El usuario inicial/demo se crea desde `docs/db/seed-demo-user.sql`.
+> `POST /api/auth/publicAuth/signup` existe por compatibilidad, pero queda bloqueada por defecto con `ENABLE_PUBLIC_SIGNUP=false`. El usuario inicial/de prueba se crea desde `docs/db/seed-de prueba-user.sql`.
 
 - `POST /api/auth/publicAuth/login`
 - `POST /api/auth/publicAuth/signup`

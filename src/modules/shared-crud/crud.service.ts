@@ -1,8 +1,9 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DataSource, EntityManager } from 'typeorm';
 import * as XLSX from 'xlsx';
 import { CrudRepository } from '../../common/repositories/crud.repository';
+import { PermissionService } from '../../common/services/permission.service';
 import { getResourceConfig, ResourceConfig } from '../resource-registry';
 
 @Injectable()
@@ -11,6 +12,7 @@ export class CrudService {
     private readonly repository: CrudRepository,
     private readonly config: ConfigService,
     private readonly dataSource: DataSource,
+    private readonly permissions: PermissionService,
   ) {}
 
   findResource(moduleName: string, resourcePath: string): ResourceConfig {
@@ -24,6 +26,7 @@ export class CrudService {
   async create(moduleName: string, resourcePath: string, payload: Record<string, unknown>, authUserId?: string) {
     const resource = this.findResource(moduleName, resourcePath);
     this.assertWriteAllowedForSmoke('POST', resource);
+    await this.assertSecurityWriteAllowed(resource, payload, authUserId);
     const data = await this.repository.create(resource, payload, authUserId);
     await this.provisionAccountingAccountsAfterCreate(resource, data, authUserId);
     return { success: true, message: `${resource.entity} creado correctamente.`, data };
@@ -33,6 +36,9 @@ export class CrudService {
     const resource = this.findResource(moduleName, resourcePath);
     this.assertWriteAllowedForSmoke('POST', resource);
     const items = this.normalizeCreateBatchPayload(payload);
+    for (const item of items) {
+      await this.assertSecurityWriteAllowed(resource, item, authUserId);
+    }
     const data = await this.repository.createMany(resource, items, authUserId);
     for (const row of data) {
       await this.provisionAccountingAccountsAfterCreate(resource, row, authUserId);
@@ -49,6 +55,7 @@ export class CrudService {
     const resource = this.findResource(moduleName, resourcePath);
     const idValues = this.mapIds(resource, ids);
     this.assertWriteAllowedForSmoke('UPDATE', resource);
+    await this.assertSecurityWriteAllowed(resource, payload, authUserId, idValues);
     const data = await this.repository.update(resource, idValues, payload, authUserId);
     return { success: true, message: `${resource.entity} actualizado correctamente.`, data };
   }
@@ -57,6 +64,9 @@ export class CrudService {
     const resource = this.findResource(moduleName, resourcePath);
     this.assertWriteAllowedForSmoke('UPDATE', resource);
     const items = this.normalizeUpdateBatchPayload(resource, payload);
+    for (const item of items) {
+      await this.assertSecurityWriteAllowed(resource, item.data, authUserId, item.ids);
+    }
     const data = await this.repository.updateMany(resource, items, authUserId);
     return {
       success: true,
@@ -365,6 +375,76 @@ export class CrudService {
   }
 
 
+
+  private async assertSecurityWriteAllowed(
+    resource: ResourceConfig,
+    payload: Record<string, unknown>,
+    authUserId?: string,
+    ids: Record<string, unknown> = {},
+  ): Promise<void> {
+    if (!authUserId) return;
+
+    if (this.isSecurityAdministrationResource(resource)) {
+      await this.assertCanManageSecurity(authUserId);
+    }
+
+    if (resource.schema === 'seguridad' && resource.tableName === 'usuario_permiso') {
+      const targetUserId = this.toOptionalString(ids.id_persona ?? payload.id_persona);
+      if (targetUserId === String(authUserId) && this.isFalseish(payload.permitido)) {
+        throw new ForbiddenException('No puedes negarte permisos a ti mismo desde usuario_permiso. Usa otro administrador para cambios críticos.');
+      }
+    }
+
+    if (resource.schema === 'seguridad' && resource.tableName === 'usuario_rol') {
+      const targetUserId = this.toOptionalString(ids.id_persona ?? payload.id_persona);
+      if (targetUserId === String(authUserId) && this.isInactiveStatus(payload.estado_registro)) {
+        throw new ForbiddenException('No puedes desactivar tu propio rol. Usa otro administrador para cambios críticos.');
+      }
+    }
+
+    if (resource.schema === 'persona' && resource.tableName === 'persona_usuario') {
+      const targetUserId = this.toOptionalString(ids.id_persona ?? payload.id_persona);
+      if (targetUserId === String(authUserId)) {
+        if (payload.es_super_usuario === false || String(payload.es_super_usuario).toLowerCase() === 'false') {
+          throw new ForbiddenException('No puedes quitarte a ti mismo el atributo de super usuario.');
+        }
+        if (this.isInactiveStatus(payload.estado_registro)) {
+          throw new ForbiddenException('No puedes desactivar tu propio usuario.');
+        }
+      }
+
+      if (Object.prototype.hasOwnProperty.call(payload, 'es_super_usuario')) {
+        await this.assertCanManageSecurity(authUserId);
+      }
+    }
+  }
+
+  private isSecurityAdministrationResource(resource: ResourceConfig): boolean {
+    if (resource.schema !== 'seguridad') return false;
+    return ['permiso', 'rol', 'rol_permiso', 'usuario_permiso', 'usuario_rol'].includes(resource.tableName);
+  }
+
+  private async assertCanManageSecurity(authUserId: string): Promise<void> {
+    const canManagePermissions = await this.permissions.hasPermission(String(authUserId), 'SISTEMA.PERMISOS.GESTIONAR');
+    const canManageRoles = await this.permissions.hasPermission(String(authUserId), 'SISTEMA.ROLES.GESTIONAR');
+    const canAssignRoles = await this.permissions.hasPermission(String(authUserId), 'SISTEMA.USUARIOS.ASIGNAR_ROL');
+
+    if (!canManagePermissions && !canManageRoles && !canAssignRoles) {
+      throw new ForbiddenException('Solo un usuario administrador puede modificar roles, permisos o asignaciones de seguridad.');
+    }
+  }
+
+  private isInactiveStatus(value: unknown): boolean {
+    const normalized = this.toOptionalString(value)?.toLowerCase();
+    return ['inactivo', 'inactive', 'desactivado', 'disabled', 'false', '0'].includes(normalized || '');
+  }
+
+  private isFalseish(value: unknown): boolean {
+    if (value === false) return true;
+    const normalized = this.toOptionalString(value)?.toLowerCase();
+    return ['false', '0', 'no', 'n', 'inactivo', 'desactivado', 'disabled'].includes(normalized || '');
+  }
+
   private async provisionAccountingAccountsAfterCreate(
     resource: ResourceConfig,
     row: Record<string, unknown>,
@@ -505,6 +585,12 @@ export class CrudService {
        VALUES ($1, $2, $3, $4, 1, CURRENT_DATE, 'Activo', $5)`,
       [entidadTipo, ids.id_persona_estudiante || null, ids.id_persona_tutor || null, idCuenta, authUserId || null],
     );
+  }
+
+  private toOptionalString(value: unknown): string | undefined {
+    if (value === undefined || value === null) return undefined;
+    const text = String(value).trim();
+    return text.length > 0 ? text : undefined;
   }
 
   private toOptionalPositiveInt(value: unknown): number | undefined {

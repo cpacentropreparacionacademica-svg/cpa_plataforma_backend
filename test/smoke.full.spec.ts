@@ -14,7 +14,7 @@ import { AllExceptionsFilter } from '../src/common/filters/all-exceptions.filter
 import { ResponseEnvelopeInterceptor } from '../src/common/interceptors/response-envelope.interceptor';
 import { RESOURCES } from '../src/modules/resource-registry';
 
-const demoUtils = require('../scripts/demo-user-utils');
+const officialUtils = require('../scripts/official-user-utils');
 
 type HttpMethod = 'get' | 'post' | 'put' | 'patch';
 
@@ -24,8 +24,27 @@ type CriticalRoute = {
   minRows?: number;
 };
 
+const EXPECTED_OFFICIAL_GROUP_CODES = [
+  '1', '1.1', '1.1.01', '1.1.03', '1.1.07', '1.1.08', '1.2', '1.2.01', '1.2.02',
+  '2', '2.1', '2.1.02', '2.1.03', '2.1.04', '2.1.05', '2.1.06', '2.2', '2.2.01',
+  '3', '3.1', '3.4', '3.5',
+  '4', '4.1', '4.1.01', '4.1.02', '4.1.03', '4.1.04', '4.2', '4.2.01', '4.2.02',
+  '5', '5.1', '5.2', '5.3', '5.4', '5.5', '5.6',
+];
+
+const EXPECTED_OFFICIAL_ACCOUNT_CODES = [
+  '1.1.01.001', '1.1.01.002', '1.1.01.003', '1.1.01.013', '1.1.03.001', '1.1.07.001', '1.1.08.001',
+  '1.2.01.001', '1.2.01.002', '1.2.01.003', '1.2.01.004', '1.2.01.005', '1.2.01.006', '1.2.01.007', '1.2.01.008', '1.2.01.009', '1.2.01.010',
+  '1.2.02.001', '1.2.02.002', '1.2.02.003', '1.2.02.004',
+  '2.1.02.001', '2.1.03.001', '2.1.04.001', '2.1.04.002', '2.1.05.001', '2.1.05.002', '2.1.06.001', '2.2.01.001', '2.2.01.002',
+  '3.1.001', '3.4.001', '3.5.001',
+  '4.1.01.001', '4.1.02.001', '4.1.03.001', '4.1.04.001', '4.2.01.001', '4.2.02.001',
+  '5.1.001', '5.2.001', '5.2.002', '5.3.001', '5.3.002', '5.3.003', '5.3.004', '5.3.005', '5.3.006', '5.3.007', '5.3.008', '5.3.009',
+  '5.4.001', '5.4.002', '5.4.003', '5.4.004', '5.5.001', '5.5.002', '5.6.001', '5.6.002',
+];
+
 function configureEnvForSmokeFull(): void {
-  demoUtils.loadProjectEnv();
+  officialUtils.loadProjectEnv();
   process.env.NODE_ENV = process.env.NODE_ENV || 'test';
   process.env.AUTH_REQUIRED = 'true';
   process.env.ENABLE_PUBLIC_SIGNUP = 'false';
@@ -170,6 +189,88 @@ describe('CPA Plataforma - smoke FULL sistema interno', () => {
       expect(row.email).toMatch(/@cpa\.com$/);
       expect(row.email).not.toContain('.test');
     }
+  });
+
+
+  it('valida plan de cuentas oficial activo y sin cuentas sobrantes visibles', async () => {
+    const activeGroupRows = await dataSource.query(
+      `SELECT codigo
+         FROM contabilidad.grupo_cuenta
+        WHERE COALESCE(estado_registro, 'Activo') IN ('Activo', 'ACTIVO', 'activo')
+        ORDER BY codigo`,
+    ) as Array<{ codigo: string }>;
+    expect(activeGroupRows.map((row) => row.codigo).sort()).toEqual([...EXPECTED_OFFICIAL_GROUP_CODES].sort());
+
+    const activeBaseAccountRows = await dataSource.query(
+      `SELECT codigo
+         FROM contabilidad.cuenta
+        WHERE COALESCE(estado_registro, 'Activo') IN ('Activo', 'ACTIVO', 'activo')
+          AND codigo NOT LIKE '1.1.03.E%'
+          AND codigo NOT LIKE '2.1.06.E%'
+          AND codigo NOT LIKE '2.1.03.T%'
+        ORDER BY codigo`,
+    ) as Array<{ codigo: string }>;
+    expect(activeBaseAccountRows.map((row) => row.codigo).sort()).toEqual([...EXPECTED_OFFICIAL_ACCOUNT_CODES].sort());
+
+    const requiredRows = await dataSource.query(
+      `SELECT codigo, nombre_cuenta
+         FROM contabilidad.cuenta
+        WHERE codigo IN ('1.1.01.001', '1.1.01.013', '1.1.03.001', '2.1.06.001', '4.1.01.001', '5.1.001')
+          AND COALESCE(estado_registro, 'Activo') IN ('Activo', 'ACTIVO', 'activo')
+        ORDER BY codigo`,
+    ) as Array<{ codigo: string; nombre_cuenta: string }>;
+    expect(requiredRows).toHaveLength(6);
+    expect(requiredRows.map((row) => row.nombre_cuenta).join(' | ')).toContain('Ingresos por clases');
+  });
+
+  it('valida edición de datos personales y autoprotección del admin', async () => {
+    expect(sessionToken).toBeTruthy();
+
+    const updatePersona = await agent
+      .patch('/api/personas/persona/900001')
+      .set('X-Session-Token', sessionToken)
+      .send({ nombres: 'Pablo', apellidos: 'Arauz Caballero' });
+    expectReached(updatePersona, 'actualizar persona base pablo');
+    expect(updatePersona.status).toBe(200);
+    expect(updatePersona.body?.data?.nombres).toBe('Pablo');
+
+    const removeOwnSuper = await agent
+      .patch('/api/personas/usuario/900001')
+      .set('X-Session-Token', sessionToken)
+      .send({ es_super_usuario: false });
+    expect(removeOwnSuper.status).toBe(403);
+    expect(String(removeOwnSuper.body?.message || '').toLowerCase()).toContain('super usuario');
+
+    const deactivateOwnUser = await agent
+      .patch('/api/personas/usuario/900001')
+      .set('X-Session-Token', sessionToken)
+      .send({ estado_registro: 'Inactivo' });
+    expect(deactivateOwnUser.status).toBe(403);
+    expect(String(deactivateOwnUser.body?.message || '').toLowerCase()).toContain('desactivar');
+  });
+
+  it('valida que contador no puede administrar permisos ni roles', async () => {
+    const contadorLogin = await request(app.getHttpServer())
+      .post('/api/auth/publicAuth/login')
+      .send({ email: 'maria.contador@cpa.com', password: 'MariaContador2026!' });
+    expectReached(contadorLogin, 'login contador maria');
+    expect(contadorLogin.status).toBe(201);
+    const contadorToken = contadorLogin.body?.data?.sessionToken;
+    expect(contadorToken).toEqual(expect.any(String));
+
+    const ids = await dataSource.query(
+      `SELECT
+         (SELECT id_rol FROM seguridad.rol WHERE codigo = 'CONTADOR' LIMIT 1) AS id_rol,
+         (SELECT id_permiso FROM seguridad.permiso WHERE codigo = 'SISTEMA.PERMISOS.GESTIONAR' LIMIT 1) AS id_permiso`,
+    ) as Array<{ id_rol: number; id_permiso: number }>;
+    expect(ids[0]?.id_rol).toBeTruthy();
+    expect(ids[0]?.id_permiso).toBeTruthy();
+
+    const denied = await request(app.getHttpServer())
+      .post('/api/seguridad/rol-permiso')
+      .set('X-Session-Token', contadorToken)
+      .send({ id_rol: ids[0].id_rol, id_permiso: ids[0].id_permiso });
+    expect(denied.status).toBe(403);
   });
 
   it('valida que todos los recursos registrados tienen tabla física y endpoint list', async () => {

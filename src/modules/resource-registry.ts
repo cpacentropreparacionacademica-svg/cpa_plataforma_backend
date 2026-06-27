@@ -164,6 +164,9 @@ export const RESOURCES: ResourceConfig[] = [
     "primaryKeys": [
       "id_centro_costo"
     ],
+    "defaultFilters": {
+      "estado_registro": "Activo"
+    },
     "permissions": {
       "create": "CONTABILIDAD.CENTRO_COSTO.CREATE",
       "read": "CONTABILIDAD.CENTRO_COSTO.READ",
@@ -198,6 +201,9 @@ export const RESOURCES: ResourceConfig[] = [
     "primaryKeys": [
       "id_concepto"
     ],
+    "defaultFilters": {
+      "estado_registro": "Activo"
+    },
     "permissions": {
       "create": "CONTABILIDAD.CONCEPTO_COSTO.CREATE",
       "read": "CONTABILIDAD.CONCEPTO_COSTO.READ",
@@ -215,6 +221,9 @@ export const RESOURCES: ResourceConfig[] = [
     "primaryKeys": [
       "id_cuenta"
     ],
+    "defaultFilters": {
+      "estado_registro": "Activo"
+    },
     "permissions": {
       "create": "CONTABILIDAD.CUENTA.CREATE",
       "read": "CONTABILIDAD.CUENTA.READ",
@@ -249,6 +258,9 @@ export const RESOURCES: ResourceConfig[] = [
     "primaryKeys": [
       "id_configuracion_cuenta"
     ],
+    "defaultFilters": {
+      "estado_registro": "Activo"
+    },
     "permissions": {
       "create": "CONTABILIDAD.CONFIGURACION_CUENTA_OPERATIVA.CREATE",
       "read": "CONTABILIDAD.CONFIGURACION_CUENTA_OPERATIVA.READ",
@@ -266,6 +278,9 @@ export const RESOURCES: ResourceConfig[] = [
     "primaryKeys": [
       "id_grupo_cuenta"
     ],
+    "defaultFilters": {
+      "estado_registro": "Activo"
+    },
     "permissions": {
       "create": "CONTABILIDAD.GRUPO_CUENTA.CREATE",
       "read": "CONTABILIDAD.GRUPO_CUENTA.READ",
@@ -603,6 +618,23 @@ export const RESOURCES: ResourceConfig[] = [
     }
   },
   {
+    "key": "persona",
+    "entity": "persona",
+    "domainFolder": "persona",
+    "routeModule": "personas",
+    "routePath": "persona",
+    "schema": "persona",
+    "tableName": "persona",
+    "primaryKeys": [
+      "id_persona"
+    ],
+    "permissions": {
+      "create": "PERSONAS.PERSONA.CREATE",
+      "read": "PERSONAS.PERSONA.READ",
+      "update": "PERSONAS.PERSONA.UPDATE"
+    }
+  },
+  {
     "key": "persona_estudiante",
     "entity": "persona_estudiante",
     "domainFolder": "persona",
@@ -732,7 +764,11 @@ export const RESOURCES: ResourceConfig[] = [
     "primaryKeys": [
       "id_permiso"
     ],
-    "permissions": {}
+    "permissions": {
+      "create": "SISTEMA.PERMISOS.GESTIONAR",
+      "read": "SISTEMA.PERMISOS.VER",
+      "update": "SISTEMA.PERMISOS.GESTIONAR"
+    }
   },
   {
     "key": "rol",
@@ -745,7 +781,11 @@ export const RESOURCES: ResourceConfig[] = [
     "primaryKeys": [
       "id_rol"
     ],
-    "permissions": {}
+    "permissions": {
+      "create": "SISTEMA.ROLES.GESTIONAR",
+      "read": "SISTEMA.ROLES.VER",
+      "update": "SISTEMA.ROLES.GESTIONAR"
+    }
   },
   {
     "key": "rol_permiso",
@@ -759,7 +799,11 @@ export const RESOURCES: ResourceConfig[] = [
       "id_rol",
       "id_permiso"
     ],
-    "permissions": {}
+    "permissions": {
+      "create": "SISTEMA.PERMISOS.GESTIONAR",
+      "read": "SISTEMA.PERMISOS.VER",
+      "update": "SISTEMA.PERMISOS.GESTIONAR"
+    }
   },
   {
     "key": "usuario_permiso",
@@ -773,7 +817,11 @@ export const RESOURCES: ResourceConfig[] = [
       "id_persona",
       "id_permiso"
     ],
-    "permissions": {}
+    "permissions": {
+      "create": "SISTEMA.PERMISOS.GESTIONAR",
+      "read": "SISTEMA.PERMISOS.VER",
+      "update": "SISTEMA.PERMISOS.GESTIONAR"
+    }
   },
   {
     "key": "usuario_rol",
@@ -787,7 +835,11 @@ export const RESOURCES: ResourceConfig[] = [
       "id_persona",
       "id_rol"
     ],
-    "permissions": {}
+    "permissions": {
+      "create": "SISTEMA.USUARIOS.ASIGNAR_ROL",
+      "read": "SISTEMA.USUARIOS.VER",
+      "update": "SISTEMA.USUARIOS.ASIGNAR_ROL"
+    }
   },
   {
     "key": "asistencia_clase_curso",

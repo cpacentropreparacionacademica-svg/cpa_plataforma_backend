@@ -12,7 +12,7 @@ import { AllExceptionsFilter } from '../src/common/filters/all-exceptions.filter
 import { ResponseEnvelopeInterceptor } from '../src/common/interceptors/response-envelope.interceptor';
 import { RESOURCES } from '../src/modules/resource-registry';
 
-const demoUtils = require('../scripts/demo-user-utils');
+const officialUtils = require('../scripts/official-user-utils');
 
 type HttpMethod = 'get' | 'post' | 'put' | 'patch';
 
@@ -25,7 +25,7 @@ type SmokeResult = {
 };
 
 function configureEnvForSmoke(): void {
-  demoUtils.loadProjectEnv();
+  officialUtils.loadProjectEnv();
 
   process.env.NODE_ENV = process.env.NODE_ENV || 'test';
   process.env.AUTH_REQUIRED = 'true';
@@ -36,7 +36,7 @@ function configureEnvForSmoke(): void {
   process.env.DB_LOGGING = 'false';
   process.env.SMOKE_DRY_RUN_CRUD_WRITES = process.env.SMOKE_DRY_RUN_CRUD_WRITES || 'true';
 
-  const testUser = demoUtils.getTestUserFromEnv();
+  const testUser = officialUtils.getOfficialUserFromEnv();
   process.env.TEST_USER_EMAIL = testUser.email;
   process.env.TEST_USER_USERNAME = testUser.username;
   process.env.TEST_USER_PASSWORD = testUser.password;
@@ -90,7 +90,7 @@ describe('CPA Plataforma NestJS - smoke E2E de endpoints', () => {
 
   beforeAll(async () => {
     configureEnvForSmoke();
-    await demoUtils.seedDemoUser();
+    await officialUtils.seedOfficialUser();
 
     const moduleFixture = await Test.createTestingModule({ imports: [AppModule] }).compile();
     app = moduleFixture.createNestApplication();
@@ -115,8 +115,8 @@ describe('CPA Plataforma NestJS - smoke E2E de endpoints', () => {
     expect(response.body?.success).toBe(true);
   });
 
-  it('prepara el usuario admin demo desde env y bloquea el signup público', async () => {
-    const testUser = demoUtils.getTestUserFromEnv();
+  it('prepara el usuario admin oficial desde env y bloquea el signup público', async () => {
+    const testUser = officialUtils.getOfficialUserFromEnv();
 
     expect(testUser.email).toBeTruthy();
     expect(testUser.username).toBeTruthy();
@@ -130,14 +130,14 @@ describe('CPA Plataforma NestJS - smoke E2E de endpoints', () => {
     expect([400, 403]).toContain(response.status);
   });
 
-  it('hace login real con el admin demo y obtiene sessionToken', async () => {
-    const testUser = demoUtils.getTestUserFromEnv();
+  it('hace login real con el admin oficial y obtiene sessionToken', async () => {
+    const testUser = officialUtils.getOfficialUserFromEnv();
 
     const response = await agent
       .post('/api/auth/publicAuth/login')
       .send({ email: testUser.email, password: testUser.password });
 
-    results.push({ name: 'login admin demo', method: 'POST', url: '/api/auth/publicAuth/login', status: response.status, message: response.body?.message });
+    results.push({ name: 'login admin oficial', method: 'POST', url: '/api/auth/publicAuth/login', status: response.status, message: response.body?.message });
     expect(response.status).toBe(201);
     expect(response.body?.success).toBe(true);
     expect(response.body?.data?.user?.email).toBe(testUser.email);
@@ -147,7 +147,7 @@ describe('CPA Plataforma NestJS - smoke E2E de endpoints', () => {
     sessionToken = response.body.data.sessionToken;
   });
 
-  it('valida endpoints privados de auth con la sesión del admin demo', async () => {
+  it('valida endpoints privados de auth con la sesión del admin oficial', async () => {
     expect(sessionToken).toBeTruthy();
 
     const privateAuthRequests: Array<{ name: string; method: HttpMethod; url: string }> = [

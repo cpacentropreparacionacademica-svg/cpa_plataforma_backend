@@ -2,17 +2,17 @@
 ## Autenticación privada
 El sistema es privado. El usuario inicial de prueba se crea por seed interno, no por endpoint público.
 ```bash
-npm run db:seed:demo
+yarn db:seed:official
 ```
 El seed toma las credenciales desde `.env`:
 ```env
-TEST_USER_EMAIL=admin.demo@cpa.test
-TEST_USER_USERNAME=admin.demo
-TEST_USER_PASSWORD=DemoAdmin123!
+TEST_USER_EMAIL=pablo.admin@cpa.com
+TEST_USER_USERNAME=pablo.admin
+TEST_USER_PASSWORD=PabloAdmin2026!
 # También acepta los alias del prompt:
-Email=admin.demo@cpa.test
-Usuario=admin.demo
-Password=DemoAdmin123!
+Email=pablo.admin@cpa.com
+Usuario=pablo.admin
+Password=PabloAdmin2026!
 ```
 Login:
 ```http
@@ -20,8 +20,8 @@ POST /api/auth/publicAuth/login
 Content-Type: application/json
 
 {
-  "email": "admin.demo@cpa.test",
-  "password": "DemoAdmin123!"
+  "email": "pablo.admin@cpa.com",
+  "password": "PabloAdmin2026!"
 }
 ```
 Usa `data.sessionToken` en el header:
@@ -30,7 +30,7 @@ X-Session-Token: <sessionToken>
 ```
 `POST /api/auth/publicAuth/signup` existe solo por compatibilidad y queda bloqueado por defecto con `ENABLE_PUBLIC_SIGNUP=false`.
 ## Smoke test E2E
-El smoke test funcional ejecuta seed, hace login con el admin demo y recorre todos los recursos registrados con `GET list`, `GET by id`, `POST`, `PUT` y `PATCH`.
+El smoke test funcional ejecuta seed, hace login con el admin oficial y recorre todos los recursos registrados con `GET list`, `GET by id`, `POST`, `PUT` y `PATCH`.
 ```bash
 npm run test:smoke
 ```

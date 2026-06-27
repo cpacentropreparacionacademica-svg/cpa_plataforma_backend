@@ -14,10 +14,10 @@ import { AppModule } from '../src/app.module';
 import { AllExceptionsFilter } from '../src/common/filters/all-exceptions.filter';
 import { ResponseEnvelopeInterceptor } from '../src/common/interceptors/response-envelope.interceptor';
 
-const demoUtils = require('../scripts/demo-user-utils');
+const officialUtils = require('../scripts/official-user-utils');
 
 function configureEnvForSmokeImports(): void {
-  demoUtils.loadProjectEnv();
+  officialUtils.loadProjectEnv();
   process.env.NODE_ENV = process.env.NODE_ENV || 'test';
   process.env.AUTH_REQUIRED = 'true';
   process.env.ENABLE_PUBLIC_SIGNUP = 'false';

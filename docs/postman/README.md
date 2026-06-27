@@ -10,14 +10,14 @@ Variables útiles:
 Antes de probar Postman ejecuta:
 
 ```bash
-npm run db:seed:demo
+yarn db:seed:official
 ```
 
-Credenciales demo:
+Credenciales oficiales de prueba:
 
 ```txt
-Email: admin.demo@cpa.test
-Password: DemoAdmin123!
+Email: pablo.admin@cpa.com
+Password: PabloAdmin2026!
 ```
 
 El sistema queda como privado: `AUTH_REQUIRED=true` y `ENABLE_PUBLIC_SIGNUP=false`.

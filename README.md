@@ -129,3 +129,21 @@ SESSION_CACHE_TTL_SECONDS=300
 Si `REDIS_URL` no está configurado, el sistema sigue funcionando con PostgreSQL como fuente de verdad y fallback local en memoria para rate limit.
 
 Documento detallado: `docs/redis/REDIS_SETUP.md`.
+
+## Validación después del seed oficial
+
+Después de cambiar el plan de cuentas, usuarios base o permisos, ejecuta siempre:
+
+```bash
+yarn db:migrate:prod
+yarn test:smoke:all
+```
+
+Si es una base limpia/local y quieres regenerar todo desde cero:
+
+```bash
+yarn db:migrate:prod:fresh
+yarn test:smoke:all
+```
+
+Notas detalladas: `SMOKE_SEED_VALIDATION_NOTES.md`.

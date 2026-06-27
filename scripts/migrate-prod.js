@@ -2,7 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 const { Client } = require('pg');
-const { loadProjectEnv } = require('./demo-user-utils');
+const { loadProjectEnv } = require('./official-user-utils');
 
 function createPgClient() {
   return new Client({
