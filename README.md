@@ -115,3 +115,17 @@ Para ejecutar manualmente:
 ```bash
 yarn backup:postgres
 ```
+
+## Redis opcional para producción
+
+El backend ahora soporta Redis opcional para rate limit distribuido y cache corto de sesiones opacas.
+
+```env
+REDIS_URL=redis://usuario:password@host:puerto
+REDIS_KEY_PREFIX=cpa:backend
+SESSION_CACHE_TTL_SECONDS=300
+```
+
+Si `REDIS_URL` no está configurado, el sistema sigue funcionando con PostgreSQL como fuente de verdad y fallback local en memoria para rate limit.
+
+Documento detallado: `docs/redis/REDIS_SETUP.md`.

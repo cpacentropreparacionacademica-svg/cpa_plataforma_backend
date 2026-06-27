@@ -2,11 +2,16 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DataSource } from 'typeorm';
 import { AuthUser } from '../types/auth-user.type';
+import { RedisService } from './redis.service';
 import { generateOpaqueToken, sha256 } from '../utils/crypto.util';
 
 @Injectable()
 export class OpaqueSessionService {
-  constructor(private readonly dataSource: DataSource, private readonly config: ConfigService) {}
+  constructor(
+    private readonly dataSource: DataSource,
+    private readonly config: ConfigService,
+    private readonly redis: RedisService,
+  ) {}
 
   async createSession(params: { idPersona: string; ip?: string | null; userAgent?: string | null }): Promise<{ session: unknown; token: string }> {
     const token = generateOpaqueToken();
@@ -25,6 +30,9 @@ export class OpaqueSessionService {
 
   async getUserFromSessionToken(token: string): Promise<AuthUser | null> {
     const tokenHash = sha256(token);
+    const cachedUser = await this.redis.getJson<AuthUser>(this.getSessionCacheKey(tokenHash));
+    if (cachedUser) return cachedUser;
+
     const ttlMinutes = Number(this.config.get<string>('SESSION_TTL_MINUTES', '480'));
 
     const rows = await this.dataSource.query(
@@ -50,7 +58,16 @@ export class OpaqueSessionService {
 
     const user = rows[0];
     if (!user) return null;
-    return { ...user, idPersona: String(user.id_persona), id_persona: String(user.id_persona), id_sesion: String(user.id_sesion) };
+
+    const authUser: AuthUser = {
+      ...user,
+      idPersona: String(user.id_persona),
+      id_persona: String(user.id_persona),
+      id_sesion: String(user.id_sesion),
+    };
+
+    await this.redis.setJson(this.getSessionCacheKey(tokenHash), authUser, this.getSessionCacheTtlSeconds());
+    return authUser;
   }
 
   async closeSession(token: string): Promise<void> {
@@ -61,5 +78,16 @@ export class OpaqueSessionService {
        WHERE metadata->>'sessionTokenHash' = $1 AND timestamp_logout IS NULL`,
       [tokenHash],
     );
+    await this.redis.delete(this.getSessionCacheKey(tokenHash));
+  }
+
+  private getSessionCacheKey(tokenHash: string): string {
+    return `session:${tokenHash}`;
+  }
+
+  private getSessionCacheTtlSeconds(): number {
+    const ttlMinutes = Number(this.config.get<string>('SESSION_TTL_MINUTES', '480'));
+    const cacheTtlSeconds = Number(this.config.get<string>('SESSION_CACHE_TTL_SECONDS', '300'));
+    return Math.max(1, Math.min(ttlMinutes * 60, cacheTtlSeconds));
   }
 }

@@ -41,3 +41,16 @@ DB_USERNAME=
 DB_PASSWORD=
 DB_DATABASE=
 ```
+
+
+## Redis opcional
+
+Configura `REDIS_URL` como variable secreta del servicio web si quieres activar rate limit distribuido y cache de sesiones. Si no se configura, el backend continúa funcionando con fallback local.
+
+Variables recomendadas:
+
+```env
+REDIS_URL=redis://usuario:password@host:puerto
+REDIS_KEY_PREFIX=cpa:backend
+SESSION_CACHE_TTL_SECONDS=300
+```

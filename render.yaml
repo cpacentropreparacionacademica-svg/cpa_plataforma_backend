@@ -7,6 +7,12 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
+      - key: REDIS_URL
+        sync: false
+      - key: REDIS_KEY_PREFIX
+        value: cpa:backend
+      - key: SESSION_CACHE_TTL_SECONDS
+        value: "300"
 
 
   - type: cron
