@@ -77,6 +77,7 @@ type VentaClaseNormalizedItem = {
   precioUnitario: number;
   porcentajeDescuento: number;
   montoDescuento: number;
+  montoRecargo: number;
   porcentajeImpuesto: number;
   montoImpuesto: number;
   montoEfectivo: number;
@@ -385,9 +386,10 @@ export class ContabilidadAccountingService {
         cantidad,
         precioUnitario,
         porcentajeDescuento: this.toMoneyNumber(item.porcentaje_descuento ?? 0),
-        montoDescuento: this.toMoneyNumber(item.monto_descuento ?? 0),
-        porcentajeImpuesto: this.toMoneyNumber(item.porcentaje_impuesto ?? 0),
-        montoImpuesto: this.toMoneyNumber(item.monto_impuesto ?? 0),
+        montoDescuento: this.inferMontoDescuento(cantidad, precioUnitario, montoPagoDeclarado, item),
+        montoRecargo: this.inferMontoRecargo(cantidad, precioUnitario, montoPagoDeclarado, item),
+        porcentajeImpuesto: this.assertNoFiscalAmount(item.porcentaje_impuesto ?? 0, `items[${index}].porcentaje_impuesto`),
+        montoImpuesto: this.assertNoFiscalAmount(item.monto_impuesto ?? item.iva ?? item.impuesto ?? 0, `items[${index}].monto_impuesto`),
         montoEfectivo,
         montoQr,
         montoCxc,
@@ -404,8 +406,8 @@ export class ContabilidadAccountingService {
         cuentaCxcCodigo: item.codigo_cuenta_cxc,
         cuentaPaqueteDiferido: item.id_cuenta_paquete_diferido ?? item.id_cuenta_ingreso_diferido,
         cuentaPaqueteDiferidoCodigo: item.codigo_cuenta_paquete_diferido ?? item.codigo_cuenta_ingreso_diferido,
-        cuentaImpuesto: item.id_cuenta_impuesto ?? item.id_cuenta_iva_debito,
-        cuentaImpuestoCodigo: item.codigo_cuenta_impuesto ?? item.codigo_cuenta_iva_debito,
+        cuentaImpuesto: undefined,
+        cuentaImpuestoCodigo: undefined,
       };
     });
   }
@@ -438,10 +440,6 @@ export class ContabilidadAccountingService {
     const idCuentaPaqueteDiferido = item.montoPaquete > 0
       ? await this.resolveCuentaEstudianteId(manager, item.idEstudiante, 'ESTUDIANTE_PAQUETE_DIFERIDO', item.cuentaPaqueteDiferido, item.cuentaPaqueteDiferidoCodigo, 'cuenta de paquete/ingreso diferido del estudiante')
       : undefined;
-    const idCuentaImpuesto = (item.porcentajeImpuesto > 0 || item.montoImpuesto > 0)
-      ? await this.resolveCuentaOperativaId(manager, 'IVA_DEBITO_FISCAL', item.cuentaImpuesto, item.cuentaImpuestoCodigo, '2.1.05.001', 'IVA débito fiscal')
-      : undefined;
-
     const clase = await this.ensureClasePorHora(manager, item, warnings, authUserId);
     const idClasePorHora = item.idClasePorHora ?? this.toOptionalPositiveInt(clase?.id_clase);
     const descripcion = item.materiaTexto || item.motivoClase || 'Clase pasada';
@@ -482,6 +480,14 @@ export class ContabilidadAccountingService {
       throw new BadRequestException(`La fila ${numeroLinea} no cuadra: formas de pago=${pagoDeclarado}, total venta=${detalleTotal}.`);
     }
 
+    const transaccionVenta = await this.insertTransaccionVenta(manager, idTransaccion, item, detalleVenta, {
+      idClasePorHora,
+      montoEfectivo,
+      montoQr,
+      montoCxc,
+      montoPaquete,
+    }, authUserId);
+
     const movimientos: NormalizedMovimiento[] = [];
     if (montoEfectivo > 0 && idCuentaEfectivo) movimientos.push({ id_cuenta: idCuentaEfectivo, debe: montoEfectivo, haber: 0 });
     if (montoQr > 0 && idCuentaQr) movimientos.push({ id_cuenta: idCuentaQr, debe: montoQr, haber: 0 });
@@ -491,9 +497,8 @@ export class ContabilidadAccountingService {
     }
     if (montoPaquete > 0 && idCuentaPaqueteDiferido) movimientos.push({ id_cuenta: idCuentaPaqueteDiferido, debe: montoPaquete, haber: 0 });
 
-    const ingresoHaber = this.toMoneyNumber(detalleTotal - detalleImpuesto);
+    const ingresoHaber = this.toMoneyNumber(detalleTotal);
     if (ingresoHaber > 0) movimientos.push({ id_cuenta: idCuentaIngreso, debe: 0, haber: ingresoHaber });
-    if (detalleImpuesto > 0 && idCuentaImpuesto) movimientos.push({ id_cuenta: idCuentaImpuesto, debe: 0, haber: detalleImpuesto });
 
     this.assertBalanced(movimientos);
     const movimientosCreados: Record<string, unknown>[] = [];
@@ -505,6 +510,7 @@ export class ContabilidadAccountingService {
       idClasePorHora,
       idTransaccion,
       idDetalleVenta: Number(detalleVenta.id_detalle_venta),
+      idTransaccionVenta: Number(transaccionVenta.id_transaccion),
       montoEfectivo,
       montoQr,
       montoCxc,
@@ -517,6 +523,7 @@ export class ContabilidadAccountingService {
       venta_clase_registro: ventaClaseRegistro,
       clase_por_hora: clase ?? null,
       transaccion,
+      transaccion_venta: transaccionVenta,
       detalle_venta: detalleVenta,
       movimientos: movimientosCreados,
       totales: this.sumMovimientos(movimientosCreados),
@@ -542,10 +549,17 @@ export class ContabilidadAccountingService {
       return rows[0];
     }
 
-    const canCreate = Boolean(item.idAula && item.idEstudiante && item.idTutor && item.idMateriaTree && item.horaIngreso && item.motivoClase);
-    if (!canCreate) {
-      warnings.push('No se creó servicios_educativos.clase_por_hora porque faltan IDs obligatorios: id_aula, id_estudiante, id_tutor, id_materia_tree y hora_ingreso. Se registró la venta y la trazabilidad del parte.');
-      return null;
+    const missingFields = [
+      ['id_aula', item.idAula],
+      ['id_estudiante', item.idEstudiante],
+      ['id_tutor', item.idTutor],
+      ['id_materia_tree', item.idMateriaTree],
+      ['hora_ingreso', item.horaIngreso],
+      ['motivo_clase', item.motivoClase],
+    ].filter(([, value]) => !value).map(([field]) => field);
+
+    if (missingFields.length > 0) {
+      throw new BadRequestException(`Para registrar parte de clases pasadas se debe crear o vincular la clase. Faltan datos obligatorios: ${missingFields.join(', ')}.`);
     }
 
     const rows = await manager.query(
@@ -582,8 +596,8 @@ export class ContabilidadAccountingService {
       `INSERT INTO contabilidad.transaccion_detalle_venta
         (id_transaccion, numero_linea, id_cliente, id_producto_educativo, id_producto_tienda, id_curso_version, id_clase_por_hora,
          id_tienda, id_sucursal, id_cuenta_ingreso, descripcion, cantidad, precio_unitario, porcentaje_descuento,
-         monto_descuento, porcentaje_impuesto, monto_impuesto, moneda, observaciones, id_usuario_creador)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
+         monto_descuento, monto_recargo, porcentaje_impuesto, monto_impuesto, moneda, observaciones, id_usuario_creador)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
        RETURNING *`,
       [
         idTransaccion,
@@ -601,9 +615,83 @@ export class ContabilidadAccountingService {
         item.precioUnitario,
         item.porcentajeDescuento,
         item.montoDescuento,
-        item.porcentajeImpuesto,
-        item.montoImpuesto,
+        item.montoRecargo,
+        0,
+        0,
         item.moneda,
+        item.observaciones || null,
+        authUserId || null,
+      ],
+    ) as Record<string, unknown>[];
+
+    return rows[0];
+  }
+
+  private async insertTransaccionVenta(
+    manager: EntityManager,
+    idTransaccion: number,
+    item: VentaClaseNormalizedItem,
+    detalleVenta: Record<string, unknown>,
+    pagos: { idClasePorHora?: number; montoEfectivo: number; montoQr: number; montoCxc: number; montoPaquete: number },
+    authUserId?: string,
+  ): Promise<Record<string, unknown>> {
+    const rows = await manager.query(
+      `INSERT INTO contabilidad.transaccion_venta
+        (id_transaccion, fecha_venta, id_cliente, id_producto_educativo, id_producto_tienda, id_curso_version,
+         id_clase_por_hora, id_tienda, id_sucursal, cantidad_total, precio_unitario_referencia,
+         monto_subtotal, monto_descuento, monto_recargo, monto_impuesto, monto_total, moneda,
+         monto_efectivo, monto_qr, monto_cxc, monto_paquete, observaciones, id_usuario_creador)
+       VALUES ($1, $2, $3, $4, $5, $6,
+               $7, $8, $9, $10, $11,
+               $12, $13, $14, 0, $15, $16,
+               $17, $18, $19, $20, $21, $22)
+       ON CONFLICT (id_transaccion) DO UPDATE SET
+         fecha_venta = EXCLUDED.fecha_venta,
+         id_cliente = EXCLUDED.id_cliente,
+         id_producto_educativo = EXCLUDED.id_producto_educativo,
+         id_producto_tienda = EXCLUDED.id_producto_tienda,
+         id_curso_version = EXCLUDED.id_curso_version,
+         id_clase_por_hora = EXCLUDED.id_clase_por_hora,
+         id_tienda = EXCLUDED.id_tienda,
+         id_sucursal = EXCLUDED.id_sucursal,
+         cantidad_total = EXCLUDED.cantidad_total,
+         precio_unitario_referencia = EXCLUDED.precio_unitario_referencia,
+         monto_subtotal = EXCLUDED.monto_subtotal,
+         monto_descuento = EXCLUDED.monto_descuento,
+         monto_recargo = EXCLUDED.monto_recargo,
+         monto_impuesto = 0,
+         monto_total = EXCLUDED.monto_total,
+         moneda = EXCLUDED.moneda,
+         monto_efectivo = EXCLUDED.monto_efectivo,
+         monto_qr = EXCLUDED.monto_qr,
+         monto_cxc = EXCLUDED.monto_cxc,
+         monto_paquete = EXCLUDED.monto_paquete,
+         observaciones = EXCLUDED.observaciones,
+         fecha_modificacion = NOW(),
+         version_registro = COALESCE(contabilidad.transaccion_venta.version_registro, 1) + 1,
+         id_usuario_modificacion = EXCLUDED.id_usuario_creador
+       RETURNING *`,
+      [
+        idTransaccion,
+        item.fecha,
+        item.idEstudiante || null,
+        item.idProductoEducativo || null,
+        item.idProductoTienda || null,
+        item.idCursoVersion || null,
+        pagos.idClasePorHora || null,
+        item.idTienda || null,
+        item.idSucursal || null,
+        this.toMoneyNumber(detalleVenta.cantidad),
+        this.toMoneyNumber(detalleVenta.precio_unitario),
+        this.toMoneyNumber(detalleVenta.monto_subtotal),
+        this.toMoneyNumber(detalleVenta.monto_descuento),
+        this.toMoneyNumber((detalleVenta as Record<string, unknown>).monto_recargo),
+        this.toMoneyNumber(detalleVenta.monto_total),
+        item.moneda,
+        pagos.montoEfectivo,
+        pagos.montoQr,
+        pagos.montoCxc,
+        pagos.montoPaquete,
         item.observaciones || null,
         authUserId || null,
       ],
@@ -619,6 +707,7 @@ export class ContabilidadAccountingService {
       idClasePorHora?: number;
       idTransaccion: number;
       idDetalleVenta: number;
+      idTransaccionVenta: number;
       montoEfectivo: number;
       montoQr: number;
       montoCxc: number;
@@ -633,13 +722,13 @@ export class ContabilidadAccountingService {
         (fecha, hora_ingreso, hora_salida, id_estudiante, estudiante_texto, id_tutor, tutor_texto, id_aula,
          id_materia_tree, id_producto_educativo, id_curso_version, id_sucursal, id_tienda, motivo_clase,
          materia_texto, tema, subtema, monto_efectivo, monto_qr, monto_cxc, monto_paquete, monto_total,
-         situacion_base, observaciones, id_clase_por_hora, id_transaccion, id_detalle_venta, estado_proceso,
+         situacion_base, observaciones, id_clase_por_hora, id_transaccion, id_transaccion_venta, id_detalle_venta, estado_proceso,
          advertencias, payload_original, id_usuario_creador)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8,
                $9, $10, $11, $12, $13, $14,
                $15, $16, $17, $18, $19, $20, $21, $22,
-               $23, $24, $25, $26, $27, 'REGISTRADO',
-               $28::jsonb, $29::jsonb, $30)
+               $23, $24, $25, $26, $27, $28, 'REGISTRADO',
+               $29::jsonb, $30::jsonb, $31)
        RETURNING *`,
       [
         item.fecha,
@@ -668,6 +757,7 @@ export class ContabilidadAccountingService {
         item.observaciones || null,
         result.idClasePorHora || null,
         result.idTransaccion,
+        result.idTransaccionVenta,
         result.idDetalleVenta,
         JSON.stringify(result.warnings),
         JSON.stringify(item.source),
@@ -765,7 +855,7 @@ export class ContabilidadAccountingService {
     }
 
     const nombre = String(estudianteRows[0].nombre_completo || `Estudiante ${idEstudiante}`).slice(0, 120);
-    const idCuentaCxc = await this.ensureCuentaByGroupCode(manager, '1.1.03', `1.1.03.E${idEstudiante}`, `CxC estudiante ${idEstudiante} - ${nombre}`, authUserId);
+    const idCuentaCxc = await this.ensureCuentaByGroupCode(manager, '1.1.02.01', `1.1.02.01.E${idEstudiante}`, `CxC estudiante ${idEstudiante} - ${nombre}`, authUserId);
     await this.ensureCuentaAsignacion(manager, 'ESTUDIANTE_CXC', idCuentaCxc, { id_persona_estudiante: idEstudiante }, authUserId);
 
     const idCuentaPaquete = await this.ensureCuentaByGroupCode(manager, '2.1.06', `2.1.06.E${idEstudiante}`, `Paquetes cobrados por anticipado estudiante ${idEstudiante} - ${nombre}`, authUserId);
@@ -846,6 +936,52 @@ export class ContabilidadAccountingService {
       throw new BadRequestException(`No se encontró ${label}. Código buscado: ${code}. Puedes enviar id_cuenta explícito en el payload.`);
     }
     return resolved;
+  }
+
+  private inferMontoDescuento(
+    cantidad: number,
+    precioUnitario: number,
+    montoPagoDeclarado: number,
+    item: Record<string, unknown>,
+  ): number {
+    const explicit = this.toMoneyNumber(item.monto_descuento ?? 0);
+    const porcentaje = this.toMoneyNumber(item.porcentaje_descuento ?? 0);
+    const bruto = this.toMoneyNumber(cantidad * precioUnitario);
+    const porcentajeMonto = this.toMoneyNumber(bruto * porcentaje / 100);
+    const baseDiscount = Math.max(explicit, porcentajeMonto);
+    const explicitRecargo = this.toMoneyNumber(item.monto_recargo ?? item.recargo ?? 0);
+
+    if (montoPagoDeclarado > 0 && baseDiscount === 0 && explicitRecargo === 0 && montoPagoDeclarado < bruto) {
+      return this.toMoneyNumber(bruto - montoPagoDeclarado);
+    }
+
+    return this.toMoneyNumber(baseDiscount);
+  }
+
+  private inferMontoRecargo(
+    cantidad: number,
+    precioUnitario: number,
+    montoPagoDeclarado: number,
+    item: Record<string, unknown>,
+  ): number {
+    const explicit = this.toMoneyNumber(item.monto_recargo ?? item.recargo ?? 0);
+    const explicitDiscount = this.toMoneyNumber(item.monto_descuento ?? 0);
+    const porcentaje = this.toMoneyNumber(item.porcentaje_descuento ?? 0);
+    const bruto = this.toMoneyNumber(cantidad * precioUnitario);
+
+    if (montoPagoDeclarado > 0 && explicit === 0 && explicitDiscount === 0 && porcentaje === 0 && montoPagoDeclarado > bruto) {
+      return this.toMoneyNumber(montoPagoDeclarado - bruto);
+    }
+
+    return explicit;
+  }
+
+  private assertNoFiscalAmount(value: unknown, label: string): number {
+    const parsed = this.toMoneyNumber(value ?? 0);
+    if (parsed !== 0) {
+      throw new BadRequestException(`${label} ya no se acepta en parte de clases pasadas. El registro automático de venta no usa IVA, crédito fiscal ni cuentas fiscales.`);
+    }
+    return 0;
   }
 
   private toOptionalPositiveInt(value: unknown): number | undefined {

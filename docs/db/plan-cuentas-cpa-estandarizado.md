@@ -32,10 +32,12 @@ Se mantuvieron las cuentas que aparecen en la operación real del centro:
 Además se conservaron las cuentas mínimas que el backend necesita para operar correctamente:
 
 - `1.1.01.013` Cobros QR y pagos móviles.
-- `1.1.07.001` IVA crédito fiscal.
-- `2.1.05.001` IVA débito fiscal.
+- `1.1.02.01.001` Cuentas por cobrar estudiantes y clientes.
+- `1.1.02.02.001` Otras cuentas por cobrar.
 - `2.1.06.001` Paquetes cobrados por anticipado.
-- Grupos `1.1.03`, `2.1.03` y `2.1.06`, necesarios para generar cuentas automáticas por estudiante y tutor.
+- Grupos `1.1.02`, `1.1.02.01`, `1.1.02.02`, `2.1.03` y `2.1.06`, necesarios para cuentas automáticas por estudiante y tutor.
+
+Desde la migración `011`, las cuentas y grupos fiscales quedan inactivos para el flujo automático de parte de clases pasadas.
 
 ## Resultado esperado
 
@@ -47,9 +49,10 @@ Además, los recursos CRUD de `cuenta`, `grupo_cuenta`, `centro_costo`, `concept
 Se mantienen activas las cuentas personalizadas que el sistema genera automáticamente:
 
 ```txt
-1.1.03.E<id_estudiante>  CxC estudiante
-2.1.06.E<id_estudiante>  Paquete/ingreso diferido estudiante
-2.1.03.T<id_tutor>       CxP tutor
+1.1.02.01.E<id_estudiante>  CxC estudiante nueva
+1.1.03.E<id_estudiante>     CxC estudiante histórica, si ya existía antes del patch
+2.1.06.E<id_estudiante>     Paquete/ingreso diferido estudiante
+2.1.03.T<id_tutor>          CxP tutor
 ```
 
 ## Render
@@ -73,3 +76,11 @@ La misma migración refuerza permisos críticos:
 - Solo administradores reciben permisos de gestión de seguridad.
 - Contadores no reciben permisos para modificar roles/permisos.
 - La función `seguridad.api_set_permisos_rol` impide que un administrador se quite a sí mismo permisos críticos del rol que está usando.
+
+## Patch 011
+
+La migración `docs/db/migrations/011_patch_venta_clase_sin_fiscal_apertura_lifecycle.sql` agrega:
+
+- Grupos exigibles `1.1.02`, `1.1.02.01`, `1.1.02.02`.
+- Inactivación de cuentas fiscales.
+- Balance de apertura `BALANCE_APERTURA_MAY26`.

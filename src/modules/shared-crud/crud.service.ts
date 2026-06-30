@@ -25,6 +25,7 @@ export class CrudService {
 
   async create(moduleName: string, resourcePath: string, payload: Record<string, unknown>, authUserId?: string) {
     const resource = this.findResource(moduleName, resourcePath);
+    this.assertNoFragmentedCreate(resource);
     this.assertWriteAllowedForSmoke('POST', resource);
     await this.assertSecurityWriteAllowed(resource, payload, authUserId);
     const data = await this.repository.create(resource, payload, authUserId);
@@ -34,6 +35,7 @@ export class CrudService {
 
   async createBatch(moduleName: string, resourcePath: string, payload: unknown, authUserId?: string) {
     const resource = this.findResource(moduleName, resourcePath);
+    this.assertNoFragmentedCreate(resource);
     this.assertWriteAllowedForSmoke('POST', resource);
     const items = this.normalizeCreateBatchPayload(payload);
     for (const item of items) {
@@ -203,6 +205,29 @@ export class CrudService {
       message: `Importación de creación procesada para ${resource.entity}.`,
       validation,
     };
+  }
+
+
+  private assertNoFragmentedCreate(resource: ResourceConfig): void {
+    const key = `${resource.routeModule}/${resource.routePath}`;
+    const lifecycleEndpoints: Record<string, string> = {
+      'personas/persona': '/api/personas/estudiante/registrar, /api/personas/tutor/registrar, /api/personas/usuario/registrar o /api/administracion/empleado/registrar',
+      'personas/estudiante': '/api/personas/estudiante/registrar',
+      'personas/tutor': '/api/personas/tutor/registrar',
+      'personas/usuario': '/api/personas/usuario/registrar',
+      'administracion/empleado': '/api/administracion/empleado/registrar',
+      'contabilidad/venta-clase-registro': '/api/contabilidad/venta-clase/registrar-batch',
+      'contabilidad/transaccion-venta': '/api/contabilidad/venta-clase/registrar-batch o un endpoint transaccional de venta específico',
+      'contabilidad/transaccion-detalle-venta': '/api/contabilidad/venta-clase/registrar-batch o un endpoint transaccional de venta específico',
+    };
+
+    const endpoint = lifecycleEndpoints[key];
+    if (!endpoint) return;
+
+    throw new BadRequestException(
+      `Creación fragmentada no permitida para ${key}. Usa el endpoint transaccional ${endpoint}. `
+        + 'La lectura y actualización del recurso siguen disponibles para edición controlada.',
+    );
   }
 
   private extractImportRows(payload: { body?: Record<string, unknown>; files?: Array<{ buffer: Buffer; originalname?: string; mimetype?: string; size?: number }> }): Record<string, unknown>[] {
@@ -479,8 +504,8 @@ export class CrudService {
 
       const idCuentaCxc = await this.ensureCuentaByGroupCode(
         manager,
-        '1.1.03',
-        `1.1.03.E${idEstudiante}`,
+        '1.1.02.01',
+        `1.1.02.01.E${idEstudiante}`,
         `CxC estudiante ${idEstudiante} - ${nombre}`,
         authUserId,
       );

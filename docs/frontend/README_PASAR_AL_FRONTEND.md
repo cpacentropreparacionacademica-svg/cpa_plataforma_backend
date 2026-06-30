@@ -70,3 +70,9 @@ El login debe aceptar correo o nombre de usuario. Para producción base usa esto
 | Katia Caballero Ardaya | `katia.admin@cpa.com` | `katia.admin` | `KatiaAdmin2026!` | Super admin |
 
 Formato oficial de correo interno: `nombre.usuario@cpa.com`.
+
+## Manual adicional por patch venta-clase/lifecycle/apertura
+
+```txt
+docs/frontend/MANUAL_CAMBIOS_FRONTEND_VENTA_CLASE_LIFECYCLE_APERTURA.md
+```

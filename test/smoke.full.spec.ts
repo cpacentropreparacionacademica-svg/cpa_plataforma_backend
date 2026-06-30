@@ -25,18 +25,18 @@ type CriticalRoute = {
 };
 
 const EXPECTED_OFFICIAL_GROUP_CODES = [
-  '1', '1.1', '1.1.01', '1.1.03', '1.1.07', '1.1.08', '1.2', '1.2.01', '1.2.02',
-  '2', '2.1', '2.1.02', '2.1.03', '2.1.04', '2.1.05', '2.1.06', '2.2', '2.2.01',
+  '1', '1.1', '1.1.01', '1.1.02', '1.1.02.01', '1.1.02.02', '1.1.08', '1.2', '1.2.01', '1.2.02',
+  '2', '2.1', '2.1.02', '2.1.03', '2.1.04', '2.1.06', '2.2', '2.2.01',
   '3', '3.1', '3.4', '3.5',
   '4', '4.1', '4.1.01', '4.1.02', '4.1.03', '4.1.04', '4.2', '4.2.01', '4.2.02',
   '5', '5.1', '5.2', '5.3', '5.4', '5.5', '5.6',
 ];
 
 const EXPECTED_OFFICIAL_ACCOUNT_CODES = [
-  '1.1.01.001', '1.1.01.002', '1.1.01.003', '1.1.01.013', '1.1.03.001', '1.1.07.001', '1.1.08.001',
+  '1.1.01.001', '1.1.01.002', '1.1.01.003', '1.1.01.013', '1.1.02.01.001', '1.1.02.02.001', '1.1.08.001',
   '1.2.01.001', '1.2.01.002', '1.2.01.003', '1.2.01.004', '1.2.01.005', '1.2.01.006', '1.2.01.007', '1.2.01.008', '1.2.01.009', '1.2.01.010',
   '1.2.02.001', '1.2.02.002', '1.2.02.003', '1.2.02.004',
-  '2.1.02.001', '2.1.03.001', '2.1.04.001', '2.1.04.002', '2.1.05.001', '2.1.05.002', '2.1.06.001', '2.2.01.001', '2.2.01.002',
+  '2.1.02.001', '2.1.03.001', '2.1.04.001', '2.1.04.002', '2.1.06.001', '2.2.01.001', '2.2.01.002',
   '3.1.001', '3.4.001', '3.5.001',
   '4.1.01.001', '4.1.02.001', '4.1.03.001', '4.1.04.001', '4.2.01.001', '4.2.02.001',
   '5.1.001', '5.2.001', '5.2.002', '5.3.001', '5.3.002', '5.3.003', '5.3.004', '5.3.005', '5.3.006', '5.3.007', '5.3.008', '5.3.009',
@@ -205,6 +205,7 @@ describe('CPA Plataforma - smoke FULL sistema interno', () => {
       `SELECT codigo
          FROM contabilidad.cuenta
         WHERE COALESCE(estado_registro, 'Activo') IN ('Activo', 'ACTIVO', 'activo')
+          AND codigo NOT LIKE '1.1.02.01.E%'
           AND codigo NOT LIKE '1.1.03.E%'
           AND codigo NOT LIKE '2.1.06.E%'
           AND codigo NOT LIKE '2.1.03.T%'
@@ -215,12 +216,35 @@ describe('CPA Plataforma - smoke FULL sistema interno', () => {
     const requiredRows = await dataSource.query(
       `SELECT codigo, nombre_cuenta
          FROM contabilidad.cuenta
-        WHERE codigo IN ('1.1.01.001', '1.1.01.013', '1.1.03.001', '2.1.06.001', '4.1.01.001', '5.1.001')
+        WHERE codigo IN ('1.1.01.001', '1.1.01.013', '1.1.02.01.001', '2.1.06.001', '4.1.01.001', '5.1.001')
           AND COALESCE(estado_registro, 'Activo') IN ('Activo', 'ACTIVO', 'activo')
         ORDER BY codigo`,
     ) as Array<{ codigo: string; nombre_cuenta: string }>;
     expect(requiredRows).toHaveLength(6);
     expect(requiredRows.map((row) => row.nombre_cuenta).join(' | ')).toContain('Ingresos por clases');
+  });
+
+  it('valida balance de apertura MAY26 seed balanceado y sin cuentas fiscales activas', async () => {
+    const fiscalRows = await dataSource.query(
+      `SELECT codigo
+         FROM contabilidad.cuenta
+        WHERE COALESCE(estado_registro, 'Activo') IN ('Activo', 'ACTIVO', 'activo')
+          AND (codigo LIKE '1.1.07.%' OR codigo LIKE '2.1.05.%' OR LOWER(nombre_cuenta) LIKE '%iva%' OR LOWER(nombre_cuenta) LIKE '%fiscal%')`,
+    ) as Array<{ codigo: string }>;
+    expect(fiscalRows).toHaveLength(0);
+
+    const rows = await dataSource.query(
+      `SELECT t.id_transaccion,
+              ROUND(COALESCE(SUM(m.debe), 0)::numeric, 2) AS debe,
+              ROUND(COALESCE(SUM(m.haber), 0)::numeric, 2) AS haber
+         FROM contabilidad.transaccion t
+         JOIN contabilidad.transaccion_movimiento_cuenta m ON m.id_transaccion = t.id_transaccion
+        WHERE t.sub_tipo_transaccion = 'BALANCE_APERTURA_MAY26'
+        GROUP BY t.id_transaccion`,
+    ) as Array<{ id_transaccion: number; debe: string; haber: string }>;
+    expect(rows).toHaveLength(1);
+    expect(Number(rows[0].debe)).toBeCloseTo(446695.24, 2);
+    expect(Number(rows[0].haber)).toBeCloseTo(446695.24, 2);
   });
 
   it('valida edición de datos personales y autoprotección del admin', async () => {
@@ -350,26 +374,33 @@ describe('CPA Plataforma - smoke FULL sistema interno', () => {
     expect(checks[0].cuentas_operativas).toBeGreaterThanOrEqual(3);
   });
 
-  it('valida creación estudiante/tutor y generación automática de cuentas asociadas', async () => {
+  it('valida creación transaccional estudiante/tutor y generación automática de cuentas asociadas', async () => {
     await cleanupSmokeFullData(dataSource);
-    await dataSource.query(
-      `INSERT INTO persona.persona (id_persona, nombres, apellidos, telefono, email, estado_registro)
-       VALUES
-       ($1, 'SMOKE FULL', 'ESTUDIANTE', '70000001', $2, 'Activo'),
-       ($3, 'SMOKE FULL', 'TUTOR', '70000002', $4, 'Activo')`,
-      [smokeEstudianteId, `smoke.estudiante.${smokeRunId}@cpa.com`, smokeTutorPersonaId, `smoke.tutor.${smokeRunId}@cpa.com`],
-    );
 
-    const estudiante = await agent.post('/api/personas/estudiante')
+    const directPersonaCreate = await agent.post('/api/personas/persona')
       .set('X-Session-Token', sessionToken)
-      .send({ id_persona: smokeEstudianteId, tipo: 'COLEGIAL', nivel_actual: 'SECUNDARIA', curso_actual: 'SEXTO', turno_actual: 'MAÑANA' });
-    expectReached(estudiante, 'crear estudiante smoke');
+      .send({ nombres: 'SMOKE FULL', apellidos: 'FRAGMENTADO', email: `smoke.fragmentado.${smokeRunId}@cpa.com` });
+    expect(directPersonaCreate.status).toBe(400);
+    expect(String(directPersonaCreate.body?.message || '').toLowerCase()).toContain('creación fragmentada');
+
+    const estudiante = await agent.post('/api/personas/estudiante/registrar')
+      .set('X-Session-Token', sessionToken)
+      .send({
+        persona: { id_persona: smokeEstudianteId, nombres: 'SMOKE FULL', apellidos: 'ESTUDIANTE', telefono: '70000001', email: `smoke.estudiante.${smokeRunId}@cpa.com` },
+        estudiante: { tipo: 'COLEGIAL', nivel_actual: 'SECUNDARIA', curso_actual: 'SEXTO', turno_actual: 'MAÑANA' },
+      });
+    expectReached(estudiante, 'registrar estudiante smoke');
     expect([201, 200]).toContain(estudiante.status);
+    expect(estudiante.body?.data?.persona?.id_persona).toBeTruthy();
+    expect(estudiante.body?.data?.estudiante?.id_persona).toBeTruthy();
 
-    const tutor = await agent.post('/api/personas/tutor')
+    const tutor = await agent.post('/api/personas/tutor/registrar')
       .set('X-Session-Token', sessionToken)
-      .send({ id_persona: smokeTutorPersonaId, pago_por_hora: 45, nivel_experiencia: 'SENIOR', tipo_estudiante_especialidad: 'COLEGIAL', nivel_estudiante_especialidad: 'SECUNDARIA' });
-    expectReached(tutor, 'crear tutor smoke');
+      .send({
+        persona: { id_persona: smokeTutorPersonaId, nombres: 'SMOKE FULL', apellidos: 'TUTOR', telefono: '70000002', email: `smoke.tutor.${smokeRunId}@cpa.com` },
+        tutor: { pago_por_hora: 45, nivel_experiencia: 'SENIOR', tipo_estudiante_especialidad: 'COLEGIAL', nivel_estudiante_especialidad: 'SECUNDARIA' },
+      });
+    expectReached(tutor, 'registrar tutor smoke');
     expect([201, 200]).toContain(tutor.status);
 
     const rows = await dataSource.query(
@@ -378,7 +409,7 @@ describe('CPA Plataforma - smoke FULL sistema interno', () => {
         WHERE (id_persona_estudiante = $1 OR id_persona_tutor = $2)
           AND entidad_tipo IN ('ESTUDIANTE_CXC','ESTUDIANTE_PAQUETE_DIFERIDO','TUTOR_CXP')
         GROUP BY entidad_tipo`,
-      [smokeEstudianteId, Number(tutor.body?.data?.id_tutor)],
+      [smokeEstudianteId, Number(tutor.body?.data?.tutor?.id_tutor)],
     ) as Array<{ entidad_tipo: string; count: number }>;
     const map = Object.fromEntries(rows.map((row) => [row.entidad_tipo, row.count]));
     expect(map.ESTUDIANTE_CXC).toBeGreaterThanOrEqual(1);
@@ -445,7 +476,11 @@ describe('CPA Plataforma - smoke FULL sistema interno', () => {
     expect(registro.transaccion?.tipo_transaccion).toBe('VENTA');
     expect(Number(registro.totales?.debe)).toBeCloseTo(Number(registro.totales?.haber), 2);
     expect(registro.detalle_venta).toBeTruthy();
+    expect(registro.transaccion_venta).toBeTruthy();
+    expect(Number(registro.transaccion_venta?.monto_impuesto || 0)).toBe(0);
+    expect(Number(registro.detalle_venta?.monto_impuesto || 0)).toBe(0);
     expect(registro.venta_clase_registro).toBeTruthy();
+    expect(Number(registro.venta_clase_registro?.id_transaccion_venta)).toBe(Number(registro.transaccion_venta?.id_transaccion));
   }, 60000);
 
   it('cierra sesión', async () => {

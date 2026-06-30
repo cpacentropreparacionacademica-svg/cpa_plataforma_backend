@@ -4,15 +4,23 @@ import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { Request } from 'express';
 import { ResourceModuleName } from '../../common/decorators/resource-module.decorator';
 import { CrudService } from '../shared-crud/crud.service';
+import { AdministracionLifecycleService } from './administracion-lifecycle.service';
 
 @ApiTags('administracion')
 @ApiCookieAuth()
 @ResourceModuleName('administracion')
 @Controller('administracion')
 export class AdministracionController {
-  constructor(private readonly crud: CrudService) {}
+  constructor(
+    private readonly crud: CrudService,
+    private readonly lifecycle: AdministracionLifecycleService,
+  ) {}
 
 
+  @Post('empleado/registrar')
+  registrarEmpleado(@Body() body: Record<string, unknown>, @Req() request: Request) {
+    return this.lifecycle.registrarEmpleado(body, request.user?.idPersona);
+  }
 
   @Post(':resourcePath/batch/validate')
   @UseInterceptors(AnyFilesInterceptor())

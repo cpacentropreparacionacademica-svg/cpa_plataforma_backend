@@ -147,3 +147,21 @@ yarn test:smoke:all
 ```
 
 Notas detalladas: `SMOKE_SEED_VALIDATION_NOTES.md`.
+
+
+## Patch venta-clase, lifecycle y balance de apertura
+
+Documentos agregados para esta versión:
+
+```txt
+docs/frontend/MANUAL_CAMBIOS_FRONTEND_VENTA_CLASE_LIFECYCLE_APERTURA.md
+docs/db/venta-clase-apertura-lifecycle.md
+docs/db/migrations/011_patch_venta_clase_sin_fiscal_apertura_lifecycle.sql
+```
+
+Puntos clave:
+
+- Parte de clases pasadas ya no usa IVA, crédito fiscal ni cuentas fiscales.
+- El flujo registra clase, transacción, movimientos, cabecera `transaccion_venta`, detalle y trazabilidad.
+- Crear estudiante/tutor/usuario/empleado debe hacerse con endpoints `/registrar`; el `POST` fragmentado queda bloqueado.
+- Se agrega balance de apertura `BALANCE_APERTURA_MAY26`.

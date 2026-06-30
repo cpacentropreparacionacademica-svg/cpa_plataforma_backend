@@ -4,15 +4,33 @@ import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { Request } from 'express';
 import { ResourceModuleName } from '../../common/decorators/resource-module.decorator';
 import { CrudService } from '../shared-crud/crud.service';
+import { PersonasLifecycleService } from './personas-lifecycle.service';
 
 @ApiTags('personas')
 @ApiCookieAuth()
 @ResourceModuleName('personas')
 @Controller('personas')
 export class PersonasController {
-  constructor(private readonly crud: CrudService) {}
+  constructor(
+    private readonly crud: CrudService,
+    private readonly lifecycle: PersonasLifecycleService,
+  ) {}
 
 
+  @Post('estudiante/registrar')
+  registrarEstudiante(@Body() body: Record<string, unknown>, @Req() request: Request) {
+    return this.lifecycle.registrarEstudiante(body, request.user?.idPersona);
+  }
+
+  @Post('tutor/registrar')
+  registrarTutor(@Body() body: Record<string, unknown>, @Req() request: Request) {
+    return this.lifecycle.registrarTutor(body, request.user?.idPersona);
+  }
+
+  @Post('usuario/registrar')
+  registrarUsuario(@Body() body: Record<string, unknown>, @Req() request: Request) {
+    return this.lifecycle.registrarUsuario(body, request.user?.idPersona);
+  }
 
   @Post(':resourcePath/batch/validate')
   @UseInterceptors(AnyFilesInterceptor())

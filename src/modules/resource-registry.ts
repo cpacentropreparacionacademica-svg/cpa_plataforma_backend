@@ -356,6 +356,26 @@ export const RESOURCES: ResourceConfig[] = [
     }
   },
   {
+    "key": "transaccion_venta",
+    "entity": "transaccion_venta",
+    "domainFolder": "contabilidad",
+    "routeModule": "contabilidad",
+    "routePath": "transaccion-venta",
+    "schema": "contabilidad",
+    "tableName": "transaccion_venta",
+    "primaryKeys": [
+      "id_transaccion"
+    ],
+    "defaultFilters": {
+      "estado_registro": "Activo"
+    },
+    "permissions": {
+      "create": "CONTABILIDAD.TRANSACCION_VENTA.CREATE",
+      "read": "CONTABILIDAD.TRANSACCION_VENTA.READ",
+      "update": "CONTABILIDAD.TRANSACCION_VENTA.UPDATE"
+    }
+  },
+  {
     "key": "venta_clase_registro",
     "entity": "venta_clase_registro",
     "domainFolder": "contabilidad",

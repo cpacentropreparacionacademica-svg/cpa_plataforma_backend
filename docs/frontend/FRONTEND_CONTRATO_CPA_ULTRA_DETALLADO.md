@@ -483,11 +483,12 @@ PATCH /api/contabilidad/configuracion-cuenta-operativa/:id_configuracion_cuenta
 ```txt
 CANAL_COBRO_EFECTIVO
 CANAL_COBRO_QR
-IVA_DEBITO_FISCAL
 INGRESO_CLASE_POR_HORA
 ```
 
 Efectivo y QR se configuran manualmente desde base/frontend, no desde `.env`.
+
+`IVA_DEBITO_FISCAL` queda inactivo para el flujo automático de parte de clases pasadas. El frontend no debe enviar IVA, crédito fiscal ni cuentas fiscales en venta-clase.
 
 CxC y paquete NO se configuran globalmente. Se resuelven por estudiante.
 

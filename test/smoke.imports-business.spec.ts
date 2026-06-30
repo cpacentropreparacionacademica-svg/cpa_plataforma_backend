@@ -184,7 +184,7 @@ describe('CPA Plataforma - smoke importaciones masivas y errores de negocio', ()
     expect(String(process.body?.message || '').toLowerCase()).toContain('error');
   });
 
-  it('rechaza errores de negocio en venta-clase: CxC sin estudiante, descuadre y montos negativos', async () => {
+  it('rechaza errores de negocio en venta-clase: CxC sin estudiante, clase incompleta, fiscal y montos negativos', async () => {
     const cxcSinEstudiante = await agent
       .post('/api/contabilidad/venta-clase/registrar-batch')
       .set('X-Session-Token', sessionToken)
@@ -203,7 +203,17 @@ describe('CPA Plataforma - smoke importaciones masivas y errores de negocio', ()
         items: [{ estudiante_texto: 'SMOKE ERROR DESCUADRE', materia: 'Matemáticas', efectivo: 10, precio_unitario: 20, cantidad: 1 }],
       });
     expect(descuadre.status).toBe(400);
-    expect(String(descuadre.body?.message || '').toLowerCase()).toContain('no cuadra');
+    expect(String(descuadre.body?.message || '').toLowerCase()).toContain('faltan datos obligatorios');
+
+    const fiscal = await agent
+      .post('/api/contabilidad/venta-clase/registrar-batch')
+      .set('X-Session-Token', sessionToken)
+      .send({
+        fecha: '2026-06-25',
+        items: [{ estudiante_texto: 'SMOKE ERROR FISCAL', materia: 'Matemáticas', efectivo: 100, precio_unitario: 100, cantidad: 1, porcentaje_impuesto: 13 }],
+      });
+    expect(fiscal.status).toBe(400);
+    expect(String(fiscal.body?.message || '').toLowerCase()).toContain('no usa iva');
 
     const negativo = await agent
       .post('/api/contabilidad/venta-clase/registrar-batch')
