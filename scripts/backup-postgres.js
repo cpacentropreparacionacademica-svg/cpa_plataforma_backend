@@ -213,7 +213,7 @@ function assertRestoreSafety(targetUrl) {
 async function dropTargetSchemas(psqlBin, targetUrl) {
   if (!isTrue(process.env.BACKUP_TARGET_DROP_SCHEMAS_FIRST)) return;
 
-  const schemas = backupSchemas().filter((schema) => schema !== 'public');
+  const schemas = backupSchemas();
   if (!schemas.length) return;
 
   const quoteLiteral = (value) => `'${String(value).replace(/'/g, "''")}'`;
