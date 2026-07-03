@@ -15,6 +15,7 @@ import { PersonasModule } from './modules/personas/personas.module';
 import { SeguridadModule } from './modules/seguridad/seguridad.module';
 import { ServiciosEducativosModule } from './modules/servicios_educativos/servicios_educativos.module';
 import { SocietarioModule } from './modules/societario/societario.module';
+import { ReporteriaModule } from './modules/reporteria/reporteria.module';
 import { RedisRateLimitGuard } from './common/guards/redis-rate-limit.guard';
 import { OpaqueSessionGuard } from './common/guards/opaque-session.guard';
 import { PermissionGuard } from './common/guards/permission.guard';
@@ -36,6 +37,7 @@ import { PermissionGuard } from './common/guards/permission.guard';
     SeguridadModule,
     ServiciosEducativosModule,
     SocietarioModule,
+    ReporteriaModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: RedisRateLimitGuard },

@@ -360,6 +360,22 @@ describe('CPA Plataforma - smoke FULL sistema interno', () => {
     }
   }, 60000);
 
+  it('valida endpoint único de reportería contable con efectivo, QR y disponible', async () => {
+    const response = await agent
+      .get('/api/reporteria/contabilidad/powerbi-movimientos')
+      .set('X-Session-Token', sessionToken)
+      .query({ desde: '2026-01-01', hasta: '2026-12-31', fechaCorte: '2026-12-31' });
+
+    expectReached(response, 'reporteria contable powerbi movimientos');
+    expect(response.status).toBe(200);
+    expect(response.body?.metadata?.origen || response.body?.data?.metadata?.origen).toBe('contabilidad.v_powerbi_contable_movimiento');
+    const metadata = response.body?.metadata || response.body?.data?.metadata;
+    const movimientos = response.body?.movimientos || response.body?.data?.movimientos;
+    expect(Array.isArray(movimientos)).toBe(true);
+    expect(Array.isArray(metadata?.cuentasEfectivo || metadata?.cuentas_efectivo)).toBe(true);
+    expect((metadata?.cuentasEfectivo || metadata?.cuentas_efectivo).length).toBeGreaterThanOrEqual(1);
+  }, 60000);
+
   it('valida seeds académicos mínimos y configuración contable operativa', async () => {
     const checks = await dataSource.query(
       `SELECT

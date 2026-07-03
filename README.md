@@ -168,3 +168,13 @@ Puntos clave:
 - El flujo registra clase, transacción, movimientos, cabecera `transaccion_venta`, detalle y trazabilidad.
 - Crear estudiante/tutor/usuario/empleado debe hacerse con endpoints `/registrar`; el `POST` fragmentado queda bloqueado.
 - Se agrega balance de apertura `BALANCE_APERTURA_MAY26`.
+
+## Reportería contable
+
+Endpoint único para el frontend de reportería:
+
+```http
+GET /api/reporteria/contabilidad/powerbi-movimientos?desde=YYYY-MM-DD&hasta=YYYY-MM-DD&fechaCorte=YYYY-MM-DD
+```
+
+Contrato: `docs/endpoints/reporteria-contable-powerbi.md`.

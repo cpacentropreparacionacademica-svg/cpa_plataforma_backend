@@ -229,6 +229,9 @@ BEGIN
     EXECUTE format('CREATE SCHEMA IF NOT EXISTS %I', schema_name);
   END LOOP;
 END $$;
+
+GRANT USAGE ON SCHEMA public TO PUBLIC;
+GRANT CREATE ON SCHEMA public TO PUBLIC;
 `;
 
   console.log('Limpiando schemas destino antes del restore. No se imprimen credenciales.');

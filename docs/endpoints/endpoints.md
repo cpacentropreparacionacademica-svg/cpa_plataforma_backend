@@ -716,3 +716,19 @@ docs/frontend/FRONTEND_CONTRATO_CPA_ULTRA_DETALLADO.md
 - `PATCH /api/contabilidad/archivo-transaccion/:id_archivo_transaccion`
 
 Ver detalle en `docs/endpoints/borradores-y-archivos.md`.
+
+## Reportería contable PowerBI
+
+```http
+GET /api/reporteria/contabilidad/powerbi-movimientos?desde=YYYY-MM-DD&hasta=YYYY-MM-DD&fechaCorte=YYYY-MM-DD
+```
+
+Fuente única: `contabilidad.v_powerbi_contable_movimiento`.
+
+El endpoint devuelve movimientos hasta `fechaCorte` y metadata con cuentas de efectivo, QR y equivalentes al disponible para que el frontend cuadre Flujo de Caja sin hardcodear cuentas.
+
+Ver contrato completo en:
+
+```txt
+docs/endpoints/reporteria-contable-powerbi.md
+```

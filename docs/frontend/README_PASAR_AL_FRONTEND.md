@@ -93,3 +93,19 @@ Nuevos recursos para frontend:
 /api/contabilidad/archivo-transaccion
 /api/contabilidad/archivo-transaccion/registrar
 ```
+
+## Añadido para reportería contable
+
+Pásale también al frontend:
+
+```txt
+docs/endpoints/reporteria-contable-powerbi.md
+```
+
+Endpoint oficial:
+
+```http
+GET /api/reporteria/contabilidad/powerbi-movimientos?desde=YYYY-MM-DD&hasta=YYYY-MM-DD&fechaCorte=YYYY-MM-DD
+```
+
+Este endpoint devuelve `metadata.cuentasEfectivo` con efectivo, QR y equivalentes al disponible. El frontend debe usar esta metadata para Flujo de Caja y no debe hardcodear cuentas.

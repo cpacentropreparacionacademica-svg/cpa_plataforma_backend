@@ -852,3 +852,56 @@ Usar como nuevos recursos CRUD:
 ```
 
 Mantener `/api/contabilidad/archivos-transaccion` solo como compatibilidad legacy.
+
+---
+
+# Reportería contable - endpoint único para frontend
+
+Documento específico: `docs/endpoints/reporteria-contable-powerbi.md`.
+
+Endpoint oficial:
+
+```http
+GET /api/reporteria/contabilidad/powerbi-movimientos?desde=YYYY-MM-DD&hasta=YYYY-MM-DD&fechaCorte=YYYY-MM-DD
+```
+
+Reglas obligatorias para el frontend:
+
+- No usar mocks en producción para reportería contable.
+- No construir Libro Diario, Mayor, Balance, Estado de Resultados o Flujo de Caja desde múltiples CRUD.
+- Usar este endpoint único como fuente de datos.
+- Enviar `X-Session-Token` como en el resto del sistema.
+- Usar `metadata.cuentasEfectivo` o `metadata.cuentas_efectivo` para identificar efectivo, QR y equivalentes al disponible.
+- `VITE_REPORTERIA_CONTABLE_ENDPOINT=/api/reporteria/contabilidad/powerbi-movimientos`.
+
+Ejemplo de respuesta:
+
+```json
+{
+  "success": true,
+  "metadata": {
+    "origen": "contabilidad.v_powerbi_contable_movimiento",
+    "desde": "2026-07-01",
+    "hasta": "2026-07-31",
+    "fechaCorte": "2026-07-31",
+    "moneda": "BOB",
+    "cuentasEfectivo": [
+      {
+        "idCuenta": 1,
+        "id_cuenta": 1,
+        "codigoCuenta": "1.1.01.001",
+        "codigo_cuenta": "1.1.01.001",
+        "nombreCuenta": "Caja general",
+        "nombre_cuenta": "Caja general",
+        "tipo": "EFECTIVO",
+        "fuente": "CONFIGURACION_OPERATIVA"
+      }
+    ]
+  },
+  "movimientos": [],
+  "data": {
+    "metadata": {},
+    "movimientos": []
+  }
+}
+```
