@@ -143,6 +143,10 @@ describe('CPA Plataforma NestJS - smoke E2E de endpoints', () => {
     expect(response.body?.data?.user?.email).toBe(testUser.email);
     expect(response.body?.data?.user?.es_super_usuario).toBe(true);
     expect(response.body?.data?.sessionToken).toEqual(expect.any(String));
+    expect(Array.isArray(response.body?.data?.permissions)).toBe(true);
+    expect(Array.isArray(response.body?.data?.permisos)).toBe(true);
+    expect(response.body?.data?.permissions.length).toBeGreaterThan(0);
+    expect(response.body?.data?.permissionCodes.length).toBeGreaterThan(0);
 
     sessionToken = response.body.data.sessionToken;
   });

@@ -27,15 +27,12 @@ export class AuthService {
     const createdSession = await this.sessions.createSession({ idPersona: String(user.id_persona), ip: params.ip, userAgent: params.userAgent });
     this.setSessionCookie(response, createdSession.token);
 
+    const sessionPayload = await this.buildSessionPayload(user, createdSession.session, createdSession.token);
+
     return {
       success: true,
       message: 'Login exitoso.',
-      data: {
-        user: this.toSafeUser(user),
-        session: createdSession.session,
-        sessionToken: createdSession.token,
-        tokenType: 'Opaque',
-      },
+      data: sessionPayload,
     };
   }
 
@@ -55,7 +52,8 @@ export class AuthService {
     if (!idPersona) throw new UnauthorizedException('Usuario no autenticado.');
     const user = await this.repository.getUserByIdPersona(idPersona);
     if (!user) throw new NotFoundException('Usuario no encontrado.');
-    return { success: true, message: 'Sesión obtenida correctamente.', data: { user: this.toSafeUser(user) } };
+    const sessionPayload = await this.buildSessionPayload(user);
+    return { success: true, message: 'Sesión obtenida correctamente.', data: sessionPayload };
   }
 
   async logout(sessionToken: string | undefined, response: Response) {
@@ -97,6 +95,44 @@ export class AuthService {
       throw new BadRequestException('Token inválido o expirado.');
     }
     await this.repository.markTokensAsUsed(idPersona, action);
+  }
+
+  private async buildSessionPayload(user: DbUser, session?: unknown, sessionToken?: string) {
+    const [roles, permissions] = await Promise.all([
+      this.repository.getRolesByIdPersona(String(user.id_persona)),
+      this.repository.getEffectivePermissionsByIdPersona(String(user.id_persona)),
+    ]);
+
+    const normalizedPermissions = permissions.map((permission) => ({
+      ...permission,
+      id_permiso: String(permission.id_permiso),
+      idPermiso: String(permission.id_permiso),
+      codigoPermiso: permission.codigo,
+      moduloPermiso: permission.modulo ?? null,
+      descripcionPermiso: permission.descripcion ?? null,
+      fuentePermiso: permission.fuente,
+    }));
+
+    const normalizedRoles = roles.map((role) => ({
+      ...role,
+      id_rol: String(role.id_rol),
+      idRol: String(role.id_rol),
+      codigoRol: role.codigo,
+      nombreRol: role.nombre,
+    }));
+
+    return {
+      user: this.toSafeUser(user),
+      session: session ? { ...(session as Record<string, unknown>), permissions: normalizedPermissions, permisos: normalizedPermissions } : undefined,
+      sessionToken,
+      tokenType: sessionToken ? 'Opaque' : undefined,
+      roles: normalizedRoles,
+      roles_usuario: normalizedRoles,
+      permissions: normalizedPermissions,
+      permisos: normalizedPermissions,
+      permissionCodes: normalizedPermissions.map((permission) => permission.codigo),
+      codigosPermiso: normalizedPermissions.map((permission) => permission.codigo),
+    };
   }
 
   private setSessionCookie(response: Response, token: string): void {

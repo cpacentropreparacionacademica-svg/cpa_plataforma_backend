@@ -14,6 +14,22 @@ export interface DbUser {
   telefono?: string | null;
 }
 
+
+export interface DbRole {
+  id_rol: string;
+  codigo: string;
+  nombre: string;
+  descripcion?: string | null;
+}
+
+export interface DbPermission {
+  id_permiso: string;
+  codigo: string;
+  descripcion?: string | null;
+  modulo?: string | null;
+  fuente: 'SUPER_USUARIO' | 'ROL' | 'DIRECTO';
+}
+
 @Injectable()
 export class AuthRepository {
   constructor(private readonly dataSource: DataSource) {}
@@ -57,6 +73,81 @@ export class AuthRepository {
       [idPersona],
     ) as DbUser[];
     return rows[0] || null;
+  }
+
+
+
+  async getRolesByIdPersona(idPersona: string): Promise<DbRole[]> {
+    const rows = await this.dataSource.query(
+      `SELECT DISTINCT r.id_rol, r.codigo, r.nombre, r.descripcion
+       FROM seguridad.usuario_rol ur
+       INNER JOIN seguridad.rol r ON r.id_rol = ur.id_rol
+       WHERE ur.id_persona = $1
+         AND COALESCE(ur.estado_registro, 'Activo') IN ('Activo', 'ACTIVO', 'activo')
+         AND COALESCE(r.estado_registro, 'Activo') IN ('Activo', 'ACTIVO', 'activo')
+       ORDER BY r.codigo ASC`,
+      [idPersona],
+    ) as DbRole[];
+    return rows;
+  }
+
+  async getEffectivePermissionsByIdPersona(idPersona: string): Promise<DbPermission[]> {
+    const user = await this.getUserByIdPersona(idPersona);
+    if (!user) return [];
+
+    if (user.es_super_usuario) {
+      const rows = await this.dataSource.query(
+        `SELECT p.id_permiso, p.codigo, p.descripcion, p.modulo, 'SUPER_USUARIO'::text AS fuente
+         FROM seguridad.permiso p
+         WHERE COALESCE(p.estado_registro, 'Activo') IN ('Activo', 'ACTIVO', 'activo')
+         ORDER BY COALESCE(p.modulo, ''), p.codigo ASC`,
+      ) as DbPermission[];
+      return rows;
+    }
+
+    const rows = await this.dataSource.query(
+      `WITH direct_denied AS (
+          SELECT up.id_permiso
+          FROM seguridad.usuario_permiso up
+          INNER JOIN seguridad.permiso p ON p.id_permiso = up.id_permiso
+          WHERE up.id_persona = $1
+            AND up.permitido = false
+            AND COALESCE(p.estado_registro, 'Activo') IN ('Activo', 'ACTIVO', 'activo')
+        ), direct_allowed AS (
+          SELECT p.id_permiso, p.codigo, p.descripcion, p.modulo, 'DIRECTO'::text AS fuente
+          FROM seguridad.usuario_permiso up
+          INNER JOIN seguridad.permiso p ON p.id_permiso = up.id_permiso
+          WHERE up.id_persona = $1
+            AND up.permitido = true
+            AND COALESCE(p.estado_registro, 'Activo') IN ('Activo', 'ACTIVO', 'activo')
+        ), role_allowed AS (
+          SELECT p.id_permiso, p.codigo, p.descripcion, p.modulo, 'ROL'::text AS fuente
+          FROM seguridad.usuario_rol ur
+          INNER JOIN seguridad.rol r ON r.id_rol = ur.id_rol
+          INNER JOIN seguridad.rol_permiso rp ON rp.id_rol = r.id_rol
+          INNER JOIN seguridad.permiso p ON p.id_permiso = rp.id_permiso
+          WHERE ur.id_persona = $1
+            AND COALESCE(ur.estado_registro, 'Activo') IN ('Activo', 'ACTIVO', 'activo')
+            AND COALESCE(r.estado_registro, 'Activo') IN ('Activo', 'ACTIVO', 'activo')
+            AND COALESCE(p.estado_registro, 'Activo') IN ('Activo', 'ACTIVO', 'activo')
+        ), effective AS (
+          SELECT * FROM direct_allowed
+          UNION ALL
+          SELECT * FROM role_allowed
+        ), ranked AS (
+          SELECT DISTINCT ON (e.id_permiso)
+            e.id_permiso, e.codigo, e.descripcion, e.modulo, e.fuente
+          FROM effective e
+          WHERE NOT EXISTS (SELECT 1 FROM direct_denied d WHERE d.id_permiso = e.id_permiso)
+          ORDER BY e.id_permiso, CASE WHEN e.fuente = 'DIRECTO' THEN 0 ELSE 1 END
+        )
+        SELECT id_permiso, codigo, descripcion, modulo, fuente
+        FROM ranked
+        ORDER BY COALESCE(modulo, ''), codigo ASC`,
+      [idPersona],
+    ) as DbPermission[];
+
+    return rows;
   }
 
   async createUser(payload: { id_persona: string; nombre_usuario: string; password: string; tipo_usuario?: string }): Promise<DbUser | null> {

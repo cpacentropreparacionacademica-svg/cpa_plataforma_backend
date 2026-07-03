@@ -168,6 +168,10 @@ describe('CPA Plataforma - smoke FULL sistema interno', () => {
     expectReached(emailLogin, 'login email pablo');
     expect(emailLogin.status).toBe(201);
     expect(emailLogin.body?.data?.sessionToken).toEqual(expect.any(String));
+    expect(Array.isArray(emailLogin.body?.data?.permissions)).toBe(true);
+    expect(Array.isArray(emailLogin.body?.data?.permisos)).toBe(true);
+    expect(emailLogin.body?.data?.permissions.length).toBeGreaterThan(0);
+    expect(emailLogin.body?.data?.permissionCodes).toContain('SISTEMA.PERMISOS.VER');
     sessionToken = emailLogin.body.data.sessionToken;
 
     const usernameLogin = await agent.post('/api/auth/publicAuth/login').send({ nombre_usuario: 'pablo.admin', password: 'PabloAdmin2026!' });
