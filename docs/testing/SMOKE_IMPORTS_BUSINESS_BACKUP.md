@@ -162,6 +162,9 @@ Si quieres que el cron deje una copia restaurada en otra base Neon, define:
 BACKUP_TARGET_DATABASE_URL=postgresql://usuario:password@host-neon-backup/db?sslmode=require
 BACKUP_RESTORE_TO_TARGET=true
 BACKUP_TARGET_CONFIRM=I_UNDERSTAND_TARGET_WILL_BE_REPLACED
+BACKUP_TARGET_DROP_SCHEMAS_FIRST=true
+BACKUP_TARGET_SINGLE_TRANSACTION=true
+BACKUP_DELETE_TEMP_SQL_AFTER_RESTORE=true
 ```
 
 Esto hace:
@@ -172,7 +175,7 @@ Esto hace:
 3. Ejecuta restore con psql hacia BACKUP_TARGET_DATABASE_URL.
 ```
 
-Advertencia: la base destino puede ser reemplazada por el dump porque el backup se genera con `--clean --if-exists`. Usa una base Neon separada exclusivamente para respaldo, no tu base productiva.
+Advertencia: la base destino puede ser reemplazada por el dump. Usa una base Neon separada exclusivamente para respaldo, no tu base productiva. Para evitar restos de schemas/constraints, activa `BACKUP_TARGET_DROP_SCHEMAS_FIRST=true`.
 
 También puedes usar simultáneamente:
 
@@ -198,6 +201,9 @@ Para que el cron realmente restaure ahí, activa también:
 ```env
 BACKUP_RESTORE_TO_TARGET=true
 BACKUP_TARGET_CONFIRM=I_UNDERSTAND_TARGET_WILL_BE_REPLACED
+BACKUP_TARGET_DROP_SCHEMAS_FIRST=true
+BACKUP_TARGET_SINGLE_TRANSACTION=true
+BACKUP_DELETE_TEMP_SQL_AFTER_RESTORE=true
 ```
 
 Si solo quieres generar/subir archivo pero no restaurar en Neon, deja:
@@ -206,7 +212,7 @@ Si solo quieres generar/subir archivo pero no restaurar en Neon, deja:
 BACKUP_RESTORE_TO_TARGET=false
 ```
 
-Regla crítica: `BACKUP_TARGET_DATABASE_URL` debe apuntar a una base distinta a `DATABASE_URL`. No uses la misma base de producción como destino.
+Regla crítica: `BACKUP_TARGET_DATABASE_URL` debe apuntar a una base distinta a `DATABASE_URL`. No uses la misma base de producción como destino. `BACKUP_UPLOAD_URL` no acepta conexiones Neon/PostgreSQL; si no tienes un endpoint HTTP de archivos, déjalo vacío.
 
 ## 6. Render Cron Job
 

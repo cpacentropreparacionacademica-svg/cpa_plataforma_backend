@@ -106,9 +106,12 @@ El link/conexión del otro proyecto Neon se configura en `.env.example` y en Ren
 BACKUP_TARGET_DATABASE_URL=postgresql://usuario:password@host-backup.neon.tech/neondb?sslmode=require
 BACKUP_RESTORE_TO_TARGET=true
 BACKUP_TARGET_CONFIRM=I_UNDERSTAND_TARGET_WILL_BE_REPLACED
+BACKUP_TARGET_DROP_SCHEMAS_FIRST=true
+BACKUP_TARGET_SINGLE_TRANSACTION=true
+BACKUP_DELETE_TEMP_SQL_AFTER_RESTORE=true
 ```
 
-`DATABASE_URL` es la base principal. `BACKUP_TARGET_DATABASE_URL` es la base destino de respaldo. Deben ser distintas.
+`DATABASE_URL` es la base principal. `BACKUP_TARGET_DATABASE_URL` es la base destino de respaldo. Deben ser distintas. `BACKUP_UPLOAD_URL` solo es para una API HTTP de subida de archivos; no coloques una URL `postgresql://` ahí.
 
 Para ejecutar manualmente:
 

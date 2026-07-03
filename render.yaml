@@ -34,6 +34,12 @@ services:
         value: "false"
       - key: BACKUP_TARGET_CONFIRM
         sync: false
+      - key: BACKUP_TARGET_DROP_SCHEMAS_FIRST
+        value: "true"
+      - key: BACKUP_TARGET_SINGLE_TRANSACTION
+        value: "true"
+      - key: BACKUP_DELETE_TEMP_SQL_AFTER_RESTORE
+        value: "true"
       - key: BACKUP_UPLOAD_URL
         sync: false
       - key: BACKUP_UPLOAD_TOKEN
