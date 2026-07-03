@@ -5,6 +5,7 @@ import { Request } from 'express';
 import { ResourceModuleName } from '../../common/decorators/resource-module.decorator';
 import { CrudService } from '../shared-crud/crud.service';
 import { ContabilidadAccountingService } from './contabilidad-accounting.service';
+import { ContabilidadArchivoService } from './contabilidad-archivo.service';
 
 @ApiTags('contabilidad')
 @ApiCookieAuth()
@@ -14,7 +15,25 @@ export class ContabilidadController {
   constructor(
     private readonly crud: CrudService,
     private readonly accounting: ContabilidadAccountingService,
+    private readonly archivoService: ContabilidadArchivoService,
   ) {}
+
+
+  @Post('archivo/registrar')
+  registrarArchivo(
+    @Body() body: Record<string, unknown>,
+    @Req() request: Request,
+  ) {
+    return this.archivoService.registrarArchivo(body, request.user?.idPersona);
+  }
+
+  @Post('archivo-transaccion/registrar')
+  registrarArchivoTransaccion(
+    @Body() body: Record<string, unknown>,
+    @Req() request: Request,
+  ) {
+    return this.archivoService.registrarArchivoTransaccion(body, request.user?.idPersona);
+  }
 
   @Post('venta-clase/registrar')
   registrarVentaClase(

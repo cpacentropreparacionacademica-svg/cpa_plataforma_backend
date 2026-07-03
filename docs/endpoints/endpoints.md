@@ -686,3 +686,33 @@ Documento principal para frontend:
 docs/frontend/FRONTEND_CONTRATO_CPA_ULTRA_DETALLADO.md
 ```
 
+
+## Nuevos endpoints: borradores y archivos independientes
+
+### Borradores
+
+- `GET /api/administracion/registro-borrador`
+- `GET /api/administracion/registro-borrador/:id_borrador`
+- `POST /api/administracion/registro-borrador`
+- `PATCH /api/administracion/registro-borrador/:id_borrador`
+- `POST /api/administracion/registro-borrador/batch`
+- `POST /api/administracion/registro-borrador/batch/validate`
+- `POST /api/administracion/registro-borrador/batch/process`
+
+### Archivos independientes
+
+- `GET /api/contabilidad/archivo`
+- `GET /api/contabilidad/archivo/:id_archivo`
+- `POST /api/contabilidad/archivo`
+- `POST /api/contabilidad/archivo/registrar`
+- `PATCH /api/contabilidad/archivo/:id_archivo`
+
+### Asociación archivo-transacción
+
+- `GET /api/contabilidad/archivo-transaccion`
+- `GET /api/contabilidad/archivo-transaccion/:id_archivo_transaccion`
+- `POST /api/contabilidad/archivo-transaccion`
+- `POST /api/contabilidad/archivo-transaccion/registrar`
+- `PATCH /api/contabilidad/archivo-transaccion/:id_archivo_transaccion`
+
+Ver detalle en `docs/endpoints/borradores-y-archivos.md`.

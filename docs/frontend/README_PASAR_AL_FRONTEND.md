@@ -76,3 +76,20 @@ Formato oficial de correo interno: `nombre.usuario@cpa.com`.
 ```txt
 docs/frontend/MANUAL_CAMBIOS_FRONTEND_VENTA_CLASE_LIFECYCLE_APERTURA.md
 ```
+
+## Actualización importante: borradores y archivos
+
+También revisar:
+
+```txt
+docs/endpoints/borradores-y-archivos.md
+```
+
+Nuevos recursos para frontend:
+
+```http
+/api/administracion/registro-borrador
+/api/contabilidad/archivo
+/api/contabilidad/archivo-transaccion
+/api/contabilidad/archivo-transaccion/registrar
+```

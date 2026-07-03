@@ -764,3 +764,91 @@ Antes de probar venta-clase:
 - [ ] El submit usa `/api/contabilidad/venta-clase/registrar-batch`.
 - [ ] El frontend muestra warnings por fila si el backend los devuelve.
 
+
+---
+
+# Anexo: borradores y archivos independientes
+
+## Borradores backend
+
+Para guardar formularios incompletos, el frontend debe usar:
+
+```http
+POST /api/administracion/registro-borrador
+GET /api/administracion/registro-borrador
+PATCH /api/administracion/registro-borrador/:id_borrador
+```
+
+Payload recomendado:
+
+```json
+{
+  "modulo": "personas",
+  "recurso": "estudiante",
+  "operacion": "create",
+  "titulo": "Borrador estudiante",
+  "payload_json": {
+    "nombres": "Ana"
+  },
+  "estado_borrador": "BORRADOR",
+  "clave_cliente": "uuid-local-del-frontend"
+}
+```
+
+No insertar formularios incompletos en las tablas finales. Primero guardar en `registro-borrador`; cuando el usuario confirme, enviar el payload al endpoint real del recurso.
+
+## Archivos independientes
+
+Un archivo ya no necesita transacción obligatoria.
+
+Crear archivo independiente:
+
+```http
+POST /api/contabilidad/archivo
+```
+
+Payload mínimo:
+
+```json
+{
+  "url_archivo": "https://storage.example.com/documento.pdf",
+  "nombre_archivo": "documento.pdf"
+}
+```
+
+Crear archivo y asociarlo a una transacción en una sola operación:
+
+```http
+POST /api/contabilidad/archivo-transaccion/registrar
+```
+
+```json
+{
+  "id_transaccion": 50,
+  "tipo_asociacion": "SOPORTE",
+  "archivo": {
+    "url_archivo": "https://storage.example.com/recibo.pdf",
+    "nombre_archivo": "recibo.pdf",
+    "tipo_mime": "application/pdf"
+  }
+}
+```
+
+Asociar archivo existente:
+
+```json
+{
+  "id_transaccion": 50,
+  "id_archivo": 10,
+  "tipo_asociacion": "SOPORTE"
+}
+```
+
+Usar como nuevos recursos CRUD:
+
+```http
+/api/contabilidad/archivo
+/api/contabilidad/archivo-transaccion
+```
+
+Mantener `/api/contabilidad/archivos-transaccion` solo como compatibilidad legacy.

@@ -87,6 +87,9 @@ describe('CPA Plataforma - smoke importaciones masivas y errores de negocio', ()
   afterAll(async () => {
     if (dataSource?.isInitialized) {
       await dataSource.query(`DELETE FROM persona.unidad_educativa WHERE nombre LIKE 'SMOKE IMPORT %'`).catch(() => undefined);
+      await dataSource.query(`DELETE FROM contabilidad.archivo_transaccion at USING contabilidad.archivo a WHERE at.id_archivo = a.id_archivo AND a.url_archivo LIKE 'https://smoke.cpa/%'`).catch(() => undefined);
+      await dataSource.query(`DELETE FROM contabilidad.archivo WHERE url_archivo LIKE 'https://smoke.cpa/%'`).catch(() => undefined);
+      await dataSource.query(`DELETE FROM administracion.registro_borrador WHERE clave_cliente LIKE 'smoke-draft-%'`).catch(() => undefined);
       await dataSource.query(`DELETE FROM contabilidad.venta_clase_registro WHERE estudiante_texto LIKE 'SMOKE ERROR%' OR tutor_texto LIKE 'SMOKE ERROR%'`).catch(() => undefined);
     }
     if (app) await app.close();
@@ -182,6 +185,76 @@ describe('CPA Plataforma - smoke importaciones masivas y errores de negocio', ()
       .send({ mode: 'create', items: [{ columna_inexistente: 'x' }] });
     expect(process.status).toBe(400);
     expect(String(process.body?.message || '').toLowerCase()).toContain('error');
+  });
+
+
+  it('crea borradores, archivos independientes y archivo-transaccion en una operación', async () => {
+    const draft = await agent
+      .post('/api/administracion/registro-borrador')
+      .set('X-Session-Token', sessionToken)
+      .send({
+        modulo: 'personas',
+        recurso: 'estudiante',
+        operacion: 'create',
+        titulo: 'SMOKE BORRADOR ESTUDIANTE',
+        payload_json: { nombres: 'Smoke', apellidos: 'Draft' },
+        estado_borrador: 'BORRADOR',
+        clave_cliente: `smoke-draft-${Date.now()}`,
+      });
+    expectReached(draft, 'crear registro borrador');
+    expect(draft.status).toBe(201);
+    expect(draft.body?.data?.id_borrador).toBeTruthy();
+
+    const standaloneFile = await agent
+      .post('/api/contabilidad/archivo/registrar')
+      .set('X-Session-Token', sessionToken)
+      .send({
+        url_archivo: `https://smoke.cpa/standalone-${Date.now()}.pdf`,
+        nombre_archivo: 'standalone.pdf',
+        tipo_mime: 'application/pdf',
+        tamano_bytes: 128,
+      });
+    expectReached(standaloneFile, 'crear archivo independiente');
+    expect(standaloneFile.status).toBe(201);
+    expect(standaloneFile.body?.data?.id_archivo).toBeTruthy();
+
+    const cuentaRows = await dataSource.query(
+      `SELECT id_cuenta FROM contabilidad.cuenta WHERE codigo IN ('1.1.01.001', '4.1.01.001') ORDER BY codigo`,
+    ) as Array<{ id_cuenta: number }>;
+    expect(cuentaRows.length).toBeGreaterThanOrEqual(2);
+
+    const transaccion = await agent
+      .post('/api/contabilidad/transaccion/con-movimientos')
+      .set('X-Session-Token', sessionToken)
+      .send({
+        transaccion: { tipo_transaccion: 'GENERAL', glosa: 'SMOKE ARCHIVO TRANSACCION' },
+        movimientos: [
+          { id_cuenta: cuentaRows[0].id_cuenta, debe: 100, haber: 0 },
+          { id_cuenta: cuentaRows[1].id_cuenta, debe: 0, haber: 100 },
+        ],
+      });
+    expectReached(transaccion, 'crear transaccion para archivo');
+    expect(transaccion.status).toBe(201);
+    const idTransaccion = transaccion.body?.data?.transaccion?.id_transaccion || transaccion.body?.data?.id_transaccion;
+    expect(idTransaccion).toBeTruthy();
+
+    const archivoTransaccion = await agent
+      .post('/api/contabilidad/archivo-transaccion/registrar')
+      .set('X-Session-Token', sessionToken)
+      .send({
+        id_transaccion: idTransaccion,
+        tipo_asociacion: 'SOPORTE',
+        archivo: {
+          url_archivo: `https://smoke.cpa/linked-${Date.now()}.pdf`,
+          nombre_archivo: 'linked.pdf',
+          tipo_mime: 'application/pdf',
+          tamano_bytes: 256,
+        },
+      });
+    expectReached(archivoTransaccion, 'crear archivo y asociacion');
+    expect(archivoTransaccion.status).toBe(201);
+    expect(archivoTransaccion.body?.data?.archivo?.id_archivo).toBeTruthy();
+    expect(archivoTransaccion.body?.data?.archivoTransaccion?.id_archivo_transaccion).toBeTruthy();
   });
 
   it('rechaza errores de negocio en venta-clase: CxC sin estudiante, clase incompleta, fiscal y montos negativos', async () => {

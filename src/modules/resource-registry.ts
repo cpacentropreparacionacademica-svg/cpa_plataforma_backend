@@ -17,6 +17,58 @@ export interface ResourceConfig {
 
 
 export const RESOURCES: ResourceConfig[] = [
+
+  {
+    "key": "registro_borrador",
+    "entity": "registro_borrador",
+    "domainFolder": "administracion",
+    "routeModule": "administracion",
+    "routePath": "registro-borrador",
+    "schema": "administracion",
+    "tableName": "registro_borrador",
+    "primaryKeys": [
+      "id_borrador"
+    ],
+    "permissions": {
+      "create": "ADMINISTRACION.REGISTRO_BORRADOR.CREATE",
+      "read": "ADMINISTRACION.REGISTRO_BORRADOR.READ",
+      "update": "ADMINISTRACION.REGISTRO_BORRADOR.UPDATE"
+    }
+  },
+  {
+    "key": "archivo",
+    "entity": "archivo",
+    "domainFolder": "contabilidad",
+    "routeModule": "contabilidad",
+    "routePath": "archivo",
+    "schema": "contabilidad",
+    "tableName": "archivo",
+    "primaryKeys": [
+      "id_archivo"
+    ],
+    "permissions": {
+      "create": "CONTABILIDAD.ARCHIVO.CREATE",
+      "read": "CONTABILIDAD.ARCHIVO.READ",
+      "update": "CONTABILIDAD.ARCHIVO.UPDATE"
+    }
+  },
+  {
+    "key": "archivo_transaccion",
+    "entity": "archivo_transaccion",
+    "domainFolder": "contabilidad",
+    "routeModule": "contabilidad",
+    "routePath": "archivo-transaccion",
+    "schema": "contabilidad",
+    "tableName": "archivo_transaccion",
+    "primaryKeys": [
+      "id_archivo_transaccion"
+    ],
+    "permissions": {
+      "create": "CONTABILIDAD.ARCHIVO_TRANSACCION.CREATE",
+      "read": "CONTABILIDAD.ARCHIVO_TRANSACCION.READ",
+      "update": "CONTABILIDAD.ARCHIVO_TRANSACCION.UPDATE"
+    }
+  },
   {
     "key": "departamento",
     "entity": "departamento",
