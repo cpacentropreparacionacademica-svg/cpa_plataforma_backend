@@ -29,7 +29,8 @@
     "test:smoke:imports-business": "jest --runTestsByPath test/smoke.imports-business.spec.ts --runInBand",
     "backup:postgres": "node scripts/backup-postgres.js",
     "db:seed:official": "node scripts/seed-official-user.js",
-    "db:clean:official": "node scripts/clean-official-data.js"
+    "db:clean:official": "node scripts/clean-official-data.js",
+    "db:seed:reporteria-contable": "node scripts/seed-reporteria-contable-permissions.js"
   },
   "dependencies": {
     "@nestjs/common": "^10.4.15",
