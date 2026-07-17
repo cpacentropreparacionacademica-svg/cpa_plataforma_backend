@@ -4,12 +4,7 @@ const BOOLEAN_VALUES = new Set(['true', 'false']);
 const SAME_SITE_VALUES = new Set(['lax', 'strict', 'none']);
 const NODE_ENVIRONMENTS = new Set(['development', 'test', 'production']);
 
-/**
- * Validates and normalizes process configuration before the application starts.
- *
- * The existing codebase consumes configuration as strings. This validator keeps
- * that contract stable while eliminating insecure implicit production defaults.
- */
+/** Validates and normalizes process configuration before the application starts. */
 export function validateEnvironment(input: Environment): Environment {
   const environment: Environment = {
     ...input,
@@ -44,6 +39,11 @@ export function validateEnvironment(input: Environment): Environment {
     SESSION_SAME_SITE: readEnum(input, 'SESSION_SAME_SITE', 'lax', SAME_SITE_VALUES),
     SESSION_CACHE_TTL_SECONDS: readPositiveInteger(input, 'SESSION_CACHE_TTL_SECONDS', 300),
     ALLOW_SESSION_HEADER: readBoolean(input, 'ALLOW_SESSION_HEADER', true),
+    PASSWORD_SCRYPT_COST: readPowerOfTwo(input, 'PASSWORD_SCRYPT_COST', 16384),
+    PASSWORD_SCRYPT_BLOCK_SIZE: readPositiveInteger(input, 'PASSWORD_SCRYPT_BLOCK_SIZE', 8),
+    PASSWORD_SCRYPT_PARALLELIZATION: readPositiveInteger(input, 'PASSWORD_SCRYPT_PARALLELIZATION', 1),
+    PASSWORD_SCRYPT_KEY_LENGTH: readRangeInteger(input, 'PASSWORD_SCRYPT_KEY_LENGTH', 64, 32, 128),
+    ACTION_TOKEN_TTL_MINUTES: readPositiveInteger(input, 'ACTION_TOKEN_TTL_MINUTES', 15),
     REDIS_URL: readString(input, 'REDIS_URL', ''),
     REDIS_KEY_PREFIX: readString(input, 'REDIS_KEY_PREFIX', 'cpa:backend'),
     REDIS_CONNECT_TIMEOUT_MS: readPositiveInteger(input, 'REDIS_CONNECT_TIMEOUT_MS', 2000),
@@ -58,29 +58,18 @@ export function validateEnvironment(input: Environment): Environment {
 
   readEnum(environment, 'NODE_ENV', 'development', NODE_ENVIRONMENTS);
   parseCorsOrigins(String(environment.CORS_ORIGINS));
-
-  if (Number(environment.DB_POOL_MIN) > Number(environment.DB_POOL_MAX)) {
-    throw new Error('DB_POOL_MIN cannot exceed DB_POOL_MAX.');
-  }
-
+  if (Number(environment.DB_POOL_MIN) > Number(environment.DB_POOL_MAX)) throw new Error('DB_POOL_MIN cannot exceed DB_POOL_MAX.');
   if (environment.SESSION_SAME_SITE === 'none' && environment.SESSION_COOKIE_SECURE !== 'true') {
     throw new Error('SESSION_SAME_SITE=none requires SESSION_COOKIE_SECURE=true.');
   }
-
   if (environment.NODE_ENV === 'production') {
-    if (parseCorsOrigins(String(environment.CORS_ORIGINS)).length === 0) {
-      throw new Error('CORS_ORIGINS must contain at least one exact origin in production.');
-    }
+    if (parseCorsOrigins(String(environment.CORS_ORIGINS)).length === 0) throw new Error('CORS_ORIGINS is required in production.');
     if (environment.AUTH_REQUIRED !== 'true') throw new Error('AUTH_REQUIRED cannot be false in production.');
-    if (environment.SESSION_COOKIE_SECURE !== 'true') {
-      throw new Error('SESSION_COOKIE_SECURE must be true in production.');
-    }
+    if (environment.SESSION_COOKIE_SECURE !== 'true') throw new Error('SESSION_COOKIE_SECURE must be true in production.');
   }
-
   return environment;
 }
 
-/** Parses exact HTTP(S) origins shared by CORS and request-origin controls. */
 export function parseCorsOrigins(value: string): string[] {
   const origins = value.split(',').map((origin) => origin.trim()).filter(Boolean);
   for (const origin of origins) {
@@ -94,41 +83,39 @@ export function parseCorsOrigins(value: string): string[] {
 }
 
 function readString(input: Environment, key: string, fallback: string): string {
-  const value = String(input[key] ?? fallback).trim();
-  if (!value && fallback) throw new Error(`${key} cannot be empty.`);
-  return value;
+  return String(input[key] ?? fallback).trim();
 }
-
 function readRequiredString(input: Environment, key: string): string {
-  const value = String(input[key] ?? '').trim();
+  const value = readString(input, key, '');
   if (!value) throw new Error(`${key} is required.`);
   return value;
 }
-
 function readBoolean(input: Environment, key: string, fallback: boolean): string {
   const value = String(input[key] ?? fallback).toLowerCase();
   if (!BOOLEAN_VALUES.has(value)) throw new Error(`${key} must be true or false.`);
   return value;
 }
-
 function readPositiveInteger(input: Environment, key: string, fallback: number): string {
-  const value = Number(input[key] ?? fallback);
-  if (!Number.isSafeInteger(value) || value <= 0) throw new Error(`${key} must be a positive integer.`);
-  return String(value);
+  return readRangeInteger(input, key, fallback, 1, Number.MAX_SAFE_INTEGER);
 }
-
 function readNonNegativeInteger(input: Environment, key: string, fallback: number): string {
+  return readRangeInteger(input, key, fallback, 0, Number.MAX_SAFE_INTEGER);
+}
+function readRangeInteger(input: Environment, key: string, fallback: number, minimum: number, maximum: number): string {
   const value = Number(input[key] ?? fallback);
-  if (!Number.isSafeInteger(value) || value < 0) throw new Error(`${key} must be a non-negative integer.`);
+  if (!Number.isSafeInteger(value) || value < minimum || value > maximum) throw new Error(`${key} is outside the accepted range.`);
   return String(value);
 }
-
+function readPowerOfTwo(input: Environment, key: string, fallback: number): string {
+  const value = Number(readPositiveInteger(input, key, fallback));
+  if (value < 16384 || (value & (value - 1)) !== 0) throw new Error(`${key} must be a power of two of at least 16384.`);
+  return String(value);
+}
 function readEnum(input: Environment, key: string, fallback: string, allowedValues: Set<string>): string {
   const value = String(input[key] ?? fallback).trim();
   if (!allowedValues.has(value)) throw new Error(`${key} has an unsupported value.`);
   return value;
 }
-
 function readBodyLimit(input: Environment, key: string, fallback: string): string {
   const value = readString(input, key, fallback);
   if (!/^\d+(?:kb|mb)$/i.test(value)) throw new Error(`${key} must use a kb or mb unit.`);

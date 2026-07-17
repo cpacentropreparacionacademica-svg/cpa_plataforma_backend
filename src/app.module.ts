@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { ApiGatewayModule } from './api-gateway/api-gateway.module';
 import { CommonModule } from './common/common.module';
+import { CsrfOriginGuard } from './common/guards/csrf-origin.guard';
 import { OpaqueSessionGuard } from './common/guards/opaque-session.guard';
 import { PermissionGuard } from './common/guards/permission.guard';
 import { RedisRateLimitGuard } from './common/guards/redis-rate-limit.guard';
@@ -44,6 +45,7 @@ import { SocietarioModule } from './modules/societario/societario.module';
   providers: [
     { provide: APP_GUARD, useClass: RedisRateLimitGuard },
     { provide: APP_GUARD, useClass: OpaqueSessionGuard },
+    { provide: APP_GUARD, useClass: CsrfOriginGuard },
     { provide: APP_GUARD, useClass: PermissionGuard },
   ],
 })
