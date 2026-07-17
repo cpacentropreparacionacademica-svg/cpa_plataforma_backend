@@ -12,15 +12,16 @@
     "type-check": "tsc --noEmit",
     "lint": "eslint \"src/**/*.ts\" \"test/**/*.ts\"",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\" \"docs/**/*.md\"",
+    "format:check": "prettier --check \"src/**/*.ts\" \"test/**/*.ts\" \"docs/**/*.md\"",
     "test": "jest",
+    "test:ci": "jest --runInBand --ci",
+    "check": "yarn format:check && yarn type-check && yarn lint && yarn test:ci && yarn build",
+    "audit:dependencies": "yarn npm audit --recursive --severity high",
     "test:smoke": "jest --runTestsByPath test/smoke.spec.ts --runInBand",
     "start:dev:trace": "node --trace-deprecation ./node_modules/@nestjs/cli/bin/nest.js start --watch",
     "test:smoke:summary": "node -e \"process.env.SMOKE_PRINT_SUMMARY='true'; require('jest/bin/jest');\" --runTestsByPath test/smoke.spec.ts --runInBand",
     "db:migrate:prod": "node scripts/migrate-prod.js",
     "db:migrate:production": "node scripts/migrate-prod.js",
-    "db:migrate:prod:fresh": "node scripts/migrate-prod.js --fresh",
-    "db:migrate:production:fresh": "node scripts/migrate-prod.js --fresh",
-    "db:reset:prod": "node scripts/migrate-prod.js --fresh",
     "render:build": "bash scripts/render-build.sh",
     "render:start": "node scripts/render-start.js",
     "test:smoke:full": "jest --runTestsByPath test/smoke.full.spec.ts --runInBand",
@@ -74,24 +75,14 @@
     "@types/multer": "^1.4.12"
   },
   "jest": {
-    "moduleFileExtensions": [
-      "js",
-      "json",
-      "ts"
-    ],
+    "moduleFileExtensions": ["js", "json", "ts"],
     "rootDir": ".",
     "testRegex": ".*\\.spec\\.ts$",
-    "transform": {
-      "^.+\\.(t|j)s$": "ts-jest"
-    },
-    "collectCoverageFrom": [
-      "src/**/*.(t|j)s"
-    ],
+    "transform": {"^.+\\.(t|j)s$": "ts-jest"},
+    "collectCoverageFrom": ["src/**/*.(t|j)s"],
     "coverageDirectory": "coverage",
     "testEnvironment": "node"
   },
-  "engines": {
-    "node": "22.x"
-  },
+  "engines": {"node": "22.x"},
   "packageManager": "yarn@4.9.2"
 }

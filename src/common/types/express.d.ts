@@ -5,6 +5,8 @@ declare global {
     interface Request {
       user?: AuthUser;
       sessionToken?: string;
+      requestId?: string;
+      sessionTransport?: 'cookie' | 'header';
     }
   }
 }

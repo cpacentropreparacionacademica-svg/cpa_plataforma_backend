@@ -14,5 +14,7 @@ declare module 'express-serve-static-core' {
   interface Request {
     user?: AuthUser;
     sessionToken?: string;
+    requestId?: string;
+    sessionTransport?: 'cookie' | 'header';
   }
 }

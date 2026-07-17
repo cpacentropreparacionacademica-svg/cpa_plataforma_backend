@@ -1,15 +1,12 @@
 import { CanActivate, ExecutionContext, HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
-
-interface RateLimitBucket {
-  count: number;
-  resetAt: number;
-}
+import { getPositiveInteger } from '../../config/runtime-config.util';
+import { BoundedRateLimitStore } from '../security/bounded-rate-limit.store';
 
 @Injectable()
 export class InMemoryRateLimitGuard implements CanActivate {
-  private readonly buckets = new Map<string, RateLimitBucket>();
+  private readonly store = new BoundedRateLimitStore();
 
   constructor(private readonly config: ConfigService) {}
 
@@ -17,23 +14,16 @@ export class InMemoryRateLimitGuard implements CanActivate {
     const request = context.switchToHttp().getRequest<Request>();
     if (request.method === 'OPTIONS') return true;
 
-    const windowMs = Number(this.config.get<string>('RATE_LIMIT_WINDOW_MS', '900000'));
-    const max = Number(this.config.get<string>('RATE_LIMIT_MAX', '100'));
-    const ip = request.ip || request.socket.remoteAddress || 'unknown';
-    const key = `${ip}:${request.method}:${request.path}`;
-    const now = Date.now();
-    const current = this.buckets.get(key);
+    const windowMs = getPositiveInteger(this.config, 'RATE_LIMIT_WINDOW_MS', 900000);
+    const maximumRequests = getPositiveInteger(this.config, 'RATE_LIMIT_MAX', 100);
+    const maximumBuckets = getPositiveInteger(this.config, 'RATE_LIMIT_FALLBACK_MAX_BUCKETS', 10000);
+    const clientIp = request.ip || request.socket.remoteAddress || 'unknown';
+    const routeKey = request.route?.path || request.path;
+    const bucket = this.store.increment(`${clientIp}:${request.method}:${routeKey}`, windowMs, maximumBuckets);
 
-    if (!current || current.resetAt <= now) {
-      this.buckets.set(key, { count: 1, resetAt: now + windowMs });
-      return true;
-    }
-
-    current.count += 1;
-    if (current.count > max) {
+    if (bucket.count > maximumRequests) {
       throw new HttpException('Demasiadas solicitudes. Intenta nuevamente más tarde.', HttpStatus.TOO_MANY_REQUESTS);
     }
-
     return true;
   }
 }
