@@ -1,0 +1,22 @@
+{
+  "src/api-gateway/resource-registry.ts": {
+    "maximumLines": 1175,
+    "reason": "Declarative resource contract currently centralises many database-backed resources.",
+    "targetRefactor": "Split into domain registries and generated composition without changing endpoint contracts."
+  },
+  "src/modules/contabilidad/contabilidad-accounting.service.ts": {
+    "maximumLines": 1148,
+    "reason": "Legacy accounting orchestration combines class sales, journal posting, reversal and validation.",
+    "targetRefactor": "Extract posting, reversal, class-sale and monetary-validation use cases under accounting contract tests."
+  },
+  "src/modules/shared-crud/crud.service.ts": {
+    "maximumLines": 650,
+    "reason": "Legacy generic CRUD service combines reads, writes, imports and metadata-driven validation.",
+    "targetRefactor": "Separate read, write and import responsibilities and restrict generic operations by capability."
+  },
+  "src/common/services/resource-metadata.service.ts": {
+    "maximumLines": 400,
+    "reason": "Metadata resolution and caching remain coupled from the pre-hardening implementation.",
+    "targetRefactor": "Separate immutable registry lookup from request-scoped resolution and cache concerns."
+  }
+}
