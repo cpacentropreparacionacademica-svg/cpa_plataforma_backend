@@ -1,0 +1,68 @@
+name: Hardening CI
+
+on:
+  push:
+    branches: [main, HARDENING]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: hardening-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Build, test and dependency gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: yarn
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install locked dependencies
+        run: yarn install --immutable
+
+      - name: Enforce source-size policy
+        run: yarn check:source-size
+
+      - name: Type check
+        run: yarn type-check
+
+      - name: Lint
+        run: yarn lint
+
+      - name: Unit and integration tests
+        run: yarn test:ci --coverage
+
+      - name: Production build
+        run: yarn build
+
+      - name: Audit high-severity dependencies
+        run: yarn audit:dependencies
+
+  secrets:
+    name: Secret scanning
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout complete history
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Scan Git history
+        uses: gitleaks/gitleaks-action@v2.3.9
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
