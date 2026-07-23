@@ -3,11 +3,14 @@ const { loadProjectEnv, getOfficialUserFromEnv, runCleanOfficialUserData } = req
 
 async function main() {
   loadProjectEnv();
-  const officialUser = getOfficialUserFromEnv();
+  const officialUser = getOfficialUserFromEnv({ requirePassword: false });
   const result = await runCleanOfficialUserData();
 
   console.log('Limpieza de usuario oficial ejecutada correctamente. Registros detectados:', result.cleaned);
-  console.log('Alcance: ids TEST_USER_CLEAN_ID_FROM-TEST_USER_CLEAN_ID_TO, email/usuario oficial configurado por entorno.');
+  console.log(
+    `Alcance: id_persona ${process.env.TEST_USER_CLEAN_ID_FROM || 900001}-${process.env.TEST_USER_CLEAN_ID_TO || 900099}`
+      + ', más el id exacto del usuario oficial. La limpieza se aborta si alcanzara a más de una persona.',
+  );
   console.log('Usuario base de referencia:', `${officialUser.email} / ${officialUser.username}`);
 }
 

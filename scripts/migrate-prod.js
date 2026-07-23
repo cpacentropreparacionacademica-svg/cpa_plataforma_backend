@@ -63,6 +63,23 @@ function checksum(content) {
   return crypto.createHash('sha256').update(content).digest('hex');
 }
 
+/**
+ * Checksums históricos aceptados para migraciones ya aplicadas.
+ * Permite corregir una migración defectuosa de forma idempotente sin bloquear
+ * despliegues existentes, manteniendo la detección de cambios no declarados.
+ */
+function loadLegacyChecksums(rootDirectory) {
+  const legacyPath = path.join(rootDirectory, 'docs', 'db', 'migrations-legacy-checksums.json');
+  if (!fs.existsSync(legacyPath)) return new Map();
+
+  const parsed = JSON.parse(fs.readFileSync(legacyPath, 'utf8'));
+  const entries = Object.entries(parsed).filter(([filename]) => !filename.startsWith('_'));
+  return new Map(entries.map(([filename, records]) => [
+    filename,
+    new Set((Array.isArray(records) ? records : []).map((record) => record.checksum)),
+  ]));
+}
+
 async function findAppliedMigration(client, filename) {
   const result = await client.query(
     'SELECT checksum FROM infraestructura.schema_migrations WHERE filename = $1 LIMIT 1',
@@ -95,12 +112,22 @@ async function runFreshReset(client, rootDirectory) {
   }
 }
 
-async function runMigration(client, migrationsDirectory, filename) {
+async function runMigration(client, migrationsDirectory, filename, legacyChecksums) {
   const sql = fs.readFileSync(path.join(migrationsDirectory, filename), 'utf8');
   const fileChecksum = checksum(sql);
   const applied = await findAppliedMigration(client, filename);
   if (applied) {
-    if (applied.checksum !== fileChecksum) throw new Error(`La migración ${filename} cambió después de aplicarse.`);
+    if (applied.checksum !== fileChecksum) {
+      if (!legacyChecksums.get(filename)?.has(applied.checksum)) {
+        throw new Error(`La migración ${filename} cambió después de aplicarse.`);
+      }
+      console.log(`SKIP ${filename} (checksum histórico aceptado; corrección idempotente declarada)`);
+      await client.query(
+        'UPDATE infraestructura.schema_migrations SET checksum = $1 WHERE filename = $2',
+        [fileChecksum, filename],
+      );
+      return;
+    }
     console.log(`SKIP ${filename}`);
     return;
   }
@@ -137,7 +164,8 @@ async function main() {
       await runFreshReset(client, rootDirectory);
       await ensureMigrationTable(client);
     }
-    for (const filename of filenames) await runMigration(client, migrationsDirectory, filename);
+    const legacyChecksums = loadLegacyChecksums(rootDirectory);
+    for (const filename of filenames) await runMigration(client, migrationsDirectory, filename, legacyChecksums);
     console.log('Migraciones de producción finalizadas correctamente.');
   } finally {
     await client.query('SELECT pg_advisory_unlock($1)', [MIGRATION_LOCK_KEY]).catch(() => undefined);

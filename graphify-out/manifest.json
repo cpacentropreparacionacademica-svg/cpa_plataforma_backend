@@ -1,0 +1,2967 @@
+{
+  "docs/db/clean-demo-data.sql": {
+    "mtime": 1783198394.4227045,
+    "ast_hash": "d40c21ec6731c08cfd4be51749d282f9",
+    "semantic_hash": ""
+  },
+  "docs/db/ddl.sql": {
+    "mtime": 1783198394.4287653,
+    "ast_hash": "2d467a9a8e393004a16c5a5d4cdac3b1",
+    "semantic_hash": ""
+  },
+  "docs/db/ddl.views.sql": {
+    "mtime": 1783198394.430758,
+    "ast_hash": "c3d27e902001254f7453bd608b9642b3",
+    "semantic_hash": ""
+  },
+  "docs/db/migrations/001_create_database_schema.sql": {
+    "mtime": 1783198394.4377584,
+    "ast_hash": "c7e2339130fe800fe2340527410918bc",
+    "semantic_hash": ""
+  },
+  "docs/db/migrations/002_seed_plan_cuentas_fundamental.sql": {
+    "mtime": 1783198394.4387648,
+    "ast_hash": "3cb70a50157263de3b98dd5a8e81dc23",
+    "semantic_hash": ""
+  },
+  "docs/db/migrations/003_seed_production_users.sql": {
+    "mtime": 1783198394.4407585,
+    "ast_hash": "56c9afc37bd8bda4bdd4db2efc53aa84",
+    "semantic_hash": ""
+  },
+  "docs/db/migrations/004_patch_transaccion_detalle_venta_costo.sql": {
+    "mtime": 1783198394.4407585,
+    "ast_hash": "dee987fa92554689c343dbd181af1226",
+    "semantic_hash": ""
+  },
+  "docs/db/migrations/005_patch_venta_clase_registro_endpoint.sql": {
+    "mtime": 1783198394.441759,
+    "ast_hash": "be249dcaee9171f7941bc304025795c6",
+    "semantic_hash": ""
+  },
+  "docs/db/migrations/006_patch_cuentas_operativas_por_persona.sql": {
+    "mtime": 1783198394.4427607,
+    "ast_hash": "e666f18e94d6e7bd8c785645a018dba1",
+    "semantic_hash": ""
+  },
+  "docs/db/migrations/007_seed_catalogos_academicos_scz.sql": {
+    "mtime": 1783198394.4427607,
+    "ast_hash": "2cdd6266b459882668a52ea9c6ff0092",
+    "semantic_hash": ""
+  },
+  "docs/db/migrations/008_seed_catalogos_academicos_scz_ampliacion.sql": {
+    "mtime": 1783198394.4437602,
+    "ast_hash": "e3b4103ef1ff724a08d4a67d9e931682",
+    "semantic_hash": ""
+  },
+  "docs/db/migrations/009_patch_usuarios_reales_katia_y_login_usuario.sql": {
+    "mtime": 1783198394.4447603,
+    "ast_hash": "67e2d62b5bbc0342030f8debb7c1efba",
+    "semantic_hash": ""
+  },
+  "docs/db/migrations/010_patch_ensure_real_users_maria_katia.sql": {
+    "mtime": 1783198394.4457686,
+    "ast_hash": "aee842ac7bfd0024be79c19ee9834c71",
+    "semantic_hash": ""
+  },
+  "docs/db/migrations/010_seed_plan_cuentas_cpa_estandarizado.sql": {
+    "mtime": 1783198394.4457686,
+    "ast_hash": "ee856ce6ed45f7c56780449e84f7615c",
+    "semantic_hash": ""
+  },
+  "docs/db/migrations/011_patch_venta_clase_sin_fiscal_apertura_lifecycle.sql": {
+    "mtime": 1783198394.4477613,
+    "ast_hash": "21c86c6e408ee73e9285b92278e77b75",
+    "semantic_hash": ""
+  },
+  "docs/db/migrations/012_patch_borradores_archivos_independientes.sql": {
+    "mtime": 1783198394.4477613,
+    "ast_hash": "238d32a3998df1fe754ca1e868d929f0",
+    "semantic_hash": ""
+  },
+  "docs/db/migrations/013_seed_reporteria_contable_permisos.sql": {
+    "mtime": 1783198394.4487584,
+    "ast_hash": "c6393ecfcb7d883ad6f0206af2a91df5",
+    "semantic_hash": ""
+  },
+  "docs/db/migrations/014_hardening_contabilidad_integridad.sql": {
+    "mtime": 1784510243.0900087,
+    "ast_hash": "895a92591de3c28e6f5f937075a86f73",
+    "semantic_hash": ""
+  },
+  "docs/db/reset/000_drop_existing_tables_if_exists.sql": {
+    "mtime": 1783198394.451759,
+    "ast_hash": "03e4d67dd371dd72f233d32f65392e76",
+    "semantic_hash": ""
+  },
+  "docs/db/seed-demo-user.sql": {
+    "mtime": 1783198394.4527602,
+    "ast_hash": "bc202b5f21ec254628efea7d57df883b",
+    "semantic_hash": ""
+  },
+  "docs/db/seed-source/plan_cuentas_ultradetallado_bolivia_servicios_educativos_tienda.json": {
+    "mtime": 1783198394.4555554,
+    "ast_hash": "fca8d61cc801f95768af40aca496c20f",
+    "semantic_hash": ""
+  },
+  "docs/db/seed-source/seed_rbac_roles_permisos_entidades_base_cpa.json": {
+    "mtime": 1783198394.4587257,
+    "ast_hash": "bfc76cd3e1d0b01f5d0ebdb5f5f7e43e",
+    "semantic_hash": ""
+  },
+  "docs/hardening/source-size-exceptions.json": {
+    "mtime": 1784510243.0945363,
+    "ast_hash": "ac35e125e6f1bdf9c0aa5a6b3fbdbc1d",
+    "semantic_hash": ""
+  },
+  "docs/postman/CPA Plataforma NestJS.postman_collection.json": {
+    "mtime": 1783198394.4763224,
+    "ast_hash": "60981ec94b0b2e6ae6601ce7cbbc673b",
+    "semantic_hash": ""
+  },
+  "nest-cli.json": {
+    "mtime": 1783198394.4893022,
+    "ast_hash": "1546276270a204a542c06a54209d3e2e",
+    "semantic_hash": ""
+  },
+  "package.json": {
+    "mtime": 1784510243.0965352,
+    "ast_hash": "0cbb46ca720a71e96c496fd8327ca769",
+    "semantic_hash": ""
+  },
+  "scripts/backup-postgres.js": {
+    "mtime": 1783198396.791942,
+    "ast_hash": "1ad40ff55c3630c744961721f373626f",
+    "semantic_hash": ""
+  },
+  "scripts/check-source-size.js": {
+    "mtime": 1784510243.098536,
+    "ast_hash": "586a15f9ea7cc00e8e157b2ea7c4d7bd",
+    "semantic_hash": ""
+  },
+  "scripts/clean-demo-data.js": {
+    "mtime": 1783198396.791942,
+    "ast_hash": "8639bdf92f1b1ef14b71df9419ced1af",
+    "semantic_hash": ""
+  },
+  "scripts/clean-official-data.js": {
+    "mtime": 1783198396.792941,
+    "ast_hash": "b45697db55f26ace5f39490a5cc26599",
+    "semantic_hash": ""
+  },
+  "scripts/demo-user-utils.js": {
+    "mtime": 1783198396.79394,
+    "ast_hash": "df960aae9b83db8cd9907d5a654ab7e7",
+    "semantic_hash": ""
+  },
+  "scripts/migrate-prod.js": {
+    "mtime": 1784510243.098536,
+    "ast_hash": "8377cd0f2df438a31778e4b114e16cc4",
+    "semantic_hash": ""
+  },
+  "scripts/official-user-utils.js": {
+    "mtime": 1783198396.7949393,
+    "ast_hash": "e525f636732e943dfe62df64075fbb7b",
+    "semantic_hash": ""
+  },
+  "scripts/render-build.sh": {
+    "mtime": 1783198396.7949393,
+    "ast_hash": "98d6666835b7100ab491fd6efb84ed93",
+    "semantic_hash": ""
+  },
+  "scripts/render-start.js": {
+    "mtime": 1783198396.7959378,
+    "ast_hash": "9c42f90041bd650a6f9c57a6f390448d",
+    "semantic_hash": ""
+  },
+  "scripts/seed-demo-user.js": {
+    "mtime": 1783198396.7959378,
+    "ast_hash": "c550bd0f8ba7e026bafb31c361a1bc47",
+    "semantic_hash": ""
+  },
+  "scripts/seed-official-user.js": {
+    "mtime": 1783198396.7969396,
+    "ast_hash": "fe3dd97415968d1201abd09b8b670253",
+    "semantic_hash": ""
+  },
+  "scripts/seed-reporteria-contable-permissions.js": {
+    "mtime": 1783198396.7969396,
+    "ast_hash": "bc701659bf03b2e1664dea0348d63011",
+    "semantic_hash": ""
+  },
+  "scripts/smoke-live.js": {
+    "mtime": 1783198396.797939,
+    "ast_hash": "f44092aa0201778bed37f3819ea45f6f",
+    "semantic_hash": ""
+  },
+  "src/api-gateway/api-gateway.module.ts": {
+    "mtime": 1783198396.7999406,
+    "ast_hash": "f2619cc1a5d457a39dbdda7afa9fce8d",
+    "semantic_hash": ""
+  },
+  "src/app.module.ts": {
+    "mtime": 1784510243.098536,
+    "ast_hash": "826d6bb8e8f62f72c862afe806e0856e",
+    "semantic_hash": ""
+  },
+  "src/common/common.module.ts": {
+    "mtime": 1784510243.1000416,
+    "ast_hash": "6bae9f1ce9329f508a19357c92412128",
+    "semantic_hash": ""
+  },
+  "src/common/decorators/public.decorator.ts": {
+    "mtime": 1783198396.8019488,
+    "ast_hash": "82c29e3a7a0a8de27073960842a01c53",
+    "semantic_hash": ""
+  },
+  "src/common/decorators/resource-module.decorator.ts": {
+    "mtime": 1783198396.8019488,
+    "ast_hash": "226f911e8c25ab6b3ff3c33357f7eaa6",
+    "semantic_hash": ""
+  },
+  "src/common/filters/all-exceptions.filter.ts": {
+    "mtime": 1784510243.1000416,
+    "ast_hash": "29fba1e39e48bd9724e7caa4f38e4414",
+    "semantic_hash": ""
+  },
+  "src/common/guards/csrf-origin.guard.ts": {
+    "mtime": 1784510243.1000416,
+    "ast_hash": "df5c2a5316e4715be91a1f1d1c3c4c41",
+    "semantic_hash": ""
+  },
+  "src/common/guards/in-memory-rate-limit.guard.ts": {
+    "mtime": 1784510243.1010475,
+    "ast_hash": "bcbbf96876dddc9a1979d25522d0004d",
+    "semantic_hash": ""
+  },
+  "src/common/guards/opaque-session.guard.ts": {
+    "mtime": 1784510243.1010475,
+    "ast_hash": "e64477b4a72e80cd5baaba9e683afcd7",
+    "semantic_hash": ""
+  },
+  "src/common/guards/permission.guard.ts": {
+    "mtime": 1783198396.8049517,
+    "ast_hash": "51cccf0486a1f88c097550107df0ca94",
+    "semantic_hash": ""
+  },
+  "src/common/guards/redis-rate-limit.guard.ts": {
+    "mtime": 1784510243.1020472,
+    "ast_hash": "bced3ce0fb80616a2418a01f1e473bf3",
+    "semantic_hash": ""
+  },
+  "src/common/interceptors/response-envelope.interceptor.ts": {
+    "mtime": 1783198396.8059492,
+    "ast_hash": "e485ad495d3736170cad03bd222db48e",
+    "semantic_hash": ""
+  },
+  "src/common/middleware/request-context.middleware.ts": {
+    "mtime": 1784510243.1025522,
+    "ast_hash": "ae508600ab5051064da0312b971c22af",
+    "semantic_hash": ""
+  },
+  "src/common/repositories/crud.repository.ts": {
+    "mtime": 1783198396.8059492,
+    "ast_hash": "7f55fb36f2db9071affd0e4c486d9491",
+    "semantic_hash": ""
+  },
+  "src/common/security/bounded-rate-limit.store.spec.ts": {
+    "mtime": 1784510243.1025522,
+    "ast_hash": "c5a368e72c767ef62b09a74b28a27130",
+    "semantic_hash": ""
+  },
+  "src/common/security/bounded-rate-limit.store.ts": {
+    "mtime": 1784510243.1035583,
+    "ast_hash": "5911fcaf9bc328d0376ee320af5a52ad",
+    "semantic_hash": ""
+  },
+  "src/common/security/password-hasher.service.spec.ts": {
+    "mtime": 1784510243.1035583,
+    "ast_hash": "483dbb49451185a789b288763aef228b",
+    "semantic_hash": ""
+  },
+  "src/common/security/password-hasher.service.ts": {
+    "mtime": 1784510243.1045587,
+    "ast_hash": "48574e5d9dffd24e5afda6c3b118f257",
+    "semantic_hash": ""
+  },
+  "src/common/services/opaque-session.service.ts": {
+    "mtime": 1783198396.80695,
+    "ast_hash": "d12715e4601477f4fdc30b12fbe5e126",
+    "semantic_hash": ""
+  },
+  "src/common/services/permission.service.ts": {
+    "mtime": 1783198396.80695,
+    "ast_hash": "a45f43644efadb9abd509a7801148845",
+    "semantic_hash": ""
+  },
+  "src/common/services/redis.service.ts": {
+    "mtime": 1784510243.1052058,
+    "ast_hash": "bf53b156dc170678bc394eb1248bff3d",
+    "semantic_hash": ""
+  },
+  "src/common/services/resource-metadata.service.ts": {
+    "mtime": 1783198396.8089497,
+    "ast_hash": "7c0f27887dc7a11b1b5f2f77364e7318",
+    "semantic_hash": ""
+  },
+  "src/common/types/auth-user.type.ts": {
+    "mtime": 1784510243.1052058,
+    "ast_hash": "0c01076061eea7af32264a915fb424cb",
+    "semantic_hash": ""
+  },
+  "src/common/types/express.d.ts": {
+    "mtime": 1784510243.1052058,
+    "ast_hash": "a216c35b572323e55f0c2e50a2bc3f01",
+    "semantic_hash": ""
+  },
+  "src/common/utils/crypto.util.ts": {
+    "mtime": 1784510243.106213,
+    "ast_hash": "c4bb39e72f25fd4f670cb56c0b4b4849",
+    "semantic_hash": ""
+  },
+  "src/common/utils/database-error.util.ts": {
+    "mtime": 1783198396.8109508,
+    "ast_hash": "1fa6197fb83845a662c34ac53ec616bb",
+    "semantic_hash": ""
+  },
+  "src/common/utils/sql.util.ts": {
+    "mtime": 1783198396.8119476,
+    "ast_hash": "6e05182b9d944d69dd0bb415e0458dbb",
+    "semantic_hash": ""
+  },
+  "src/config/environment.schema.spec.ts": {
+    "mtime": 1784510243.106213,
+    "ast_hash": "3d2087f47193360fdd8b7f86a35c1ed6",
+    "semantic_hash": ""
+  },
+  "src/config/environment.schema.ts": {
+    "mtime": 1784510243.1072123,
+    "ast_hash": "78294348a8ce34cd45ebc99baef5757b",
+    "semantic_hash": ""
+  },
+  "src/config/runtime-config.util.ts": {
+    "mtime": 1784510243.1072123,
+    "ast_hash": "a5d74f03953ef492f6d644fcbcab619b",
+    "semantic_hash": ""
+  },
+  "src/database/database.module.ts": {
+    "mtime": 1784510243.108212,
+    "ast_hash": "91b5b494eabd27a860b22f6155e0544e",
+    "semantic_hash": ""
+  },
+  "src/main.ts": {
+    "mtime": 1784510243.108212,
+    "ast_hash": "28ecc0700a81986480172871a754a7bb",
+    "semantic_hash": ""
+  },
+  "src/modules/administracion/administracion-lifecycle.service.ts": {
+    "mtime": 1783198396.816465,
+    "ast_hash": "83400bf20dc8be1f2e197ed71cc99148",
+    "semantic_hash": ""
+  },
+  "src/modules/administracion/administracion.controller.ts": {
+    "mtime": 1783198396.8174644,
+    "ast_hash": "f02ab1a823a278bfde0c99c4dfab8802",
+    "semantic_hash": ""
+  },
+  "src/modules/administracion/administracion.module.ts": {
+    "mtime": 1783198396.818473,
+    "ast_hash": "7552e89b20a78f7ad39930f5ab705258",
+    "semantic_hash": ""
+  },
+  "src/modules/administracion/administracion.router.js": {
+    "mtime": 1784510241.710694,
+    "ast_hash": "af1498af11ea9b15553c55765721e9be",
+    "semantic_hash": ""
+  },
+  "src/modules/administracion/controller/departamento.controller.js": {
+    "mtime": 1784510241.7117572,
+    "ast_hash": "5e761cd6e5d26030a39a33cdbe990971",
+    "semantic_hash": ""
+  },
+  "src/modules/administracion/controller/empleado.controller.js": {
+    "mtime": 1784510241.7122715,
+    "ast_hash": "3aecb01c325c21c5b89cc6308704d897",
+    "semantic_hash": ""
+  },
+  "src/modules/administracion/controller/empleado_posicion_pago.controller.js": {
+    "mtime": 1784510241.7133236,
+    "ast_hash": "eda9da3552dcba023c73df4434e8a158",
+    "semantic_hash": ""
+  },
+  "src/modules/administracion/controller/empleado_registro_pago.controller.js": {
+    "mtime": 1784510241.7138531,
+    "ast_hash": "b989987a8403e657ec0b3c8a27bda876",
+    "semantic_hash": ""
+  },
+  "src/modules/administracion/controller/kpi.controller.js": {
+    "mtime": 1784510241.7148986,
+    "ast_hash": "67b3d9ca7a744267dc4663ee1ff84091",
+    "semantic_hash": ""
+  },
+  "src/modules/administracion/controller/objetivo_kpi.controller.js": {
+    "mtime": 1784510241.7154212,
+    "ast_hash": "90261f7679cdcc4bdc4bdbd82d21ceb3",
+    "semantic_hash": ""
+  },
+  "src/modules/administracion/controller/posicion.controller.js": {
+    "mtime": 1784510241.7154212,
+    "ast_hash": "7ed2747925c58dee003bc339211e532d",
+    "semantic_hash": ""
+  },
+  "src/modules/administracion/models/departamento.model.js": {
+    "mtime": 1784510241.716467,
+    "ast_hash": "096d7d0a3565a4c9ac03c564ba2aa680",
+    "semantic_hash": ""
+  },
+  "src/modules/administracion/models/empleado.model.js": {
+    "mtime": 1784510241.7169976,
+    "ast_hash": "ff3d5be2ddea6d73ac3140ec3fe21fbf",
+    "semantic_hash": ""
+  },
+  "src/modules/administracion/models/empleado_posicion_pago.model.js": {
+    "mtime": 1784510241.7175167,
+    "ast_hash": "52f7324fa389a0102ef3e7c184527975",
+    "semantic_hash": ""
+  },
+  "src/modules/administracion/models/empleado_registro_pago.model.js": {
+    "mtime": 1784510241.718036,
+    "ast_hash": "40ab63d202b9933bef614b4c56e9483e",
+    "semantic_hash": ""
+  },
+  "src/modules/administracion/models/kpi.model.js": {
+    "mtime": 1784510241.718559,
+    "ast_hash": "3fb73474a007b193438b02c9a09a8a6b",
+    "semantic_hash": ""
+  },
+  "src/modules/administracion/models/objetivo_kpi.model.js": {
+    "mtime": 1784510241.718559,
+    "ast_hash": "19cfb81ca98658451ffbaef937af9692",
+    "semantic_hash": ""
+  },
+  "src/modules/administracion/models/posicion.model.js": {
+    "mtime": 1784510241.7190807,
+    "ast_hash": "71c2d51ea2cdc3cbd0b4edf30badfa6a",
+    "semantic_hash": ""
+  },
+  "src/modules/administracion/repository/departamento.repository.js": {
+    "mtime": 1784510241.7196023,
+    "ast_hash": "4aad6e2cd94cd173c8913b0498c72d78",
+    "semantic_hash": ""
+  },
+  "src/modules/administracion/repository/empleado.repository.js": {
+    "mtime": 1784510241.7201266,
+    "ast_hash": "4633f1d96e8e8d7601f1c178679bc6d6",
+    "semantic_hash": ""
+  },
+  "src/modules/administracion/repository/empleado_posicion_pago.repository.js": {
+    "mtime": 1784510241.72065,
+    "ast_hash": "cf04705cf513ca4c85d7da5db89b6d6c",
+    "semantic_hash": ""
+  },
+  "src/modules/administracion/repository/empleado_registro_pago.repository.js": {
+    "mtime": 1784510241.7211719,
+    "ast_hash": "a2c8f511a33685823f1d7f799aedf76c",
+    "semantic_hash": ""
+  },
+  "src/modules/administracion/repository/kpi.repository.js": {
+    "mtime": 1784510241.721693,
+    "ast_hash": "e43c9783e670c55e59a0c182b081b8fc",
+    "semantic_hash": ""
+  },
+  "src/modules/administracion/repository/objetivo_kpi.repository.js": {
+    "mtime": 1784510241.721693,
+    "ast_hash": "d14c35e4f030d663e269cc66440db7c2",
+    "semantic_hash": ""
+  },
+  "src/modules/administracion/repository/posicion.repository.js": {
+    "mtime": 1784510241.7222075,
+    "ast_hash": "7048a6896e0a7a7a484ea35c8df9be19",
+    "semantic_hash": ""
+  },
+  "src/modules/administracion/router/departamento.router.js": {
+    "mtime": 1784510241.7233863,
+    "ast_hash": "3df78e3497b785fb443a92c5796d1f6d",
+    "semantic_hash": ""
+  },
+  "src/modules/administracion/router/empleado.router.js": {
+    "mtime": 1784510241.7244506,
+    "ast_hash": "c8b81d2597e4eb9e9f4e2cef19447619",
+    "semantic_hash": ""
+  },
+  "src/modules/administracion/router/empleado_posicion_pago.router.js": {
+    "mtime": 1784510241.7249777,
+    "ast_hash": "bcd2f904673e603a373acca8f413ef0f",
+    "semantic_hash": ""
+  },
+  "src/modules/administracion/router/empleado_registro_pago.router.js": {
+    "mtime": 1784510241.725554,
+    "ast_hash": "830e7af6a173896554cd36d7ae5f4cba",
+    "semantic_hash": ""
+  },
+  "src/modules/administracion/router/kpi.router.js": {
+    "mtime": 1784510241.7260745,
+    "ast_hash": "8f425c081c31e540357420f387a54cb5",
+    "semantic_hash": ""
+  },
+  "src/modules/administracion/router/objetivo_kpi.router.js": {
+    "mtime": 1784510241.7260745,
+    "ast_hash": "6ac1af3015efb99721f4ddbb01a4eab1",
+    "semantic_hash": ""
+  },
+  "src/modules/administracion/router/posicion.router.js": {
+    "mtime": 1784510241.7265863,
+    "ast_hash": "28b6027c60c018a85552c647def14fd6",
+    "semantic_hash": ""
+  },
+  "src/modules/administracion/schemas/departamento.schema.js": {
+    "mtime": 1784510241.727116,
+    "ast_hash": "d29e4e15cda339ccf5882f44ecc729d6",
+    "semantic_hash": ""
+  },
+  "src/modules/administracion/schemas/empleado.schema.js": {
+    "mtime": 1784510241.7276497,
+    "ast_hash": "401ca6c36268ec29e1cb015d4a50a436",
+    "semantic_hash": ""
+  },
+  "src/modules/administracion/schemas/empleado_posicion_pago.schema.js": {
+    "mtime": 1784510241.7287104,
+    "ast_hash": "f9cffb8e926ab0f553829718c5172b98",
+    "semantic_hash": ""
+  },
+  "src/modules/administracion/schemas/empleado_registro_pago.schema.js": {
+    "mtime": 1784510241.7292418,
+    "ast_hash": "4a9e17a8521a6614b0f7be53f7f5dd23",
+    "semantic_hash": ""
+  },
+  "src/modules/administracion/schemas/index.schemas.js": {
+    "mtime": 1784510241.7297726,
+    "ast_hash": "c7b27c322936a10c2520607b9e650b4c",
+    "semantic_hash": ""
+  },
+  "src/modules/administracion/schemas/kpi.schema.js": {
+    "mtime": 1784510241.7297726,
+    "ast_hash": "2d1a0e70fe05dd81671f848b3d55deb2",
+    "semantic_hash": ""
+  },
+  "src/modules/administracion/schemas/objetivo_kpi.schema.js": {
+    "mtime": 1784510241.7303057,
+    "ast_hash": "e18aed8a48573ccacf9773012ebddf07",
+    "semantic_hash": ""
+  },
+  "src/modules/administracion/schemas/posicion.schema.js": {
+    "mtime": 1784510241.730836,
+    "ast_hash": "f9aa7729d1add1f388aaa8d5040499d5",
+    "semantic_hash": ""
+  },
+  "src/modules/administracion/service/departamento.service.js": {
+    "mtime": 1784510241.7313697,
+    "ast_hash": "fde131778cd255f020c7821dc7a4b3a1",
+    "semantic_hash": ""
+  },
+  "src/modules/administracion/service/empleado.service.js": {
+    "mtime": 1784510241.731897,
+    "ast_hash": "f0da4a96695fde10b1f3a4df83a26469",
+    "semantic_hash": ""
+  },
+  "src/modules/administracion/service/empleado_posicion_pago.service.js": {
+    "mtime": 1784510241.732411,
+    "ast_hash": "721bda363f14133cf15f9991834b8919",
+    "semantic_hash": ""
+  },
+  "src/modules/administracion/service/empleado_registro_pago.service.js": {
+    "mtime": 1784510241.733468,
+    "ast_hash": "2ca65d70c1304062a49ceaaba979fae6",
+    "semantic_hash": ""
+  },
+  "src/modules/administracion/service/kpi.service.js": {
+    "mtime": 1784510241.7340229,
+    "ast_hash": "8ff2cafa616174299f68472274ea78cb",
+    "semantic_hash": ""
+  },
+  "src/modules/administracion/service/objetivo_kpi.service.js": {
+    "mtime": 1784510241.7345493,
+    "ast_hash": "cf3df674b15444b5a5533ac1f11aebb1",
+    "semantic_hash": ""
+  },
+  "src/modules/administracion/service/posicion.service.js": {
+    "mtime": 1784510241.7350743,
+    "ast_hash": "2ab8f96304508a93fd89ff6a2e295255",
+    "semantic_hash": ""
+  },
+  "src/modules/auth/auth.controller.ts": {
+    "mtime": 1783198396.8194637,
+    "ast_hash": "ef348f593c1e256a8ec86e5b08f0bada",
+    "semantic_hash": ""
+  },
+  "src/modules/auth/auth.module.ts": {
+    "mtime": 1783198396.8194637,
+    "ast_hash": "194074e48cfc57e01cf53a04e3574096",
+    "semantic_hash": ""
+  },
+  "src/modules/auth/auth.private.router.js": {
+    "mtime": 1784510241.7355998,
+    "ast_hash": "8033d495b939880df56aba2dc9acad36",
+    "semantic_hash": ""
+  },
+  "src/modules/auth/auth.public.router.js": {
+    "mtime": 1784510241.7355998,
+    "ast_hash": "b7640c051723d881f289335091741f33",
+    "semantic_hash": ""
+  },
+  "src/modules/auth/auth.repository.ts": {
+    "mtime": 1784510243.1092112,
+    "ast_hash": "8303722e863e56aeaa2915cbb613dea3",
+    "semantic_hash": ""
+  },
+  "src/modules/auth/auth.service.ts": {
+    "mtime": 1784510243.1092112,
+    "ast_hash": "faeacdad2ee7c7efba760f814666377e",
+    "semantic_hash": ""
+  },
+  "src/modules/auth/controller/auth.controller.js": {
+    "mtime": 1784510241.7366862,
+    "ast_hash": "66c011a0cb617ba2b74e6eb0291135df",
+    "semantic_hash": ""
+  },
+  "src/modules/auth/dto/auth.dto.ts": {
+    "mtime": 1784510243.1102116,
+    "ast_hash": "04beaade1359920fc2fa46c7e4849a91",
+    "semantic_hash": ""
+  },
+  "src/modules/auth/repository/auth.repository.js": {
+    "mtime": 1784510241.737206,
+    "ast_hash": "a100e916378da1fe5ee8c4a27d7e8ee0",
+    "semantic_hash": ""
+  },
+  "src/modules/auth/router/auth.private.router.js": {
+    "mtime": 1784510241.7377388,
+    "ast_hash": "03513fff9ab1a9ee70009528182640f7",
+    "semantic_hash": ""
+  },
+  "src/modules/auth/router/auth.public.router.js": {
+    "mtime": 1784510241.738264,
+    "ast_hash": "560296d8f47ac08ba471d425f9d39910",
+    "semantic_hash": ""
+  },
+  "src/modules/auth/schemas/auth.schema.js": {
+    "mtime": 1784510241.738862,
+    "ast_hash": "d1150517db3e7046ed0aed29c42bf6e9",
+    "semantic_hash": ""
+  },
+  "src/modules/auth/service/auth.permissions.service.js": {
+    "mtime": 1784510241.739389,
+    "ast_hash": "46ee5ee798f879694381139d5e3f2f31",
+    "semantic_hash": ""
+  },
+  "src/modules/auth/service/auth.service.js": {
+    "mtime": 1784510241.739919,
+    "ast_hash": "d4dd592e3b94b3446bccc0e2f668dee1",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/contabilidad-accounting.service.ts": {
+    "mtime": 1783198396.8234658,
+    "ast_hash": "d0a8a0c50ca57dcbd1a3cc83ffb7c79b",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/contabilidad-archivo.service.ts": {
+    "mtime": 1783198396.824466,
+    "ast_hash": "b5acf0ecf550dda85c4ab01baf45082c",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/contabilidad.controller.ts": {
+    "mtime": 1783198396.8254666,
+    "ast_hash": "63f6882a1d25ef25a5e6f438328a82fe",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/contabilidad.module.ts": {
+    "mtime": 1783198396.8264668,
+    "ast_hash": "b7ce377fde47c5c7b7b64cc016be447c",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/contabilidad.router.js": {
+    "mtime": 1784510241.739919,
+    "ast_hash": "d0fa0ab513944fe3c1af1fcef892e978",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/controller/archivos_transaccion.controller.js": {
+    "mtime": 1784510241.740926,
+    "ast_hash": "46035a6a39ae629c9d15515b3bb19f5c",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/controller/centro_costo.controller.js": {
+    "mtime": 1784510241.740926,
+    "ast_hash": "789dca412d2f2371eeb6da10170d0c54",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/controller/centro_costo_mapa.controller.js": {
+    "mtime": 1784510241.7419262,
+    "ast_hash": "b1e7ae9b152dc7eb7b5381cea48b4262",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/controller/concepto_costo.controller.js": {
+    "mtime": 1784510241.742432,
+    "ast_hash": "6fbd548599ea90b8056525fd4e89a87f",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/controller/cuenta.controller.js": {
+    "mtime": 1784510241.742432,
+    "ast_hash": "4f2a89f3e7b140554964d38e66fca045",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/controller/cuenta_asignacion.controller.js": {
+    "mtime": 1784510241.7434394,
+    "ast_hash": "a34eac596930441e2d55df03f98932be",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/controller/grupo_cuenta.controller.js": {
+    "mtime": 1784510241.7444396,
+    "ast_hash": "813aa139a1ef29045ef06a7be29ad2ae",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/controller/pago_tutor.controller.js": {
+    "mtime": 1784510241.7444396,
+    "ast_hash": "7c93254eea003833c024c70eef6b95ca",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/controller/pago_tutor_detalle.controller.js": {
+    "mtime": 1784510241.7454407,
+    "ast_hash": "bd1de4985f37a185e43910eb180de415",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/controller/transaccion.controller.js": {
+    "mtime": 1784510241.7454407,
+    "ast_hash": "99aa600ed0d68de3f753d4609fb3e7f2",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/controller/transaccion_movimiento_cuenta.controller.js": {
+    "mtime": 1784510241.7454407,
+    "ast_hash": "11c3e30eaf47c8dfa79ab2e3565e0e28",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/models/archivos_transaccion.model.js": {
+    "mtime": 1784510241.7469482,
+    "ast_hash": "c834a3063700b1e08a1d8f08ee854c6d",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/models/centro_costo.model.js": {
+    "mtime": 1784510241.7469482,
+    "ast_hash": "405f9580cae6c0b5ec1c6effb504842b",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/models/centro_costo_mapa.model.js": {
+    "mtime": 1784510241.7479568,
+    "ast_hash": "6819493bea7030dff90596a10ad3fdd7",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/models/concepto_costo.model.js": {
+    "mtime": 1784510241.7479568,
+    "ast_hash": "68f4955b63945a352ad7f08f7bae4466",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/models/cuenta.model.js": {
+    "mtime": 1784510241.748957,
+    "ast_hash": "8c4270064b3977120a14d3d4f140db5b",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/models/cuenta_asignacion.model.js": {
+    "mtime": 1784510241.748957,
+    "ast_hash": "90923b5d962f03f8f4fa26847fee0b1c",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/models/grupo_cuenta.model.js": {
+    "mtime": 1784510241.748957,
+    "ast_hash": "53f5f7e7abfeab31cde42456b01d07ab",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/models/pago_tutor.model.js": {
+    "mtime": 1784510241.749955,
+    "ast_hash": "66fec8f77c1aa94abae6f3a414505dbc",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/models/pago_tutor_detalle.model.js": {
+    "mtime": 1784510241.749955,
+    "ast_hash": "e5ade32458ef5c0ce5ca739f14d99d46",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/models/transaccion.model.js": {
+    "mtime": 1784510241.7509544,
+    "ast_hash": "47479eaba02d2f91358cf6f9975c6722",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/models/transaccion_movimiento_cuenta.model.js": {
+    "mtime": 1784510241.7509544,
+    "ast_hash": "3dd8c341d62674da166e31ccb7820366",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/repository/archivos_transaccion.repository.js": {
+    "mtime": 1784510241.752458,
+    "ast_hash": "5d8953c60ef29eeefb53c289bef643f2",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/repository/centro_costo.repository.js": {
+    "mtime": 1784510241.752458,
+    "ast_hash": "acf68bc679cfe19ece96d93320087233",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/repository/centro_costo_mapa.repository.js": {
+    "mtime": 1784510241.753465,
+    "ast_hash": "873dce03368b16832ea8df66c1cccfdf",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/repository/concepto_costo.repository.js": {
+    "mtime": 1784510241.753465,
+    "ast_hash": "6a3e101bb4c44309a098f7128321b714",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/repository/cuenta.repository.js": {
+    "mtime": 1784510241.7540438,
+    "ast_hash": "56f71c4a0dbe2a9b07cf5fc799aeffbc",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/repository/cuenta_asignacion.repository.js": {
+    "mtime": 1784510241.7540438,
+    "ast_hash": "bfd6e210809d669e9f17e6d1146948c1",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/repository/grupo_cuenta.repository.js": {
+    "mtime": 1784510241.7550511,
+    "ast_hash": "d4c9a37e876cafe6437ccd125911ad7d",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/repository/pago_tutor.repository.js": {
+    "mtime": 1784510241.7550511,
+    "ast_hash": "26205f2e9c222fbb2462593f73c5c27a",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/repository/pago_tutor_detalle.repository.js": {
+    "mtime": 1784510241.7550511,
+    "ast_hash": "ab6a5b3180f7b36a5a4b84a59afba685",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/repository/transaccion.repository.js": {
+    "mtime": 1784510241.75605,
+    "ast_hash": "108696a57c7936ebedde56130f22409b",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/repository/transaccion_movimiento_cuenta.repository.js": {
+    "mtime": 1784510241.75605,
+    "ast_hash": "66dcb6cb4039fddef66555ae44c40e01",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/router/archivos_transaccion.router.js": {
+    "mtime": 1784510241.7570493,
+    "ast_hash": "599a7a71b2803e87d8ce2fd64797fe54",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/router/centro_costo.router.js": {
+    "mtime": 1784510241.7570493,
+    "ast_hash": "f51b29cdb3cf31542288e26322cce813",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/router/centro_costo_mapa.router.js": {
+    "mtime": 1784510241.7584488,
+    "ast_hash": "4ead6ffa094a4fc48919de552aebc5c8",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/router/concepto_costo.router.js": {
+    "mtime": 1784510241.7584488,
+    "ast_hash": "b9f9d1a84fcd13447e960441629a74ce",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/router/cuenta.router.js": {
+    "mtime": 1784510241.7584488,
+    "ast_hash": "0c3f9acf665cc19fc12ea8d60d9e26c4",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/router/cuenta_asignacion.router.js": {
+    "mtime": 1784510241.759448,
+    "ast_hash": "3a908431eee700ae1ad7844a58316b4f",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/router/grupo_cuenta.router.js": {
+    "mtime": 1784510241.759448,
+    "ast_hash": "bb7f5491970a09477dac7e38b47f3044",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/router/pago_tutor.router.js": {
+    "mtime": 1784510241.759448,
+    "ast_hash": "a886486cafe5ca07f75d976447b6c9de",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/router/pago_tutor_detalle.router.js": {
+    "mtime": 1784510241.7604492,
+    "ast_hash": "5d728e0ffe0a877b6607f60713af064f",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/router/transaccion.router.js": {
+    "mtime": 1784510241.7604492,
+    "ast_hash": "6d23cae4640e2bd4da2d8bf9502e8658",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/router/transaccion_movimiento_cuenta.router.js": {
+    "mtime": 1784510241.7604492,
+    "ast_hash": "0dba47f6a94e15bc5f0a76233fe11001",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/schemas/archivos_transaccion.schema.js": {
+    "mtime": 1784510241.7619565,
+    "ast_hash": "b2321eaf3323c773d009648fdcc44586",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/schemas/centro_costo.schema.js": {
+    "mtime": 1784510241.7619565,
+    "ast_hash": "c24d188555400a06a42df53f93291298",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/schemas/centro_costo_mapa.schema.js": {
+    "mtime": 1784510241.7629647,
+    "ast_hash": "c59f29080b397952bb7cf7754122dc34",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/schemas/concepto_costo.schema.js": {
+    "mtime": 1784510241.7629647,
+    "ast_hash": "5335b2c07988dae2e3e1b60a29bcea5a",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/schemas/cuenta.schema.js": {
+    "mtime": 1784510241.7629647,
+    "ast_hash": "e3bbdfcd37ee208751a1c1e515cf265a",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/schemas/cuenta_asignacion.schema.js": {
+    "mtime": 1784510241.7639706,
+    "ast_hash": "7e0c9c1a657f547cbab8e4f3ed92fe85",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/schemas/grupo_cuenta.schema.js": {
+    "mtime": 1784510241.7639706,
+    "ast_hash": "d3385828d819aec5d47117742cf709e5",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/schemas/index.schemas.js": {
+    "mtime": 1784510241.7639706,
+    "ast_hash": "39ca02cbd02b7e38b18f4c67872600a0",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/schemas/pago_tutor.schema.js": {
+    "mtime": 1784510241.7649765,
+    "ast_hash": "6876d66fd5cd0facd2b367ecbcb64cda",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/schemas/pago_tutor_detalle.schema.js": {
+    "mtime": 1784510241.7649765,
+    "ast_hash": "519f18ccc65e15f42d996d8b48fbaf76",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/schemas/transaccion.schema.js": {
+    "mtime": 1784510241.7659762,
+    "ast_hash": "c0545861c9482f08a34d6b04d513dbfe",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/schemas/transaccion_movimiento_cuenta.schema.js": {
+    "mtime": 1784510241.7659762,
+    "ast_hash": "c562091be9f412a998a38bfe4bb11eb4",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/service/archivos_transaccion.service.js": {
+    "mtime": 1784510241.7659762,
+    "ast_hash": "13d5058f8a306f049c0a7a0675b1b8e0",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/service/centro_costo.service.js": {
+    "mtime": 1784510241.7659762,
+    "ast_hash": "46386dee3bbec0f3f28a0c86b8568794",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/service/centro_costo_mapa.service.js": {
+    "mtime": 1784510241.767483,
+    "ast_hash": "080352c8b532bd4158cbb28c6463be8e",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/service/concepto_costo.service.js": {
+    "mtime": 1784510241.767483,
+    "ast_hash": "71bf2091a4e21a81fffd8a357b6e8b12",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/service/cuenta.service.js": {
+    "mtime": 1784510241.7684913,
+    "ast_hash": "7ad70d4aad6b003b77368370fc786c2e",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/service/cuenta_asignacion.service.js": {
+    "mtime": 1784510241.7684913,
+    "ast_hash": "7e5f8c10d566adb2dca50442f79ec291",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/service/grupo_cuenta.service.js": {
+    "mtime": 1784510241.7684913,
+    "ast_hash": "101d71cce818da489e15c86dfe20a381",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/service/pago_tutor.service.js": {
+    "mtime": 1784510241.7694905,
+    "ast_hash": "fb7bf38df96ee7ced82a501361ee0965",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/service/pago_tutor_detalle.service.js": {
+    "mtime": 1784510241.7700684,
+    "ast_hash": "ba2c51a1395aa2c0b2079ea694d43bc3",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/service/transaccion.service.js": {
+    "mtime": 1784510241.7700684,
+    "ast_hash": "82ddec01c96ec53685fda3a2026ab911",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/service/transaccion_movimiento_cuenta.service.js": {
+    "mtime": 1784510241.7700684,
+    "ast_hash": "74b100b5039dcb7e3534524ad0d657ad",
+    "semantic_hash": ""
+  },
+  "src/modules/deuda/controller/deuda.controller.js": {
+    "mtime": 1784510241.771075,
+    "ast_hash": "4e2574dbd2b7fa5b525f183a56d308c1",
+    "semantic_hash": ""
+  },
+  "src/modules/deuda/controller/pago.controller.js": {
+    "mtime": 1784510241.772075,
+    "ast_hash": "917a5d237372887bc603ef795cc1d33f",
+    "semantic_hash": ""
+  },
+  "src/modules/deuda/deuda.controller.ts": {
+    "mtime": 1783198396.8284674,
+    "ast_hash": "016edf7959adc78684cec5699ec6d786",
+    "semantic_hash": ""
+  },
+  "src/modules/deuda/deuda.module.ts": {
+    "mtime": 1783198396.8284674,
+    "ast_hash": "d9bf8f049166cdd2e7f774f3434904bf",
+    "semantic_hash": ""
+  },
+  "src/modules/deuda/deuda.router.js": {
+    "mtime": 1784510241.772075,
+    "ast_hash": "23f0c476eb5300c437da92b5b9496e36",
+    "semantic_hash": ""
+  },
+  "src/modules/deuda/models/deuda.model.js": {
+    "mtime": 1784510241.7725794,
+    "ast_hash": "f44c6ad93f3813b4839df3d47d63d1d2",
+    "semantic_hash": ""
+  },
+  "src/modules/deuda/models/pago.model.js": {
+    "mtime": 1784510241.7725794,
+    "ast_hash": "aa529760943177cafa26bc80ded71c41",
+    "semantic_hash": ""
+  },
+  "src/modules/deuda/repository/deuda.repository.js": {
+    "mtime": 1784510241.7735858,
+    "ast_hash": "753e4f41586b1d7ff9c4625a188d1043",
+    "semantic_hash": ""
+  },
+  "src/modules/deuda/repository/pago.repository.js": {
+    "mtime": 1784510241.7735858,
+    "ast_hash": "74160fb9bb25efa116a2e45dbe64504d",
+    "semantic_hash": ""
+  },
+  "src/modules/deuda/router/deuda.router.js": {
+    "mtime": 1784510241.7745862,
+    "ast_hash": "b9cd4cca23cf0683a61001198ebb8bbe",
+    "semantic_hash": ""
+  },
+  "src/modules/deuda/router/pago.router.js": {
+    "mtime": 1784510241.7745862,
+    "ast_hash": "892574b7c1fdd59471b5a2953744f674",
+    "semantic_hash": ""
+  },
+  "src/modules/deuda/schemas/deuda.schema.js": {
+    "mtime": 1784510241.7756102,
+    "ast_hash": "31c03c5b821059e3c39e1add35057472",
+    "semantic_hash": ""
+  },
+  "src/modules/deuda/schemas/index.schemas.js": {
+    "mtime": 1784510241.7756102,
+    "ast_hash": "cba6c0fbc692015053b21d463b2cea22",
+    "semantic_hash": ""
+  },
+  "src/modules/deuda/schemas/pago.schema.js": {
+    "mtime": 1784510241.7766104,
+    "ast_hash": "3e18711746fbb4f327fc14d972982842",
+    "semantic_hash": ""
+  },
+  "src/modules/deuda/service/deuda.service.js": {
+    "mtime": 1784510241.7766104,
+    "ast_hash": "d4fa9ab173963c4c97a05db0bc1f7f7d",
+    "semantic_hash": ""
+  },
+  "src/modules/deuda/service/pago.service.js": {
+    "mtime": 1784510241.7776103,
+    "ast_hash": "02d5b5632b404397b281531f420e3d4e",
+    "semantic_hash": ""
+  },
+  "src/modules/health/health.controller.ts": {
+    "mtime": 1784510243.1102116,
+    "ast_hash": "5b95e10752ccd4d84384ac08c31cb716",
+    "semantic_hash": ""
+  },
+  "src/modules/health/health.module.ts": {
+    "mtime": 1783198396.829467,
+    "ast_hash": "1117b386e55c6306e09569ce6ea70d07",
+    "semantic_hash": ""
+  },
+  "src/modules/index.js": {
+    "mtime": 1784510241.7776103,
+    "ast_hash": "c8a31550ee4434d6fb3c5d947b3119ed",
+    "semantic_hash": ""
+  },
+  "src/modules/infraestructura/controller/edificio.controller.js": {
+    "mtime": 1784510241.7789497,
+    "ast_hash": "2a42d494a493c5f9ca596866e8873d45",
+    "semantic_hash": ""
+  },
+  "src/modules/infraestructura/controller/encargado.controller.js": {
+    "mtime": 1784510241.7789497,
+    "ast_hash": "2fbb98adb3297522515b917638dfd2eb",
+    "semantic_hash": ""
+  },
+  "src/modules/infraestructura/controller/espacio.controller.js": {
+    "mtime": 1784510241.77995,
+    "ast_hash": "6f542e2e678170a1b8c4da8a5972673d",
+    "semantic_hash": ""
+  },
+  "src/modules/infraestructura/controller/sucursal.controller.js": {
+    "mtime": 1784510241.77995,
+    "ast_hash": "1d31f53176e01dff64096e3a6de5c11d",
+    "semantic_hash": ""
+  },
+  "src/modules/infraestructura/controller/tienda.controller.js": {
+    "mtime": 1784510241.7809489,
+    "ast_hash": "ff7cd1cdf196e0f3536eb0080ac26d38",
+    "semantic_hash": ""
+  },
+  "src/modules/infraestructura/infraestructura.controller.ts": {
+    "mtime": 1783198396.830467,
+    "ast_hash": "3aa51728420a748dc41e54d121008ebc",
+    "semantic_hash": ""
+  },
+  "src/modules/infraestructura/infraestructura.module.ts": {
+    "mtime": 1783198396.830467,
+    "ast_hash": "9d2692ac22a45f451b4d6a70f0f0e69d",
+    "semantic_hash": ""
+  },
+  "src/modules/infraestructura/infraestructura.router.js": {
+    "mtime": 1784510241.7809489,
+    "ast_hash": "47fb17006b9c366875c4b71ac860b301",
+    "semantic_hash": ""
+  },
+  "src/modules/infraestructura/models/edificio.model.js": {
+    "mtime": 1784510241.7819483,
+    "ast_hash": "9882058f0870b4dd6a734396fd5d4ba5",
+    "semantic_hash": ""
+  },
+  "src/modules/infraestructura/models/encargado.model.js": {
+    "mtime": 1784510241.7819483,
+    "ast_hash": "b34416363f163bca6345518927bcd8c5",
+    "semantic_hash": ""
+  },
+  "src/modules/infraestructura/models/espacio.model.js": {
+    "mtime": 1784510241.7819483,
+    "ast_hash": "6b59510fd998deecee153247e7dd1a3e",
+    "semantic_hash": ""
+  },
+  "src/modules/infraestructura/models/sucursal.model.js": {
+    "mtime": 1784510241.7833707,
+    "ast_hash": "07139df9dcb879fa546825bc755cbb95",
+    "semantic_hash": ""
+  },
+  "src/modules/infraestructura/models/tienda.model.js": {
+    "mtime": 1784510241.7833707,
+    "ast_hash": "3d868d2df8a2baafc1cc3ddcf21b5eb7",
+    "semantic_hash": ""
+  },
+  "src/modules/infraestructura/repository/edificio.repository.js": {
+    "mtime": 1784510241.7843773,
+    "ast_hash": "206e0b9513c8a7d1885abae40d6ad8bd",
+    "semantic_hash": ""
+  },
+  "src/modules/infraestructura/repository/encargado.repository.js": {
+    "mtime": 1784510241.7843773,
+    "ast_hash": "9867d45f1dbf866f07da5f6cbc277811",
+    "semantic_hash": ""
+  },
+  "src/modules/infraestructura/repository/espacio.repository.js": {
+    "mtime": 1784510241.7853763,
+    "ast_hash": "0aa64aa43f5c417cdcb47daedcb6fb30",
+    "semantic_hash": ""
+  },
+  "src/modules/infraestructura/repository/sucursal.repository.js": {
+    "mtime": 1784510241.7853763,
+    "ast_hash": "d460b051fde77b7b3a6ba2db292c2b2c",
+    "semantic_hash": ""
+  },
+  "src/modules/infraestructura/repository/tienda.repository.js": {
+    "mtime": 1784510241.7860076,
+    "ast_hash": "7f8222710d748eaca591e78b389709ec",
+    "semantic_hash": ""
+  },
+  "src/modules/infraestructura/router/edificio.router.js": {
+    "mtime": 1784510241.7860076,
+    "ast_hash": "3cac5cdc907af36cfcbf03de4195e6a1",
+    "semantic_hash": ""
+  },
+  "src/modules/infraestructura/router/encargado.router.js": {
+    "mtime": 1784510241.7870147,
+    "ast_hash": "292f9be7f1f5d683dfd630abd8241389",
+    "semantic_hash": ""
+  },
+  "src/modules/infraestructura/router/espacio.router.js": {
+    "mtime": 1784510241.7870147,
+    "ast_hash": "53198fce3415d814d220dfaa1a79c102",
+    "semantic_hash": ""
+  },
+  "src/modules/infraestructura/router/sucursal.router.js": {
+    "mtime": 1784510241.788016,
+    "ast_hash": "f75983794ec80c800919f8e5ea4d4d10",
+    "semantic_hash": ""
+  },
+  "src/modules/infraestructura/router/tienda.router.js": {
+    "mtime": 1784510241.7885218,
+    "ast_hash": "57666650177815f3095877420d7e65c3",
+    "semantic_hash": ""
+  },
+  "src/modules/infraestructura/schemas/edificio.schema.js": {
+    "mtime": 1784510241.7885218,
+    "ast_hash": "d8e5dd821bab053ad77c93731483d0ac",
+    "semantic_hash": ""
+  },
+  "src/modules/infraestructura/schemas/encargado.schema.js": {
+    "mtime": 1784510241.7895293,
+    "ast_hash": "6b69dc81a908e5b083b6e97289e4ba47",
+    "semantic_hash": ""
+  },
+  "src/modules/infraestructura/schemas/espacio.schema.js": {
+    "mtime": 1784510241.7895293,
+    "ast_hash": "27cdec212783d9c5db06f83fa4d5e1a9",
+    "semantic_hash": ""
+  },
+  "src/modules/infraestructura/schemas/index.schemas.js": {
+    "mtime": 1784510241.7895293,
+    "ast_hash": "e12c5945c60ab49d5e11cbb982c4a648",
+    "semantic_hash": ""
+  },
+  "src/modules/infraestructura/schemas/sucursal.schema.js": {
+    "mtime": 1784510241.79053,
+    "ast_hash": "644ffbaa344d04d0c084f7c9cfdebbaf",
+    "semantic_hash": ""
+  },
+  "src/modules/infraestructura/schemas/tienda.schema.js": {
+    "mtime": 1784510241.79053,
+    "ast_hash": "60f10645484a9f3414bc66732970ac04",
+    "semantic_hash": ""
+  },
+  "src/modules/infraestructura/service/edificio.service.js": {
+    "mtime": 1784510241.79053,
+    "ast_hash": "5cafaed13a1d65145698a4ab80255630",
+    "semantic_hash": ""
+  },
+  "src/modules/infraestructura/service/encargado.service.js": {
+    "mtime": 1784510241.7920358,
+    "ast_hash": "1c5a979de5d777a02d00e1c9ace94156",
+    "semantic_hash": ""
+  },
+  "src/modules/infraestructura/service/espacio.service.js": {
+    "mtime": 1784510241.7920358,
+    "ast_hash": "362fb218d1ed5302f7ca67a340b840ae",
+    "semantic_hash": ""
+  },
+  "src/modules/infraestructura/service/sucursal.service.js": {
+    "mtime": 1784510241.7920358,
+    "ast_hash": "0a63b4301c196d831f7ad763d11e2105",
+    "semantic_hash": ""
+  },
+  "src/modules/infraestructura/service/tienda.service.js": {
+    "mtime": 1784510241.7930431,
+    "ast_hash": "fd63192e6f4f9394efa45dfd4cd5b516",
+    "semantic_hash": ""
+  },
+  "src/modules/inventario/controller/bien.controller.js": {
+    "mtime": 1784510241.7935488,
+    "ast_hash": "b3551089b4f2bdfa84df2a058d285e17",
+    "semantic_hash": ""
+  },
+  "src/modules/inventario/controller/bien_instancia.controller.js": {
+    "mtime": 1784510241.7935488,
+    "ast_hash": "6b8c4603d7682167f54392d74a1513a5",
+    "semantic_hash": ""
+  },
+  "src/modules/inventario/controller/bien_lote.controller.js": {
+    "mtime": 1784510241.794556,
+    "ast_hash": "6652033d616f21d93cbed83688e38fde",
+    "semantic_hash": ""
+  },
+  "src/modules/inventario/controller/movimiento_detalle.controller.js": {
+    "mtime": 1784510241.794556,
+    "ast_hash": "64fe9c713a45ddb7ab1306e66ceead7d",
+    "semantic_hash": ""
+  },
+  "src/modules/inventario/inventario.controller.ts": {
+    "mtime": 1783198396.8324656,
+    "ast_hash": "43e76436e222129210543ec737d3d74b",
+    "semantic_hash": ""
+  },
+  "src/modules/inventario/inventario.module.ts": {
+    "mtime": 1783198396.8334653,
+    "ast_hash": "6a06e9fa5355e2476f59d0847901a3f3",
+    "semantic_hash": ""
+  },
+  "src/modules/inventario/inventario.router.js": {
+    "mtime": 1784510241.7955542,
+    "ast_hash": "422f1082fcf9461fa386856a9c72dfd3",
+    "semantic_hash": ""
+  },
+  "src/modules/inventario/models/bien.model.js": {
+    "mtime": 1784510241.7955542,
+    "ast_hash": "3570849323c5a138929d90b65aedf7f8",
+    "semantic_hash": ""
+  },
+  "src/modules/inventario/models/bien_instancia.model.js": {
+    "mtime": 1784510241.7965531,
+    "ast_hash": "3c739603f4095fbb31e45868ff1531d1",
+    "semantic_hash": ""
+  },
+  "src/modules/inventario/models/bien_lote.model.js": {
+    "mtime": 1784510241.7965531,
+    "ast_hash": "af6abd1b2203b1cd25f4411726ac11ed",
+    "semantic_hash": ""
+  },
+  "src/modules/inventario/models/movimiento_detalle.model.js": {
+    "mtime": 1784510241.797553,
+    "ast_hash": "6fa7d0d030c7d48b99981391dfff8c30",
+    "semantic_hash": ""
+  },
+  "src/modules/inventario/repository/bien.repository.js": {
+    "mtime": 1784510241.7985606,
+    "ast_hash": "a010d026614bb4ff6d4f34bcdca085f2",
+    "semantic_hash": ""
+  },
+  "src/modules/inventario/repository/bien_instancia.repository.js": {
+    "mtime": 1784510241.7995658,
+    "ast_hash": "81aaf8bfb3044b96f1dd9d1d850ae581",
+    "semantic_hash": ""
+  },
+  "src/modules/inventario/repository/bien_lote.repository.js": {
+    "mtime": 1784510241.7995658,
+    "ast_hash": "cbd0de873ab7a7da039bf1aa3a4d3d3a",
+    "semantic_hash": ""
+  },
+  "src/modules/inventario/repository/movimiento_detalle.repository.js": {
+    "mtime": 1784510241.7995658,
+    "ast_hash": "f085114d2706cc67ea9eecdcfc737d74",
+    "semantic_hash": ""
+  },
+  "src/modules/inventario/router/bien.router.js": {
+    "mtime": 1784510241.8009531,
+    "ast_hash": "2b3ea28629c6eaa6a794155ae0b69952",
+    "semantic_hash": ""
+  },
+  "src/modules/inventario/router/bien_instancia.router.js": {
+    "mtime": 1784510241.8019683,
+    "ast_hash": "24cf4bf25635d077ec347a933c1ec97e",
+    "semantic_hash": ""
+  },
+  "src/modules/inventario/router/bien_lote.router.js": {
+    "mtime": 1784510241.803123,
+    "ast_hash": "c375a0905fd947279c73814cfb8f5718",
+    "semantic_hash": ""
+  },
+  "src/modules/inventario/router/movimiento_detalle.router.js": {
+    "mtime": 1784510241.803123,
+    "ast_hash": "52bda6b4bdf086757f94a8d075a276d4",
+    "semantic_hash": ""
+  },
+  "src/modules/inventario/schemas/bien.schema.js": {
+    "mtime": 1784510241.8041244,
+    "ast_hash": "8dbf107ce83c12ccf4d6c4c20811b966",
+    "semantic_hash": ""
+  },
+  "src/modules/inventario/schemas/bien_instancia.schema.js": {
+    "mtime": 1784510241.8041244,
+    "ast_hash": "d96d440503f0348f0f433d47ebfbe90c",
+    "semantic_hash": ""
+  },
+  "src/modules/inventario/schemas/bien_lote.schema.js": {
+    "mtime": 1784510241.8051326,
+    "ast_hash": "79bfa3aad3820d8346dc97b770092973",
+    "semantic_hash": ""
+  },
+  "src/modules/inventario/schemas/index.schemas.js": {
+    "mtime": 1784510241.8051326,
+    "ast_hash": "e63542c442390bbb11cae48e14fad509",
+    "semantic_hash": ""
+  },
+  "src/modules/inventario/schemas/movimiento_detalle.schema.js": {
+    "mtime": 1784510241.806132,
+    "ast_hash": "c562d85681e878d9040bef9fe8e36606",
+    "semantic_hash": ""
+  },
+  "src/modules/inventario/service/bien.service.js": {
+    "mtime": 1784510241.806132,
+    "ast_hash": "ef9dcf349b2fd4e09c88cdc5e1a08f08",
+    "semantic_hash": ""
+  },
+  "src/modules/inventario/service/bien_instancia.service.js": {
+    "mtime": 1784510241.8071318,
+    "ast_hash": "8b31de193134ffee904bbd4752f2a6e6",
+    "semantic_hash": ""
+  },
+  "src/modules/inventario/service/bien_lote.service.js": {
+    "mtime": 1784510241.8071318,
+    "ast_hash": "f69bdb378ef2356a792122f00088f1ce",
+    "semantic_hash": ""
+  },
+  "src/modules/inventario/service/movimiento_detalle.service.js": {
+    "mtime": 1784510241.8071318,
+    "ast_hash": "948979db86b6ed09794297c87fd9050b",
+    "semantic_hash": ""
+  },
+  "src/modules/persona/controller/estudiante_padre.controller.js": {
+    "mtime": 1784510241.80864,
+    "ast_hash": "54dd6c18441f91033623f04e10f70b25",
+    "semantic_hash": ""
+  },
+  "src/modules/persona/controller/persona.controller.js": {
+    "mtime": 1784510241.8096485,
+    "ast_hash": "e53c34dc65dc794e0c2f37a80cd20c43",
+    "semantic_hash": ""
+  },
+  "src/modules/persona/controller/persona_estudiante.controller.js": {
+    "mtime": 1784510241.8106484,
+    "ast_hash": "73cece6628c1182612e13cd583e190cc",
+    "semantic_hash": ""
+  },
+  "src/modules/persona/controller/persona_padre.controller.js": {
+    "mtime": 1784510241.8106484,
+    "ast_hash": "1ec7e5cf0d218d83fb09ebe385bb0027",
+    "semantic_hash": ""
+  },
+  "src/modules/persona/controller/persona_tutor.controller.js": {
+    "mtime": 1784510241.8121545,
+    "ast_hash": "d3f7003d16e7ecd2a510c6e5f9f74327",
+    "semantic_hash": ""
+  },
+  "src/modules/persona/controller/persona_usuario.controller.js": {
+    "mtime": 1784510241.8121545,
+    "ast_hash": "2c5ea7f475fac918e103f9f0c08d7951",
+    "semantic_hash": ""
+  },
+  "src/modules/persona/controller/proveedor.controller.js": {
+    "mtime": 1784510241.8131618,
+    "ast_hash": "19764fb952bf977eabaf911e89ed7a72",
+    "semantic_hash": ""
+  },
+  "src/modules/persona/controller/unidad_educativa.controller.js": {
+    "mtime": 1784510241.8131618,
+    "ast_hash": "930846f5369dc59b10ffaf938c0e2cd0",
+    "semantic_hash": ""
+  },
+  "src/modules/persona/models/estudiante_padre.model.js": {
+    "mtime": 1784510241.8141623,
+    "ast_hash": "4faa48a70d532c7f363d122554f01ca4",
+    "semantic_hash": ""
+  },
+  "src/modules/persona/models/persona.model.js": {
+    "mtime": 1784510241.8141623,
+    "ast_hash": "a2e8fc8d9c0d8a875837e3f44b2db129",
+    "semantic_hash": ""
+  },
+  "src/modules/persona/models/persona_estudiante.model.js": {
+    "mtime": 1784510241.8151681,
+    "ast_hash": "6d65b243d4b41e4c05a21a6c222bd027",
+    "semantic_hash": ""
+  },
+  "src/modules/persona/models/persona_padre.model.js": {
+    "mtime": 1784510241.8161688,
+    "ast_hash": "0d788d6a4ca42470c545aa9f2095ea09",
+    "semantic_hash": ""
+  },
+  "src/modules/persona/models/persona_tutor.model.js": {
+    "mtime": 1784510241.8168063,
+    "ast_hash": "f08ec68450c1042bd44e5bc25044bab9",
+    "semantic_hash": ""
+  },
+  "src/modules/persona/models/persona_usuario.model.js": {
+    "mtime": 1784510241.8168063,
+    "ast_hash": "0123a3b2a9c4709253023b506f1bc3fd",
+    "semantic_hash": ""
+  },
+  "src/modules/persona/models/proveedor.model.js": {
+    "mtime": 1784510241.8178132,
+    "ast_hash": "6c1a94a525805f5fedaec5ef4771a6e9",
+    "semantic_hash": ""
+  },
+  "src/modules/persona/models/unidad_educativa.model.js": {
+    "mtime": 1784510241.8178132,
+    "ast_hash": "3c962174cbf6001eafd319aa78a88ed9",
+    "semantic_hash": ""
+  },
+  "src/modules/persona/persona.router.js": {
+    "mtime": 1784510241.8178132,
+    "ast_hash": "cf24a4c438c952fc2b54773a0a16db78",
+    "semantic_hash": ""
+  },
+  "src/modules/persona/repository/estudiante_padre.repository.js": {
+    "mtime": 1784510241.8193183,
+    "ast_hash": "f8504d2f57bd7e944b1fbf9c3ff42b51",
+    "semantic_hash": ""
+  },
+  "src/modules/persona/repository/persona.repository.js": {
+    "mtime": 1784510241.8193183,
+    "ast_hash": "c70b4be51fa076c3572681ddb5ac0171",
+    "semantic_hash": ""
+  },
+  "src/modules/persona/repository/persona_estudiante.repository.js": {
+    "mtime": 1784510241.8193183,
+    "ast_hash": "80008f355b3c141d76830f088143c405",
+    "semantic_hash": ""
+  },
+  "src/modules/persona/repository/persona_padre.repository.js": {
+    "mtime": 1784510241.8203237,
+    "ast_hash": "c8e4ebdc87739a1bd7e598aeeb802108",
+    "semantic_hash": ""
+  },
+  "src/modules/persona/repository/persona_tutor.repository.js": {
+    "mtime": 1784510241.8203237,
+    "ast_hash": "c4fd76eb2acdbc931b30b89d825e4228",
+    "semantic_hash": ""
+  },
+  "src/modules/persona/repository/persona_usuario.repository.js": {
+    "mtime": 1784510241.8203237,
+    "ast_hash": "b0ea2ae4001d4ee03f155cd8fa71f855",
+    "semantic_hash": ""
+  },
+  "src/modules/persona/repository/proveedor.repository.js": {
+    "mtime": 1784510241.821324,
+    "ast_hash": "e4972208211363c4354617c83abec79c",
+    "semantic_hash": ""
+  },
+  "src/modules/persona/repository/unidad_educativa.repository.js": {
+    "mtime": 1784510241.821324,
+    "ast_hash": "7a4ee483745ed2cd5afbd5d6bf235792",
+    "semantic_hash": ""
+  },
+  "src/modules/persona/router/estudiante_padre.router.js": {
+    "mtime": 1784510241.8223243,
+    "ast_hash": "4a49d60d6041699e78d977737a0135ee",
+    "semantic_hash": ""
+  },
+  "src/modules/persona/router/persona.router.js": {
+    "mtime": 1784510241.8223243,
+    "ast_hash": "c5c4fd2f96b52914fe339dc772d60e00",
+    "semantic_hash": ""
+  },
+  "src/modules/persona/router/persona_estudiante.router.js": {
+    "mtime": 1784510241.8228283,
+    "ast_hash": "d438abddedcbc329b91b94a9c284cd61",
+    "semantic_hash": ""
+  },
+  "src/modules/persona/router/persona_padre.router.js": {
+    "mtime": 1784510241.8228283,
+    "ast_hash": "836580467d1df8d1e81c61b5fc7ca158",
+    "semantic_hash": ""
+  },
+  "src/modules/persona/router/persona_tutor.router.js": {
+    "mtime": 1784510241.8238347,
+    "ast_hash": "418c448132639e6c0ddb7c0cd2f8b44b",
+    "semantic_hash": ""
+  },
+  "src/modules/persona/router/persona_usuario.router.js": {
+    "mtime": 1784510241.8238347,
+    "ast_hash": "a9132b4e695d022f1026a73b24cec75a",
+    "semantic_hash": ""
+  },
+  "src/modules/persona/router/proveedor.router.js": {
+    "mtime": 1784510241.8238347,
+    "ast_hash": "c95e97d4f9ea979df145c52db912e145",
+    "semantic_hash": ""
+  },
+  "src/modules/persona/router/unidad_educativa.router.js": {
+    "mtime": 1784510241.824839,
+    "ast_hash": "e93527ba74dce5a655c769e3e8fdd9b5",
+    "semantic_hash": ""
+  },
+  "src/modules/persona/schemas/estudiante_padre.schema.js": {
+    "mtime": 1784510241.8258407,
+    "ast_hash": "1aa630cc9fc682d111933411e35490e5",
+    "semantic_hash": ""
+  },
+  "src/modules/persona/schemas/index.schemas.js": {
+    "mtime": 1784510241.8258407,
+    "ast_hash": "a8f5d8029e73d2db1e7e3dceca0107e3",
+    "semantic_hash": ""
+  },
+  "src/modules/persona/schemas/persona.schema.js": {
+    "mtime": 1784510241.8268402,
+    "ast_hash": "6d98e92613091c6594c614c7feb68eaf",
+    "semantic_hash": ""
+  },
+  "src/modules/persona/schemas/persona_estudiante.schema.js": {
+    "mtime": 1784510241.8268402,
+    "ast_hash": "9da102248fc287faf2bc9d4d5a51a209",
+    "semantic_hash": ""
+  },
+  "src/modules/persona/schemas/persona_padre.schema.js": {
+    "mtime": 1784510241.8268402,
+    "ast_hash": "9ea2832ed529b18146b3982b7ea9a9da",
+    "semantic_hash": ""
+  },
+  "src/modules/persona/schemas/persona_tutor.schema.js": {
+    "mtime": 1784510241.8278415,
+    "ast_hash": "43f32a4438fad3427e51649baf63e869",
+    "semantic_hash": ""
+  },
+  "src/modules/persona/schemas/persona_usuario.schema.js": {
+    "mtime": 1784510241.8278415,
+    "ast_hash": "72477713e3f2699550ff5b52c10b557a",
+    "semantic_hash": ""
+  },
+  "src/modules/persona/schemas/proveedor.schema.js": {
+    "mtime": 1784510241.8278415,
+    "ast_hash": "967fd0f139d200013ba6a920ed24cdb0",
+    "semantic_hash": ""
+  },
+  "src/modules/persona/schemas/unidad_educativa.schema.js": {
+    "mtime": 1784510241.8278415,
+    "ast_hash": "6382236ba2227eeabf2f40e8ffac5abc",
+    "semantic_hash": ""
+  },
+  "src/modules/persona/service/estudiante_padre.service.js": {
+    "mtime": 1784510241.8293486,
+    "ast_hash": "e76448ce2d540ae4f56178f3950c5bc8",
+    "semantic_hash": ""
+  },
+  "src/modules/persona/service/persona.service.js": {
+    "mtime": 1784510241.8303564,
+    "ast_hash": "9a14094e2035dab628446169ea36e91f",
+    "semantic_hash": ""
+  },
+  "src/modules/persona/service/persona_estudiante.service.js": {
+    "mtime": 1784510241.8303564,
+    "ast_hash": "7bf1c7738eaeea648d2877c906cb23de",
+    "semantic_hash": ""
+  },
+  "src/modules/persona/service/persona_padre.service.js": {
+    "mtime": 1784510241.8313558,
+    "ast_hash": "f5a3ac486b14a33246b69e4e38515620",
+    "semantic_hash": ""
+  },
+  "src/modules/persona/service/persona_tutor.service.js": {
+    "mtime": 1784510241.8313558,
+    "ast_hash": "dbcefeb3ab50dac2986615f39dc6c36a",
+    "semantic_hash": ""
+  },
+  "src/modules/persona/service/persona_usuario.service.js": {
+    "mtime": 1784510241.832355,
+    "ast_hash": "cbeb8b07e372402120293b5ecac40064",
+    "semantic_hash": ""
+  },
+  "src/modules/persona/service/proveedor.service.js": {
+    "mtime": 1784510241.832355,
+    "ast_hash": "3049509796b93ec16fa716d4b472ea31",
+    "semantic_hash": ""
+  },
+  "src/modules/persona/service/unidad_educativa.service.js": {
+    "mtime": 1784510241.8328595,
+    "ast_hash": "643eefcb0f7ab99a26f25b3215a2397d",
+    "semantic_hash": ""
+  },
+  "src/modules/personas/personas-lifecycle.service.ts": {
+    "mtime": 1783198396.8354685,
+    "ast_hash": "8feadc0f3b4960069917896fe64cbb7d",
+    "semantic_hash": ""
+  },
+  "src/modules/personas/personas.controller.ts": {
+    "mtime": 1783198396.8364656,
+    "ast_hash": "0430752ba684fb3c2b18b5031d60c043",
+    "semantic_hash": ""
+  },
+  "src/modules/personas/personas.module.ts": {
+    "mtime": 1783198396.8364656,
+    "ast_hash": "d9a00257a5a22110f4c3219d2930a531",
+    "semantic_hash": ""
+  },
+  "src/modules/reporteria/reporteria-contabilidad.service.ts": {
+    "mtime": 1783198396.8374658,
+    "ast_hash": "c03db30ae9c200dc115074ed3e10662e",
+    "semantic_hash": ""
+  },
+  "src/modules/reporteria/reporteria.controller.ts": {
+    "mtime": 1783198396.8384647,
+    "ast_hash": "c6e5bc910716a61b4b55f006b98ff3b8",
+    "semantic_hash": ""
+  },
+  "src/modules/reporteria/reporteria.module.ts": {
+    "mtime": 1783198396.8394656,
+    "ast_hash": "743fb23681c04c80f5d54cfe52ff2cab",
+    "semantic_hash": ""
+  },
+  "src/modules/resource-registry.ts": {
+    "mtime": 1783198396.8404658,
+    "ast_hash": "12c623c1b3527784fdd11fc395c70194",
+    "semantic_hash": ""
+  },
+  "src/modules/seguridad/controller/action_log.controller.js": {
+    "mtime": 1784510241.8338647,
+    "ast_hash": "e57769c09af105d5f0a3402f6c7ceca0",
+    "semantic_hash": ""
+  },
+  "src/modules/seguridad/controller/permiso.controller.js": {
+    "mtime": 1784510241.8338647,
+    "ast_hash": "1e66596ff58265be6cc940e522b85eb6",
+    "semantic_hash": ""
+  },
+  "src/modules/seguridad/controller/rol.controller.js": {
+    "mtime": 1784510241.8348641,
+    "ast_hash": "4c852e3c9bfd612bb8433eca851fecee",
+    "semantic_hash": ""
+  },
+  "src/modules/seguridad/controller/rol_permiso.controller.js": {
+    "mtime": 1784510241.8348641,
+    "ast_hash": "cd898cebd10e223325708ae3a747d0c8",
+    "semantic_hash": ""
+  },
+  "src/modules/seguridad/controller/sesion.controller.js": {
+    "mtime": 1784510241.8358665,
+    "ast_hash": "825fb862dde7445cd4cf10782377c91c",
+    "semantic_hash": ""
+  },
+  "src/modules/seguridad/controller/usuario_permiso.controller.js": {
+    "mtime": 1784510241.8358665,
+    "ast_hash": "54c7e6ef36376bc51609d4c1502df195",
+    "semantic_hash": ""
+  },
+  "src/modules/seguridad/controller/usuario_rol.controller.js": {
+    "mtime": 1784510241.8358665,
+    "ast_hash": "c41dc930e0210fb637f06e5273ab4522",
+    "semantic_hash": ""
+  },
+  "src/modules/seguridad/models/action_log.model.js": {
+    "mtime": 1784510241.8368669,
+    "ast_hash": "6ef3d8f7dd5da5a48b16436871ac2f43",
+    "semantic_hash": ""
+  },
+  "src/modules/seguridad/models/permiso.model.js": {
+    "mtime": 1784510241.8368669,
+    "ast_hash": "00ad18d7d4796d5ebe1096c7818daa1b",
+    "semantic_hash": ""
+  },
+  "src/modules/seguridad/models/rol.model.js": {
+    "mtime": 1784510241.8378644,
+    "ast_hash": "5e57f9908867b2e3c432ab111ed099d8",
+    "semantic_hash": ""
+  },
+  "src/modules/seguridad/models/rol_permiso.model.js": {
+    "mtime": 1784510241.8378644,
+    "ast_hash": "85cf3f94a5bd206a21d6bbda56353dfe",
+    "semantic_hash": ""
+  },
+  "src/modules/seguridad/models/sesion.model.js": {
+    "mtime": 1784510241.838866,
+    "ast_hash": "f76bac54e4e85ad377520fba3c6bedaf",
+    "semantic_hash": ""
+  },
+  "src/modules/seguridad/models/token.model.js": {
+    "mtime": 1784510241.838866,
+    "ast_hash": "c1a8994c01fe9aed694b0795000ca655",
+    "semantic_hash": ""
+  },
+  "src/modules/seguridad/models/usuario_permiso.model.js": {
+    "mtime": 1784510241.838866,
+    "ast_hash": "02ca17e678aa09dc4ee16d1810b62e23",
+    "semantic_hash": ""
+  },
+  "src/modules/seguridad/models/usuario_rol.model.js": {
+    "mtime": 1784510241.8403692,
+    "ast_hash": "cd48f6d1c20a706334f260149a3f4da5",
+    "semantic_hash": ""
+  },
+  "src/modules/seguridad/repository/action_log.repository.js": {
+    "mtime": 1784510241.8403692,
+    "ast_hash": "b8dbdf041e039ecdd26a2d7dae4c9b3b",
+    "semantic_hash": ""
+  },
+  "src/modules/seguridad/repository/permiso.repository.js": {
+    "mtime": 1784510241.8413737,
+    "ast_hash": "62e907092965990d8233b4a655bbc5db",
+    "semantic_hash": ""
+  },
+  "src/modules/seguridad/repository/rol.repository.js": {
+    "mtime": 1784510241.8413737,
+    "ast_hash": "aa886deeaecec9c4751070494c13662c",
+    "semantic_hash": ""
+  },
+  "src/modules/seguridad/repository/rol_permiso.repository.js": {
+    "mtime": 1784510241.8413737,
+    "ast_hash": "85a4a02c27e12e413bee45161483f088",
+    "semantic_hash": ""
+  },
+  "src/modules/seguridad/repository/sesion.repository.js": {
+    "mtime": 1784510241.842376,
+    "ast_hash": "a2015bbc4413a9a79ee2be32f8c994a9",
+    "semantic_hash": ""
+  },
+  "src/modules/seguridad/repository/usuario_permiso.repository.js": {
+    "mtime": 1784510241.842376,
+    "ast_hash": "45dce81cd24fdcf1e8f15f4fa084b841",
+    "semantic_hash": ""
+  },
+  "src/modules/seguridad/repository/usuario_rol.repository.js": {
+    "mtime": 1784510241.842376,
+    "ast_hash": "a3d05343e9f28dd97e4ad2fec77115b4",
+    "semantic_hash": ""
+  },
+  "src/modules/seguridad/router/action_log.router.js": {
+    "mtime": 1784510241.8436275,
+    "ast_hash": "309bad72bd4d8c520a039469944ab594",
+    "semantic_hash": ""
+  },
+  "src/modules/seguridad/router/permiso.router.js": {
+    "mtime": 1784510241.8436275,
+    "ast_hash": "eb90e18d9fcfd966f08ab99660fe1127",
+    "semantic_hash": ""
+  },
+  "src/modules/seguridad/router/rol.router.js": {
+    "mtime": 1784510241.8446317,
+    "ast_hash": "29de3e66417af7c19362c52ea3b57b6b",
+    "semantic_hash": ""
+  },
+  "src/modules/seguridad/router/rol_permiso.router.js": {
+    "mtime": 1784510241.8456295,
+    "ast_hash": "8c1f52abcef2fab88847c8597e085fb1",
+    "semantic_hash": ""
+  },
+  "src/modules/seguridad/router/sesion.router.js": {
+    "mtime": 1784510241.8456295,
+    "ast_hash": "6b204be4eaa624ec4ea4cbeebc6a940b",
+    "semantic_hash": ""
+  },
+  "src/modules/seguridad/router/usuario_permiso.router.js": {
+    "mtime": 1784510241.8466294,
+    "ast_hash": "14b814b9f256daf21b00f1efdb58e4de",
+    "semantic_hash": ""
+  },
+  "src/modules/seguridad/router/usuario_rol.router.js": {
+    "mtime": 1784510241.8466294,
+    "ast_hash": "9620f4dd87b0c450df318a6ae4b9a924",
+    "semantic_hash": ""
+  },
+  "src/modules/seguridad/schemas/action_log.schema.js": {
+    "mtime": 1784510241.8472872,
+    "ast_hash": "75711d90c5b0b67281f843fff0341dc5",
+    "semantic_hash": ""
+  },
+  "src/modules/seguridad/schemas/index.schemas.js": {
+    "mtime": 1784510241.8472872,
+    "ast_hash": "2c0024f8175363b19728fa6598c90a11",
+    "semantic_hash": ""
+  },
+  "src/modules/seguridad/schemas/permiso.schema.js": {
+    "mtime": 1784510241.8482928,
+    "ast_hash": "d5a58172a164be95fed67806e5222509",
+    "semantic_hash": ""
+  },
+  "src/modules/seguridad/schemas/rol.schema.js": {
+    "mtime": 1784510241.8482928,
+    "ast_hash": "05624587b7c50b19fca617bea9dad482",
+    "semantic_hash": ""
+  },
+  "src/modules/seguridad/schemas/rol_permiso.schema.js": {
+    "mtime": 1784510241.8492935,
+    "ast_hash": "c3a8f4de2d0c8fe78177c12279313eb4",
+    "semantic_hash": ""
+  },
+  "src/modules/seguridad/schemas/sesion.schema.js": {
+    "mtime": 1784510241.8492935,
+    "ast_hash": "fa6b843e8e288f0956c2be32211dbe34",
+    "semantic_hash": ""
+  },
+  "src/modules/seguridad/schemas/usuario_permiso.schema.js": {
+    "mtime": 1784510241.8502958,
+    "ast_hash": "f24533737f918b12ea7dc2c51dbdbac4",
+    "semantic_hash": ""
+  },
+  "src/modules/seguridad/schemas/usuario_rol.schema.js": {
+    "mtime": 1784510241.8508024,
+    "ast_hash": "7b4d1e47779d750d0ca304195cb8b35d",
+    "semantic_hash": ""
+  },
+  "src/modules/seguridad/seguridad.controller.ts": {
+    "mtime": 1783198396.8414657,
+    "ast_hash": "f16ebad7af5254848bb0ed529f6bd76a",
+    "semantic_hash": ""
+  },
+  "src/modules/seguridad/seguridad.module.ts": {
+    "mtime": 1783198396.8414657,
+    "ast_hash": "8d111fed5f9fc20f042beae2fc86b989",
+    "semantic_hash": ""
+  },
+  "src/modules/seguridad/seguridad.router.js": {
+    "mtime": 1784510241.8508024,
+    "ast_hash": "6a9b5f7872c889873d0043e27e9d644c",
+    "semantic_hash": ""
+  },
+  "src/modules/seguridad/service/action_log.service.js": {
+    "mtime": 1784510241.8508024,
+    "ast_hash": "0942e8108cce304854b53a9e2e1dd0bb",
+    "semantic_hash": ""
+  },
+  "src/modules/seguridad/service/permiso.service.js": {
+    "mtime": 1784510241.8508024,
+    "ast_hash": "578ae7825a19623f6bf3a0270ab5e29c",
+    "semantic_hash": ""
+  },
+  "src/modules/seguridad/service/rol.service.js": {
+    "mtime": 1784510241.8523078,
+    "ast_hash": "0d9e5556454a88420a1521a10e292170",
+    "semantic_hash": ""
+  },
+  "src/modules/seguridad/service/rol_permiso.service.js": {
+    "mtime": 1784510241.8523078,
+    "ast_hash": "2cdb3f78fa78327f890f4adf6519c7e9",
+    "semantic_hash": ""
+  },
+  "src/modules/seguridad/service/sesion.service.js": {
+    "mtime": 1784510241.853315,
+    "ast_hash": "d85ba8b1606a7db3d5a91599aaf9cab1",
+    "semantic_hash": ""
+  },
+  "src/modules/seguridad/service/usuario_permiso.service.js": {
+    "mtime": 1784510241.853315,
+    "ast_hash": "2cead7d85692ac222adc6f8a4741f176",
+    "semantic_hash": ""
+  },
+  "src/modules/seguridad/service/usuario_rol.service.js": {
+    "mtime": 1784510241.853315,
+    "ast_hash": "6ba50c38615cbdbb19136c807ef925fd",
+    "semantic_hash": ""
+  },
+  "src/modules/servicios_educativos/controller/asistencia_clase_curso.controller.js": {
+    "mtime": 1784510241.8543208,
+    "ast_hash": "d6d098000777f7015ca7017df227de9b",
+    "semantic_hash": ""
+  },
+  "src/modules/servicios_educativos/controller/clase_curso.controller.js": {
+    "mtime": 1784510241.8543208,
+    "ast_hash": "be6fde295c865ccc36ab6aad331145db",
+    "semantic_hash": ""
+  },
+  "src/modules/servicios_educativos/controller/clase_por_hora.controller.js": {
+    "mtime": 1784510241.8553193,
+    "ast_hash": "93e4f42e085c1f40ba2e848797119424",
+    "semantic_hash": ""
+  },
+  "src/modules/servicios_educativos/controller/curso_version.controller.js": {
+    "mtime": 1784510241.8553193,
+    "ast_hash": "f22bed4f67d7fbba873c97990641e134",
+    "semantic_hash": ""
+  },
+  "src/modules/servicios_educativos/controller/horarios.controller.js": {
+    "mtime": 1784510241.8563194,
+    "ast_hash": "981f523ded6ebafa45c9c4063bb57522",
+    "semantic_hash": ""
+  },
+  "src/modules/servicios_educativos/controller/materia_tree.controller.js": {
+    "mtime": 1784510241.8563194,
+    "ast_hash": "0709da96ca8209e0d164090f15e923a1",
+    "semantic_hash": ""
+  },
+  "src/modules/servicios_educativos/controller/paquetes_producto_educativo.controller.js": {
+    "mtime": 1784510241.8563194,
+    "ast_hash": "8832c2129f53d45e413ab85b06e656c9",
+    "semantic_hash": ""
+  },
+  "src/modules/servicios_educativos/controller/producto_educativo.controller.js": {
+    "mtime": 1784510241.857319,
+    "ast_hash": "4141a8a65b1736a094443dd4efd82abc",
+    "semantic_hash": ""
+  },
+  "src/modules/servicios_educativos/models/asistencia_clase_curso.model.js": {
+    "mtime": 1784510241.857319,
+    "ast_hash": "2f71dd593ee5b63c021aec2aab1381ae",
+    "semantic_hash": ""
+  },
+  "src/modules/servicios_educativos/models/clase_curso.model.js": {
+    "mtime": 1784510241.858319,
+    "ast_hash": "e755fcad0763b46374c9845131482fa8",
+    "semantic_hash": ""
+  },
+  "src/modules/servicios_educativos/models/clase_por_hora.model.js": {
+    "mtime": 1784510241.8588903,
+    "ast_hash": "45070400ae2e02a500e8303bc12f4b59",
+    "semantic_hash": ""
+  },
+  "src/modules/servicios_educativos/models/curso_version.model.js": {
+    "mtime": 1784510241.8593967,
+    "ast_hash": "98ecd09598cbfb656d6b5d567725c17f",
+    "semantic_hash": ""
+  },
+  "src/modules/servicios_educativos/models/horarios.model.js": {
+    "mtime": 1784510241.8599212,
+    "ast_hash": "4ce4c20f69c123aa83ab6528cc70b035",
+    "semantic_hash": ""
+  },
+  "src/modules/servicios_educativos/models/materia_tree.model.js": {
+    "mtime": 1784510241.860441,
+    "ast_hash": "8a783b11b6a075fd7e28cf36e5ec3787",
+    "semantic_hash": ""
+  },
+  "src/modules/servicios_educativos/models/paquetes_producto_educativo.model.js": {
+    "mtime": 1784510241.860972,
+    "ast_hash": "826925494d83fc17b98f751a65e605a7",
+    "semantic_hash": ""
+  },
+  "src/modules/servicios_educativos/models/producto_educativo.model.js": {
+    "mtime": 1784510241.8620076,
+    "ast_hash": "d1e5d7fa915f3f7c997def3ce2e122cd",
+    "semantic_hash": ""
+  },
+  "src/modules/servicios_educativos/repository/asistencia_clase_curso.repository.js": {
+    "mtime": 1784510241.8620076,
+    "ast_hash": "5f4b3ae11d3e77e7a93e3f24945eed77",
+    "semantic_hash": ""
+  },
+  "src/modules/servicios_educativos/repository/clase_curso.repository.js": {
+    "mtime": 1784510241.8627212,
+    "ast_hash": "6a5392cae666d37538d6204b0623701c",
+    "semantic_hash": ""
+  },
+  "src/modules/servicios_educativos/repository/clase_por_hora.repository.js": {
+    "mtime": 1784510241.863251,
+    "ast_hash": "1360435e69121c6188a9b681dbe01d87",
+    "semantic_hash": ""
+  },
+  "src/modules/servicios_educativos/repository/curso_version.repository.js": {
+    "mtime": 1784510241.863825,
+    "ast_hash": "f3510677834de77dff3dc5c93f5ae87f",
+    "semantic_hash": ""
+  },
+  "src/modules/servicios_educativos/repository/horarios.repository.js": {
+    "mtime": 1784510241.863825,
+    "ast_hash": "9a808096d867ac1f09a97bc109881f37",
+    "semantic_hash": ""
+  },
+  "src/modules/servicios_educativos/repository/materia_tree.repository.js": {
+    "mtime": 1784510241.8643427,
+    "ast_hash": "63401878a94a9875caabe7f48d79df3a",
+    "semantic_hash": ""
+  },
+  "src/modules/servicios_educativos/repository/paquetes_producto_educativo.repository.js": {
+    "mtime": 1784510241.8648713,
+    "ast_hash": "eb92c87373922d60120ecddaff7a5a27",
+    "semantic_hash": ""
+  },
+  "src/modules/servicios_educativos/repository/producto_educativo.repository.js": {
+    "mtime": 1784510241.8654,
+    "ast_hash": "4831a678b76a9669b40e776c8281ab7c",
+    "semantic_hash": ""
+  },
+  "src/modules/servicios_educativos/router/asistencia_clase_curso.router.js": {
+    "mtime": 1784510241.8660238,
+    "ast_hash": "f7a96200f16c68ccb02fe2137f607600",
+    "semantic_hash": ""
+  },
+  "src/modules/servicios_educativos/router/clase_curso.router.js": {
+    "mtime": 1784510241.8665442,
+    "ast_hash": "31196f8bd55f05537a1373028f85eb9c",
+    "semantic_hash": ""
+  },
+  "src/modules/servicios_educativos/router/clase_por_hora.router.js": {
+    "mtime": 1784510241.8681846,
+    "ast_hash": "02bb2d753781484ca8a618d821881dd8",
+    "semantic_hash": ""
+  },
+  "src/modules/servicios_educativos/router/curso_version.router.js": {
+    "mtime": 1784510241.8681846,
+    "ast_hash": "1f98832392db86006ef6cad1f0de048c",
+    "semantic_hash": ""
+  },
+  "src/modules/servicios_educativos/router/horarios.router.js": {
+    "mtime": 1784510241.868713,
+    "ast_hash": "2fd5b3c941ea751765f173dbb7cb7e3a",
+    "semantic_hash": ""
+  },
+  "src/modules/servicios_educativos/router/materia_tree.router.js": {
+    "mtime": 1784510241.86977,
+    "ast_hash": "c2aaecedbe2562219f34961fa8d5abe9",
+    "semantic_hash": ""
+  },
+  "src/modules/servicios_educativos/router/paquetes_producto_educativo.router.js": {
+    "mtime": 1784510241.86977,
+    "ast_hash": "db93bc2e6f1833a0d7be67d52803c281",
+    "semantic_hash": ""
+  },
+  "src/modules/servicios_educativos/router/producto_educativo.router.js": {
+    "mtime": 1784510241.8702886,
+    "ast_hash": "1a896e126dd6395f6b6e7a1b328e504a",
+    "semantic_hash": ""
+  },
+  "src/modules/servicios_educativos/schemas/asistencia_clase_curso.schema.js": {
+    "mtime": 1784510241.8713436,
+    "ast_hash": "f3f4cca825719d5c3b0ba4ccf693023f",
+    "semantic_hash": ""
+  },
+  "src/modules/servicios_educativos/schemas/clase_curso.schema.js": {
+    "mtime": 1784510241.871873,
+    "ast_hash": "33cc3e38d6f3c8142d24859c94a55163",
+    "semantic_hash": ""
+  },
+  "src/modules/servicios_educativos/schemas/clase_por_hora.schema.js": {
+    "mtime": 1784510241.8723907,
+    "ast_hash": "550d5e655690dcc2335d8750ae03e5b2",
+    "semantic_hash": ""
+  },
+  "src/modules/servicios_educativos/schemas/curso_version.schema.js": {
+    "mtime": 1784510241.8729188,
+    "ast_hash": "99d3ada93ca544c69cf207fd1a2a8f8c",
+    "semantic_hash": ""
+  },
+  "src/modules/servicios_educativos/schemas/horarios.schema.js": {
+    "mtime": 1784510241.8734374,
+    "ast_hash": "9cc88391d82dfa3a215d503c5e7a557c",
+    "semantic_hash": ""
+  },
+  "src/modules/servicios_educativos/schemas/index.schemas.js": {
+    "mtime": 1784510241.873957,
+    "ast_hash": "acce5cd6ceb2b9551209d49e8b8d5fe2",
+    "semantic_hash": ""
+  },
+  "src/modules/servicios_educativos/schemas/materia_tree.schema.js": {
+    "mtime": 1784510241.873957,
+    "ast_hash": "97eb79325aeab8ec2672aab81aff2652",
+    "semantic_hash": ""
+  },
+  "src/modules/servicios_educativos/schemas/paquetes_producto_educativo.schema.js": {
+    "mtime": 1784510241.874488,
+    "ast_hash": "9c29abfeedbe8068b09cbe78029da3b9",
+    "semantic_hash": ""
+  },
+  "src/modules/servicios_educativos/schemas/producto_educativo.schema.js": {
+    "mtime": 1784510241.8750093,
+    "ast_hash": "850c53983fe28712afc08fca1e299f1b",
+    "semantic_hash": ""
+  },
+  "src/modules/servicios_educativos/service/asistencia_clase_curso.service.js": {
+    "mtime": 1784510241.8755336,
+    "ast_hash": "01d71f6543bba4051cecac3a31040fb7",
+    "semantic_hash": ""
+  },
+  "src/modules/servicios_educativos/service/clase_curso.service.js": {
+    "mtime": 1784510241.876065,
+    "ast_hash": "d9e8a26dee37b0225820efe6b72586c7",
+    "semantic_hash": ""
+  },
+  "src/modules/servicios_educativos/service/clase_por_hora.service.js": {
+    "mtime": 1784510241.8765924,
+    "ast_hash": "ff879fc05954df315503b7b126c89912",
+    "semantic_hash": ""
+  },
+  "src/modules/servicios_educativos/service/curso_version.service.js": {
+    "mtime": 1784510241.877133,
+    "ast_hash": "51e6c0369fdeb12f0e9f408eb6208394",
+    "semantic_hash": ""
+  },
+  "src/modules/servicios_educativos/service/horarios.service.js": {
+    "mtime": 1784510241.877133,
+    "ast_hash": "5ec1561401e59d44825cbd44c5ea4250",
+    "semantic_hash": ""
+  },
+  "src/modules/servicios_educativos/service/materia_tree.service.js": {
+    "mtime": 1784510241.8777363,
+    "ast_hash": "fd958cbf47460006e56b450fa079f5f1",
+    "semantic_hash": ""
+  },
+  "src/modules/servicios_educativos/service/paquetes_producto_educativo.service.js": {
+    "mtime": 1784510241.8782585,
+    "ast_hash": "62bce279ac2cda9060cd4fb89824fb55",
+    "semantic_hash": ""
+  },
+  "src/modules/servicios_educativos/service/producto_educativo.service.js": {
+    "mtime": 1784510241.8782585,
+    "ast_hash": "bbfdc7c241b33456276171e87f33272e",
+    "semantic_hash": ""
+  },
+  "src/modules/servicios_educativos/servicios_educativos.controller.ts": {
+    "mtime": 1783198396.8424666,
+    "ast_hash": "b7311a3513ba47d49eb0ed3212020eba",
+    "semantic_hash": ""
+  },
+  "src/modules/servicios_educativos/servicios_educativos.module.ts": {
+    "mtime": 1783198396.8434663,
+    "ast_hash": "71fcc9aa0e93738a929a6be640b395ed",
+    "semantic_hash": ""
+  },
+  "src/modules/servicios_educativos/servicios_educativos.router.js": {
+    "mtime": 1784510241.8787816,
+    "ast_hash": "f4fe30aed8ba279c89908837271a3c7b",
+    "semantic_hash": ""
+  },
+  "src/modules/shared-crud/crud.service.ts": {
+    "mtime": 1783198396.8454654,
+    "ast_hash": "1788296bed69b515d334108099f5f3bb",
+    "semantic_hash": ""
+  },
+  "src/modules/shared-crud/shared-crud.module.ts": {
+    "mtime": 1783198396.8454654,
+    "ast_hash": "623cb6d03f3b3282251b0f94e0a530a6",
+    "semantic_hash": ""
+  },
+  "src/modules/societario/controller/clase_titulo.controller.js": {
+    "mtime": 1784510241.8798227,
+    "ast_hash": "ea2527171691d2928d2817c2b57f7386",
+    "semantic_hash": ""
+  },
+  "src/modules/societario/controller/dividendo.controller.js": {
+    "mtime": 1784510241.8798227,
+    "ast_hash": "9447205b1f3edb34b323a42082817c31",
+    "semantic_hash": ""
+  },
+  "src/modules/societario/controller/dividendo_pago.controller.js": {
+    "mtime": 1784510241.880347,
+    "ast_hash": "29fadd68cd0de193c0ce76647b4fa491",
+    "semantic_hash": ""
+  },
+  "src/modules/societario/controller/emision_titulo.controller.js": {
+    "mtime": 1784510241.880871,
+    "ast_hash": "421cfa068974dd1818ba7b8f6a3ce16b",
+    "semantic_hash": ""
+  },
+  "src/modules/societario/controller/tenencia.controller.js": {
+    "mtime": 1784510241.881384,
+    "ast_hash": "8c82a4f2200140c39a18e26bba83fc28",
+    "semantic_hash": ""
+  },
+  "src/modules/societario/controller/titular.controller.js": {
+    "mtime": 1784510241.881384,
+    "ast_hash": "798d538a4bf8a0d61eb03d6543b08360",
+    "semantic_hash": ""
+  },
+  "src/modules/societario/controller/transferencia_titulo.controller.js": {
+    "mtime": 1784510241.8823903,
+    "ast_hash": "1955f1d9ce765cd0d6b8712aa452cb90",
+    "semantic_hash": ""
+  },
+  "src/modules/societario/models/clase_titulo.model.js": {
+    "mtime": 1784510241.8828952,
+    "ast_hash": "e934d4d8f449aac48a732d5367321213",
+    "semantic_hash": ""
+  },
+  "src/modules/societario/models/dividendo.model.js": {
+    "mtime": 1784510241.88342,
+    "ast_hash": "e30a136d1baa2c1f438bb5f810b6b006",
+    "semantic_hash": ""
+  },
+  "src/modules/societario/models/dividendo_pago.model.js": {
+    "mtime": 1784510241.883955,
+    "ast_hash": "016607988aec3cb1f7c3270fdd6005d1",
+    "semantic_hash": ""
+  },
+  "src/modules/societario/models/emision_titulo.model.js": {
+    "mtime": 1784510241.8844852,
+    "ast_hash": "b361287caf3a2304b1f298d8364f70e7",
+    "semantic_hash": ""
+  },
+  "src/modules/societario/models/tenencia.model.js": {
+    "mtime": 1784510241.8850074,
+    "ast_hash": "bcbd7d85d699b40dfbd127a7a4a3ee16",
+    "semantic_hash": ""
+  },
+  "src/modules/societario/models/titular.model.js": {
+    "mtime": 1784510241.8850074,
+    "ast_hash": "28c9d044b3005265fc2ad330dcf0d385",
+    "semantic_hash": ""
+  },
+  "src/modules/societario/models/transferencia_titulo.model.js": {
+    "mtime": 1784510241.8850074,
+    "ast_hash": "b10a5909a65f8fc4137595d13a23e0fb",
+    "semantic_hash": ""
+  },
+  "src/modules/societario/repository/clase_titulo.repository.js": {
+    "mtime": 1784510241.886012,
+    "ast_hash": "1f04d3919a3f1c9ae65f330fd1d64b05",
+    "semantic_hash": ""
+  },
+  "src/modules/societario/repository/dividendo.repository.js": {
+    "mtime": 1784510241.887012,
+    "ast_hash": "abd12eaddd622fd03d641dcc5e9ff448",
+    "semantic_hash": ""
+  },
+  "src/modules/societario/repository/dividendo_pago.repository.js": {
+    "mtime": 1784510241.887012,
+    "ast_hash": "32bebba8d2af1a5207934eb0b49147b9",
+    "semantic_hash": ""
+  },
+  "src/modules/societario/repository/emision_titulo.repository.js": {
+    "mtime": 1784510241.887012,
+    "ast_hash": "42b6edf90eb5b7331368f709c7aa9261",
+    "semantic_hash": ""
+  },
+  "src/modules/societario/repository/tenencia.repository.js": {
+    "mtime": 1784510241.8880115,
+    "ast_hash": "a9558e7efe7fd28fc80cff2f9c0a76a0",
+    "semantic_hash": ""
+  },
+  "src/modules/societario/repository/titular.repository.js": {
+    "mtime": 1784510241.8880115,
+    "ast_hash": "c8fcb478b58d09cd1785c798b10a616b",
+    "semantic_hash": ""
+  },
+  "src/modules/societario/repository/transferencia_titulo.repository.js": {
+    "mtime": 1784510241.8880115,
+    "ast_hash": "064f20c2ac4aae151319335ccb6b13cc",
+    "semantic_hash": ""
+  },
+  "src/modules/societario/router/clase_titulo.router.js": {
+    "mtime": 1784510241.8890119,
+    "ast_hash": "f3513c7be678c94a58b91dcfb9d3c805",
+    "semantic_hash": ""
+  },
+  "src/modules/societario/router/dividendo.router.js": {
+    "mtime": 1784510241.8900142,
+    "ast_hash": "e8365e095b7eac4e939247372e155b54",
+    "semantic_hash": ""
+  },
+  "src/modules/societario/router/dividendo_pago.router.js": {
+    "mtime": 1784510241.8900142,
+    "ast_hash": "62e21d14443d276b08868b3235b45c97",
+    "semantic_hash": ""
+  },
+  "src/modules/societario/router/emision_titulo.router.js": {
+    "mtime": 1784510241.8900142,
+    "ast_hash": "16c8894b94c3293a6795fd2f1f2fde3b",
+    "semantic_hash": ""
+  },
+  "src/modules/societario/router/tenencia.router.js": {
+    "mtime": 1784510241.8900142,
+    "ast_hash": "896efb2243e9fe47b982a3883c2c5da1",
+    "semantic_hash": ""
+  },
+  "src/modules/societario/router/titular.router.js": {
+    "mtime": 1784510241.8915217,
+    "ast_hash": "c4a7b908d3af2634c82d6875db2d19d0",
+    "semantic_hash": ""
+  },
+  "src/modules/societario/router/transferencia_titulo.router.js": {
+    "mtime": 1784510241.8915217,
+    "ast_hash": "d34b5765e7916322ec6d7106a0b4b480",
+    "semantic_hash": ""
+  },
+  "src/modules/societario/schemas/clase_titulo.schema.js": {
+    "mtime": 1784510241.8926365,
+    "ast_hash": "7b09be998e0c79cc09e913c6f7e45689",
+    "semantic_hash": ""
+  },
+  "src/modules/societario/schemas/dividendo.schema.js": {
+    "mtime": 1784510241.8926365,
+    "ast_hash": "9a4517a902e97332c4ee5bca5ca439eb",
+    "semantic_hash": ""
+  },
+  "src/modules/societario/schemas/dividendo_pago.schema.js": {
+    "mtime": 1784510241.8931637,
+    "ast_hash": "08cd52555c75a032d68ea0a858443121",
+    "semantic_hash": ""
+  },
+  "src/modules/societario/schemas/emision_titulo.schema.js": {
+    "mtime": 1784510241.8942115,
+    "ast_hash": "54f9073a05237dc06f937c3b96ae4226",
+    "semantic_hash": ""
+  },
+  "src/modules/societario/schemas/index.schemas.js": {
+    "mtime": 1784510241.8947327,
+    "ast_hash": "e922759d9b8903eeb574fbf01ddaa121",
+    "semantic_hash": ""
+  },
+  "src/modules/societario/schemas/tenencia.schema.js": {
+    "mtime": 1784510241.8947327,
+    "ast_hash": "c5d4d788853100726d17361828d99431",
+    "semantic_hash": ""
+  },
+  "src/modules/societario/schemas/titular.schema.js": {
+    "mtime": 1784510241.8952913,
+    "ast_hash": "7282365351c011708829f76828976883",
+    "semantic_hash": ""
+  },
+  "src/modules/societario/schemas/transferencia_titulo.schema.js": {
+    "mtime": 1784510241.8958116,
+    "ast_hash": "e90b64f386a519a058455dbe7f2944a5",
+    "semantic_hash": ""
+  },
+  "src/modules/societario/service/clase_titulo.service.js": {
+    "mtime": 1784510241.8963377,
+    "ast_hash": "aa35a06328a922d8c9320028cb3456e8",
+    "semantic_hash": ""
+  },
+  "src/modules/societario/service/dividendo.service.js": {
+    "mtime": 1784510241.8968575,
+    "ast_hash": "fe313a13c7ca95bdf341d174d508b7a6",
+    "semantic_hash": ""
+  },
+  "src/modules/societario/service/dividendo_pago.service.js": {
+    "mtime": 1784510241.8973777,
+    "ast_hash": "afa5cc474d0ffd8e1a86a562fe65a851",
+    "semantic_hash": ""
+  },
+  "src/modules/societario/service/emision_titulo.service.js": {
+    "mtime": 1784510241.8984153,
+    "ast_hash": "351f541d7e2a52440a0b818e5422696c",
+    "semantic_hash": ""
+  },
+  "src/modules/societario/service/tenencia.service.js": {
+    "mtime": 1784510241.8989425,
+    "ast_hash": "1c70aed76230329e75e246b999eddeb3",
+    "semantic_hash": ""
+  },
+  "src/modules/societario/service/titular.service.js": {
+    "mtime": 1784510241.8989425,
+    "ast_hash": "88f61ce4aea77cd7f2ff9ce7ab4b00f5",
+    "semantic_hash": ""
+  },
+  "src/modules/societario/service/transferencia_titulo.service.js": {
+    "mtime": 1784510241.8994634,
+    "ast_hash": "7206153b7d1fbad79292fe0945f53f48",
+    "semantic_hash": ""
+  },
+  "src/modules/societario/societario.controller.ts": {
+    "mtime": 1783198396.8464673,
+    "ast_hash": "bbad5d1e6fdeb5750e690b61fe5290a5",
+    "semantic_hash": ""
+  },
+  "src/modules/societario/societario.module.ts": {
+    "mtime": 1783198396.8474677,
+    "ast_hash": "93d36757cde3bcf02fdbd5a70b033e33",
+    "semantic_hash": ""
+  },
+  "src/modules/societario/societario.router.js": {
+    "mtime": 1784510241.899987,
+    "ast_hash": "9436cf1a2a8e12680334bd84eba2f308",
+    "semantic_hash": ""
+  },
+  "src/shared/cache/cacheKeys.js": {
+    "mtime": 1784510241.9010997,
+    "ast_hash": "d71d7beb65c2fc83ff6b04b43a5d158b",
+    "semantic_hash": ""
+  },
+  "src/shared/cache/redis.helper.js": {
+    "mtime": 1784510241.9010997,
+    "ast_hash": "4913cc702d57948537219c0db4ae36c8",
+    "semantic_hash": ""
+  },
+  "src/shared/http/getIPAdress.js": {
+    "mtime": 1784510241.9021466,
+    "ast_hash": "cdb08adede86e6a2e319fa1bba60d237",
+    "semantic_hash": ""
+  },
+  "src/shared/repository/createCrudRepository.js": {
+    "mtime": 1784510241.9026737,
+    "ast_hash": "1b390cefc3a9d1e904333cbbf9831e38",
+    "semantic_hash": ""
+  },
+  "src/shared/service/createCrudService.js": {
+    "mtime": 1784510241.9037693,
+    "ast_hash": "5afb5baad26a9b7d19073d5574bd0a0e",
+    "semantic_hash": ""
+  },
+  "src/shared/utils/emptyResultFromRepo.js": {
+    "mtime": 1784510241.9042983,
+    "ast_hash": "e437f8304dbb64d38da56f79b77d5e62",
+    "semantic_hash": ""
+  },
+  "src/shared/utils/getRequestMeta.js": {
+    "mtime": 1784510241.9048188,
+    "ast_hash": "586415c0b785f5c7d711bf4d5510c3ce",
+    "semantic_hash": ""
+  },
+  "src/shared/utils/getUserId.js": {
+    "mtime": 1784510241.9048188,
+    "ast_hash": "16c10afb60f42a4b5d127f3430cc9fd7",
+    "semantic_hash": ""
+  },
+  "src/shared/utils/removeSensitiveFields.js": {
+    "mtime": 1784510241.9053445,
+    "ast_hash": "2c6a5cb9b7c6a4590a84cab172251603",
+    "semantic_hash": ""
+  },
+  "src/shared/utils/safeCompare.js": {
+    "mtime": 1784510241.9064138,
+    "ast_hash": "35cad073597be1477d09e5fa89205d98",
+    "semantic_hash": ""
+  },
+  "src/shared/utils/sendAttemptingRequest.js": {
+    "mtime": 1784510241.9064138,
+    "ast_hash": "7a0c8b7518bed2dc3d7f2345800b23d2",
+    "semantic_hash": ""
+  },
+  "src/shared/utils/sendRequestFailed.js": {
+    "mtime": 1784510241.9069545,
+    "ast_hash": "7b97cffc44ecc04a704679665ec51376",
+    "semantic_hash": ""
+  },
+  "src/shared/utils/sendRequestSuccess.js": {
+    "mtime": 1784510241.9069545,
+    "ast_hash": "a2b28f77eb00265fdfcc46278e8f8a14",
+    "semantic_hash": ""
+  },
+  "src/shared/utils/sendRequestValidationError.js": {
+    "mtime": 1784510241.907481,
+    "ast_hash": "37ba43516ca17585a63e98caa61922d4",
+    "semantic_hash": ""
+  },
+  "src/shared/utils/sendServerInternalError.js": {
+    "mtime": 1784510241.9081647,
+    "ast_hash": "501fc357eceb87b7a385362b088907a5",
+    "semantic_hash": ""
+  },
+  "src/shared/utils/toPlain.js": {
+    "mtime": 1784510241.9081647,
+    "ast_hash": "6c2ae02cc06e5ff8f5e9cb7e2eebe0f8",
+    "semantic_hash": ""
+  },
+  "src/shared/validation/zod.helpers.js": {
+    "mtime": 1784510241.9092574,
+    "ast_hash": "1b2dd7d065d6df69f486cc333be258a0",
+    "semantic_hash": ""
+  },
+  "test/smoke.full.spec.ts": {
+    "mtime": 1783198396.8484674,
+    "ast_hash": "7e0a4e409ef4ad836d726ac7ae0ed430",
+    "semantic_hash": ""
+  },
+  "test/smoke.imports-business.spec.ts": {
+    "mtime": 1783198396.8494642,
+    "ast_hash": "90ee9fdf673200b5e9f2898e59754b21",
+    "semantic_hash": ""
+  },
+  "test/smoke.spec.ts": {
+    "mtime": 1783198396.8504665,
+    "ast_hash": "a19f813dbc1ed7f3b8b4d650167acc04",
+    "semantic_hash": ""
+  },
+  "tsconfig.build.json": {
+    "mtime": 1783198396.851466,
+    "ast_hash": "df019a0a16898608771ba1d82f9b40ec",
+    "semantic_hash": ""
+  },
+  "tsconfig.json": {
+    "mtime": 1783198396.8543203,
+    "ast_hash": "19e923b2119c7390a6d1eed0fa6b3cb0",
+    "semantic_hash": ""
+  },
+  ".github/workflows/codeql.yml": {
+    "mtime": 1784510243.087719,
+    "ast_hash": "f39fbff51412018923f84288bb71bbe3",
+    "semantic_hash": ""
+  },
+  ".github/workflows/hardening-ci.yml": {
+    "mtime": 1784510243.087719,
+    "ast_hash": "c7d2367215ec341c967791d91858b071",
+    "semantic_hash": ""
+  },
+  ".yarnrc.yml": {
+    "mtime": 1783198394.4167056,
+    "ast_hash": "0c83729fc79baeb64f03eac2d7f1ad4f",
+    "semantic_hash": ""
+  },
+  "README.md": {
+    "mtime": 1783198394.4177077,
+    "ast_hash": "4bfa57bee927bea0590d7efbac1a09ed",
+    "semantic_hash": ""
+  },
+  "SECURITY.md": {
+    "mtime": 1784510243.0900087,
+    "ast_hash": "9efd01a8c43b98173f14d0e1ff90571b",
+    "semantic_hash": ""
+  },
+  "docker-compose.yml": {
+    "mtime": 1783198394.4187117,
+    "ast_hash": "be2c53740d9e236a149147aca24d13eb",
+    "semantic_hash": ""
+  },
+  "docs/architecture/architecture.md": {
+    "mtime": 1783198394.4197044,
+    "ast_hash": "038ea00b18e7af4f198e8a9b9757e510",
+    "semantic_hash": ""
+  },
+  "docs/architecture/flows.md": {
+    "mtime": 1783198394.4197044,
+    "ast_hash": "a706870845c5454d90210eb91c8500f8",
+    "semantic_hash": ""
+  },
+  "docs/architecture/migration-report.md": {
+    "mtime": 1783198394.4197044,
+    "ast_hash": "1a288062f33419320f8c1ad219136fc4",
+    "semantic_hash": ""
+  },
+  "docs/architecture/node-runtime.md": {
+    "mtime": 1783198394.4207056,
+    "ast_hash": "59a610cf1ad825bd87b6cc4d694df59b",
+    "semantic_hash": ""
+  },
+  "docs/architecture/security.md": {
+    "mtime": 1783198394.421713,
+    "ast_hash": "daee2ab43ecfa69ea388c06f92f140cc",
+    "semantic_hash": ""
+  },
+  "docs/db/README.md": {
+    "mtime": 1783198394.421713,
+    "ast_hash": "4311cc8ecbf0403313fb5cd950f1baa5",
+    "semantic_hash": ""
+  },
+  "docs/db/fix-migracion-006-audit-trigger.md": {
+    "mtime": 1783198394.4317594,
+    "ast_hash": "78c9268196579320fa0cd0939d6ac6e5",
+    "semantic_hash": ""
+  },
+  "docs/db/plan-cuentas-ampliado.md": {
+    "mtime": 1783198394.4497652,
+    "ast_hash": "bb77d3d8b50672b30ddff4188dc62b07",
+    "semantic_hash": ""
+  },
+  "docs/db/plan-cuentas-cpa-estandarizado.md": {
+    "mtime": 1783198394.4507668,
+    "ast_hash": "e77628376cb8d93b2ba239404e8fd2bc",
+    "semantic_hash": ""
+  },
+  "docs/db/production-bootstrap.md": {
+    "mtime": 1783198394.4507668,
+    "ast_hash": "c62d6f49a2b6a6187601a504d4e21e51",
+    "semantic_hash": ""
+  },
+  "docs/db/seed-catalogos-academicos-scz.md": {
+    "mtime": 1783198394.451759,
+    "ast_hash": "191f31dabc04fad3ccdabe062939f5cc",
+    "semantic_hash": ""
+  },
+  "docs/db/transaccion-detalle-venta-costo.md": {
+    "mtime": 1783198394.4597273,
+    "ast_hash": "be0afb93d5be0c42e52b22476215cf15",
+    "semantic_hash": ""
+  },
+  "docs/db/venta-clase-apertura-lifecycle.md": {
+    "mtime": 1783198394.460726,
+    "ast_hash": "3de150c1b10c9adff478f2495ecd4861",
+    "semantic_hash": ""
+  },
+  "docs/db/venta-clase-registro.md": {
+    "mtime": 1783198394.460726,
+    "ast_hash": "3416d51b21956412262d8df28f932ac0",
+    "semantic_hash": ""
+  },
+  "docs/decisions/0001-preserve-typeorm-during-hardening.md": {
+    "mtime": 1784510243.0910165,
+    "ast_hash": "3095fc67db107923b2d0336909b2d0c2",
+    "semantic_hash": ""
+  },
+  "docs/decisions/0002-language-boundaries.md": {
+    "mtime": 1784510243.0910165,
+    "ast_hash": "2573a9df4144d353505f285f12bbcc4a",
+    "semantic_hash": ""
+  },
+  "docs/deploy/frontend-list-contract-final-fix.md": {
+    "mtime": 1783198394.4623144,
+    "ast_hash": "c36e28f4591d9f0309e56f931ef24b06",
+    "semantic_hash": ""
+  },
+  "docs/deploy/frontend-list-response-fix.md": {
+    "mtime": 1783198394.4633222,
+    "ast_hash": "c15e9d9294c6311793512f68cc4f9658",
+    "semantic_hash": ""
+  },
+  "docs/deploy/render.md": {
+    "mtime": 1783198394.4633222,
+    "ast_hash": "3c765d93772d90f956c477d7ae4961ff",
+    "semantic_hash": ""
+  },
+  "docs/endpoints/auth-session-permisos.md": {
+    "mtime": 1783198394.4643233,
+    "ast_hash": "48748a42929be5c1c286ab45bdf79016",
+    "semantic_hash": ""
+  },
+  "docs/endpoints/batch-y-contabilidad.md": {
+    "mtime": 1783198394.4653234,
+    "ast_hash": "a83049e46a78acc719bcb8c3c2faae80",
+    "semantic_hash": ""
+  },
+  "docs/endpoints/borradores-y-archivos.md": {
+    "mtime": 1783198394.4663224,
+    "ast_hash": "1a9ef0bd3dfe028a3c6861c5510b7b8d",
+    "semantic_hash": ""
+  },
+  "docs/endpoints/cuentas-operativas-persona.md": {
+    "mtime": 1783198394.4663224,
+    "ast_hash": "6570a149973fc5eb528b37378782c203",
+    "semantic_hash": ""
+  },
+  "docs/endpoints/endpoints.md": {
+    "mtime": 1783198394.467321,
+    "ast_hash": "dadb9b8744504f7509b4354aacd6ce64",
+    "semantic_hash": ""
+  },
+  "docs/endpoints/reporteria-contable-powerbi.md": {
+    "mtime": 1783198394.4683213,
+    "ast_hash": "46f3e653d41c86f2fceb959a83e4978b",
+    "semantic_hash": ""
+  },
+  "docs/endpoints/transaccion-detalle-venta-costo.md": {
+    "mtime": 1783198394.4683213,
+    "ast_hash": "287bbd969ba44ae8ff476d3e633f39ff",
+    "semantic_hash": ""
+  },
+  "docs/endpoints/venta-clase-frontend-contract.md": {
+    "mtime": 1783198394.469322,
+    "ast_hash": "cebb80ea3f0b4497ae40ddab1359ccab",
+    "semantic_hash": ""
+  },
+  "docs/endpoints/venta-clase-registro.md": {
+    "mtime": 1783198394.469322,
+    "ast_hash": "cf08f73be08758e348263c6c906477b8",
+    "semantic_hash": ""
+  },
+  "docs/frontend/FRONTEND_CONTRATO_CPA_ULTRA_DETALLADO.md": {
+    "mtime": 1783198394.4713204,
+    "ast_hash": "034ed407826e894d7af3e5dcb5ae306a",
+    "semantic_hash": ""
+  },
+  "docs/frontend/MANUAL_CAMBIOS_FRONTEND_VENTA_CLASE_LIFECYCLE_APERTURA.md": {
+    "mtime": 1783198394.4723222,
+    "ast_hash": "5dbfb35ad4c1e82c068210db991857ad",
+    "semantic_hash": ""
+  },
+  "docs/frontend/README_PASAR_AL_FRONTEND.md": {
+    "mtime": 1783198394.473323,
+    "ast_hash": "c8e3cee5e36d58ee3e4807f0a03f89bd",
+    "semantic_hash": ""
+  },
+  "docs/frontend/venta-clase-table-contract.md": {
+    "mtime": 1783198394.473323,
+    "ast_hash": "a187707fb0ceaf8b5170116c81d8c134",
+    "semantic_hash": ""
+  },
+  "docs/hardening/README.md": {
+    "mtime": 1784510243.0920167,
+    "ast_hash": "7d76a46e7725a270f02613e58bf44dc9",
+    "semantic_hash": ""
+  },
+  "docs/hardening/accounting-production-review.md": {
+    "mtime": 1784510243.0925224,
+    "ast_hash": "736e16a273807eb4e1705844f82f9087",
+    "semantic_hash": ""
+  },
+  "docs/hardening/audit-baseline.md": {
+    "mtime": 1784510243.0925224,
+    "ast_hash": "ecde03930ec697223c774ae720ad6821",
+    "semantic_hash": ""
+  },
+  "docs/hardening/clean-code-report.md": {
+    "mtime": 1784510243.0935295,
+    "ast_hash": "fea69abd9e7381c01330e45087ef9c95",
+    "semantic_hash": ""
+  },
+  "docs/hardening/financial-controls-matrix.md": {
+    "mtime": 1784510243.0935295,
+    "ast_hash": "61182aee5baac81b7562fe401a3605f7",
+    "semantic_hash": ""
+  },
+  "docs/hardening/production-readiness.md": {
+    "mtime": 1784510243.0945363,
+    "ast_hash": "6732fe84e966d9abe9073045ded83909",
+    "semantic_hash": ""
+  },
+  "docs/hardening/security-incident-response.md": {
+    "mtime": 1784510243.0945363,
+    "ast_hash": "eaf16e4b4d2982f5bb91dafcc66ae630",
+    "semantic_hash": ""
+  },
+  "docs/hardening/standards-traceability.md": {
+    "mtime": 1784510243.095535,
+    "ast_hash": "95d2ce92c6974c97d6366786ba87fdc2",
+    "semantic_hash": ""
+  },
+  "docs/local/LOCAL_RUN_TROUBLESHOOTING.md": {
+    "mtime": 1783198394.4743211,
+    "ast_hash": "cd28da5990872ad5384f2fd111be0aa2",
+    "semantic_hash": ""
+  },
+  "docs/postman/README.md": {
+    "mtime": 1783198394.4773216,
+    "ast_hash": "34c61c9fba3794cd777cb279565132bc",
+    "semantic_hash": ""
+  },
+  "docs/project/DOCUMENTACION_GENERAL_ULTRA_DETALLADA.md": {
+    "mtime": 1783198394.4782956,
+    "ast_hash": "2b6d0c3cbe11977b5d00f02d839e9f07",
+    "semantic_hash": ""
+  },
+  "docs/redis/REDIS_SETUP.md": {
+    "mtime": 1783198394.4793043,
+    "ast_hash": "e826ecb0bbba28452b9a38b308bbf68f",
+    "semantic_hash": ""
+  },
+  "docs/reporteria/SEED_PERMISOS_REPORTERIA_CONTABLE.md": {
+    "mtime": 1783198394.4793043,
+    "ast_hash": "d0437f4f6c7586ce4d81662bf46ad25b",
+    "semantic_hash": ""
+  },
+  "docs/runbooks/backup-restore.md": {
+    "mtime": 1784510243.095535,
+    "ast_hash": "d2f7c617b7ff9f809e88da7e21f4fd54",
+    "semantic_hash": ""
+  },
+  "docs/runbooks/deployment.md": {
+    "mtime": 1784510243.0965352,
+    "ast_hash": "875e5628d339e8bcb5a1e0180976d727",
+    "semantic_hash": ""
+  },
+  "docs/systemInfo/README.md": {
+    "mtime": 1783198394.4803038,
+    "ast_hash": "09e073f59e4833d4f26c86b85b59d57c",
+    "semantic_hash": ""
+  },
+  "docs/testing/AUDITORIA_BORRADORES_ARCHIVOS_2026.md": {
+    "mtime": 1783198394.486303,
+    "ast_hash": "a9e63da14e8d09ee248336a2a88169c6",
+    "semantic_hash": ""
+  },
+  "docs/testing/AUDITORIA_REPORTERIA_CONTABLE_POWERBI.md": {
+    "mtime": 1783198394.4873023,
+    "ast_hash": "5bcb1112c26ba1da3a22501a6fa282e6",
+    "semantic_hash": ""
+  },
+  "docs/testing/RENDER_BUILD_MAIN_JS_FIX.md": {
+    "mtime": 1783198394.4873023,
+    "ast_hash": "7bdc4be77a2a02202c68c5d169b0fa6e",
+    "semantic_hash": ""
+  },
+  "docs/testing/SMOKE_FULL_CONTRATO_10.md": {
+    "mtime": 1783198394.4883022,
+    "ast_hash": "9191118f845b59a3d0d3f4fc68359173",
+    "semantic_hash": ""
+  },
+  "docs/testing/SMOKE_FULL_REPETIBLE_FIX.md": {
+    "mtime": 1783198394.4883022,
+    "ast_hash": "ee6644fdf57e5ca7be4721974b087171",
+    "semantic_hash": ""
+  },
+  "docs/testing/SMOKE_IMPORTS_BUSINESS_BACKUP.md": {
+    "mtime": 1783198394.4893022,
+    "ast_hash": "224e3737c18eb00f2f7c198348797efd",
+    "semantic_hash": ""
+  },
+  "prompt/contextSystem.md": {
+    "mtime": 1783198396.7889414,
+    "ast_hash": "e2897a3b5badfd9a3234a8e05578ca7f",
+    "semantic_hash": ""
+  },
+  "prompt/index.md": {
+    "mtime": 1783198396.7889414,
+    "ast_hash": "57726a930bf5340a182a67586fb82da6",
+    "semantic_hash": ""
+  },
+  "prompt/programacionBackend.md": {
+    "mtime": 1783198396.7899415,
+    "ast_hash": "d243e0732f2e40ad1a674e0acad3bc64",
+    "semantic_hash": ""
+  },
+  "prompt/programacionGeneral.md": {
+    "mtime": 1783198396.7909408,
+    "ast_hash": "bb33666b1bf4d5023f8450d96f312555",
+    "semantic_hash": ""
+  },
+  "render.yaml": {
+    "mtime": 1784510243.097536,
+    "ast_hash": "cf7c92ebc7e25d7396992201a325302c",
+    "semantic_hash": ""
+  },
+  "src/README.md": {
+    "mtime": 1783198396.7989407,
+    "ast_hash": "71d8317245d83ec628f3861cee570afa",
+    "semantic_hash": ""
+  },
+  "src/api-gateway/README.md": {
+    "mtime": 1783198396.7989407,
+    "ast_hash": "906133fdabef95840456a6524b40b75f",
+    "semantic_hash": ""
+  },
+  "src/common/README.md": {
+    "mtime": 1783198396.800949,
+    "ast_hash": "3a252eb11c7e35a25156ba267a87451c",
+    "semantic_hash": ""
+  },
+  "src/config/README.md": {
+    "mtime": 1783198396.8129492,
+    "ast_hash": "a46c23a311252de059e72815ce455bd2",
+    "semantic_hash": ""
+  },
+  "src/database/README.md": {
+    "mtime": 1783198396.8129492,
+    "ast_hash": "9a01c136d655834cb5407aa86220a428",
+    "semantic_hash": ""
+  },
+  "src/modules/README.md": {
+    "mtime": 1783198396.8149495,
+    "ast_hash": "8310c640dd5fe8609ab4db38dc696c27",
+    "semantic_hash": ""
+  },
+  "src/modules/administracion/README.md": {
+    "mtime": 1783198396.8154569,
+    "ast_hash": "8dd6740ce750a4f508b8989b3c539855",
+    "semantic_hash": ""
+  },
+  "src/modules/auth/README.md": {
+    "mtime": 1783198396.818473,
+    "ast_hash": "bdd389c5d9c3d44ab1cc378a9e16f9e7",
+    "semantic_hash": ""
+  },
+  "src/modules/contabilidad/README.md": {
+    "mtime": 1783198396.8224669,
+    "ast_hash": "9190e92cfbacd3545671822614be9051",
+    "semantic_hash": ""
+  },
+  "src/modules/deuda/README.md": {
+    "mtime": 1783198396.8274658,
+    "ast_hash": "872d4dc6be372a90b0a7db5b47cc0028",
+    "semantic_hash": ""
+  },
+  "src/modules/infraestructura/README.md": {
+    "mtime": 1783198396.829467,
+    "ast_hash": "58c4f8250c2e6f58e646aa5ba2d18d79",
+    "semantic_hash": ""
+  },
+  "src/modules/inventario/README.md": {
+    "mtime": 1783198396.8324656,
+    "ast_hash": "2a2359b2beb3b9386d4622e403b3a6ee",
+    "semantic_hash": ""
+  },
+  "src/modules/personas/README.md": {
+    "mtime": 1783198396.8344657,
+    "ast_hash": "0318d5d1714fe8a50198ea9598fbf320",
+    "semantic_hash": ""
+  },
+  "src/modules/seguridad/README.md": {
+    "mtime": 1783198396.8404658,
+    "ast_hash": "027e51ea3f5400f426559f065900fdac",
+    "semantic_hash": ""
+  },
+  "src/modules/servicios_educativos/README.md": {
+    "mtime": 1783198396.8424666,
+    "ast_hash": "9e9270f75f5586d154f1559229276e49",
+    "semantic_hash": ""
+  },
+  "src/modules/shared-crud/README.md": {
+    "mtime": 1783198396.8444667,
+    "ast_hash": "f9c270e9b9f9a83841ffabbcf4febc64",
+    "semantic_hash": ""
+  },
+  "src/modules/societario/README.md": {
+    "mtime": 1783198396.8464673,
+    "ast_hash": "4545d6905b16a1a3f9db949b202c2d9f",
+    "semantic_hash": ""
+  }
+}

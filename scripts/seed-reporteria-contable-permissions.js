@@ -1,18 +1,41 @@
 /* eslint-disable no-console */
+const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
-const { Client } = require('pg');
 const { loadProjectEnv } = require('./official-user-utils');
+const { createSecurePgClient } = require('./seed-security');
+
+const MIGRATION_FILENAME = '013_seed_reporteria_contable_permisos.sql';
 
 function createPgClient() {
-  return new Client({
-    host: process.env.PGHOST || 'localhost',
-    port: Number(process.env.PGPORT || 5432),
-    database: process.env.PGDATABASE || 'neondb',
-    user: process.env.PGUSER || 'postgres',
-    password: process.env.PGPASSWORD || 'postgres',
-    ssl: process.env.PGSSLMODE === 'require' ? { rejectUnauthorized: false } : false,
-  });
+  return createSecurePgClient('cpa-seed-reporteria');
+}
+
+/**
+ * Registra la migración en el libro de migraciones.
+ *
+ * Este script ejecuta un archivo de `docs/db/migrations` directamente. Al no dejar
+ * constancia en `infraestructura.schema_migrations`, `migrate-prod.js` volvía a
+ * aplicarlo después. La migración 013 es idempotente, así que no causaba daño, pero el
+ * libro de migraciones dejaba de reflejar el estado real de la base de datos.
+ */
+async function recordMigration(client, sql) {
+  const checksum = crypto.createHash('sha256').update(sql).digest('hex');
+  await client.query('CREATE SCHEMA IF NOT EXISTS infraestructura');
+  await client.query(`
+    CREATE TABLE IF NOT EXISTS infraestructura.schema_migrations (
+      id bigserial PRIMARY KEY,
+      filename text NOT NULL UNIQUE,
+      checksum text NOT NULL,
+      executed_at timestamptz NOT NULL DEFAULT now()
+    )
+  `);
+  await client.query(
+    `INSERT INTO infraestructura.schema_migrations (filename, checksum)
+     VALUES ($1, $2)
+     ON CONFLICT (filename) DO UPDATE SET checksum = EXCLUDED.checksum`,
+    [MIGRATION_FILENAME, checksum],
+  );
 }
 
 async function countReporteriaPermissions(client) {
@@ -39,7 +62,7 @@ async function main() {
   const rootDir = path.resolve(__dirname, '..');
   loadProjectEnv(rootDir);
 
-  const migrationPath = path.join(rootDir, 'docs', 'db', 'migrations', '013_seed_reporteria_contable_permisos.sql');
+  const migrationPath = path.join(rootDir, 'docs', 'db', 'migrations', MIGRATION_FILENAME);
   if (!fs.existsSync(migrationPath)) {
     throw new Error(`No existe la migración de permisos de reportería: ${migrationPath}`);
   }
@@ -51,6 +74,7 @@ async function main() {
   try {
     await client.query('BEGIN');
     await client.query(sql);
+    await recordMigration(client, sql);
     await client.query('COMMIT');
 
     const total = await countReporteriaPermissions(client);

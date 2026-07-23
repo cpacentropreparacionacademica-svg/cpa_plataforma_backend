@@ -131,6 +131,18 @@ const TRANSACCION_INSERT_COLUMNS = [
   'id_pago_tutor',
 ] as const;
 
+/**
+ * Columnas de reversión: las fija el servidor al revertir un asiento.
+ * Nunca se aceptan desde el payload del cliente, para que no se pueda declarar
+ * un asiento cualquiera como reversión de otro.
+ */
+const TRANSACCION_REVERSAL_COLUMNS = [
+  'id_transaccion_revertida',
+  'motivo_reversion',
+  'fecha_reversion',
+  'id_usuario_reversion',
+] as const;
+
 @Injectable()
 export class ContabilidadAccountingService {
   constructor(private readonly dataSource: DataSource) {}
@@ -162,7 +174,10 @@ export class ContabilidadAccountingService {
         for (let index = 0; index < items.length; index += 1) {
           registros.push(await this.processVentaClaseItem(manager, items[index], index + 1, authUserId));
         }
-        const total = registros.reduce((sum, registro) => sum + this.toMoneyNumber((registro as Record<string, unknown>).monto_total), 0);
+        const total = registros.reduce(
+          (sum, registro) => sum + this.toMoneyNumber((registro as Record<string, unknown>).monto_total),
+          0,
+        );
         return {
           registros,
           count: registros.length,
@@ -222,24 +237,52 @@ export class ContabilidadAccountingService {
       throw new BadRequestException('id_transaccion debe ser un entero positivo.');
     }
 
+    const motivo = this.toOptionalString(payload?.motivo);
+    if (!motivo) {
+      throw new BadRequestException('motivo es obligatorio para revertir un asiento contable.');
+    }
+
     try {
       const data = await this.dataSource.transaction(async (manager) => {
-        const originalRows = await manager.query(
+        const originalRows = (await manager.query(
           `SELECT * FROM contabilidad.transaccion WHERE id_transaccion = $1 AND COALESCE(estado_registro, 'Activo') = 'Activo' LIMIT 1`,
           [originalId],
-        ) as Record<string, unknown>[];
+        )) as Record<string, unknown>[];
 
         const original = originalRows[0];
         if (!original) throw new NotFoundException('No se encontró la transacción/asiento a revertir.');
 
-        const movementRows = await manager.query(
+        // Un asiento reverso no se revierte: se registra un nuevo asiento con el efecto deseado.
+        if (original.id_transaccion_revertida) {
+          throw new BadRequestException(
+            `La transacción ${originalId} ya es un asiento de reversión. ` +
+              'Registra un asiento nuevo en lugar de revertir una reversión.',
+          );
+        }
+
+        const existingReversal = (await manager.query(
+          `SELECT id_transaccion
+             FROM contabilidad.transaccion
+            WHERE id_transaccion_revertida = $1
+              AND COALESCE(estado_registro, 'Activo') = 'Activo'
+            LIMIT 1`,
+          [originalId],
+        )) as Array<{ id_transaccion: unknown }>;
+
+        if (existingReversal[0]) {
+          throw new BadRequestException(
+            `La transacción ${originalId} ya fue revertida por el asiento ${existingReversal[0].id_transaccion}.`,
+          );
+        }
+
+        const movementRows = (await manager.query(
           `SELECT *
              FROM contabilidad.transaccion_movimiento_cuenta
             WHERE id_transaccion = $1
               AND COALESCE(estado_registro, 'Activo') = 'Activo'
             ORDER BY id_movimiento ASC`,
           [originalId],
-        ) as Record<string, unknown>[];
+        )) as Record<string, unknown>[];
 
         if (movementRows.length === 0) {
           throw new BadRequestException('El asiento no tiene movimientos activos para revertir.');
@@ -253,35 +296,40 @@ export class ContabilidadAccountingService {
 
         this.assertBalanced(reversedMovimientos);
 
-        const glosa = String(
-          payload?.glosa
-          || `Reversión del asiento ${originalId}${payload?.motivo ? ` - ${payload.motivo}` : ''}`,
-        ).slice(0, 300);
+        const glosa = String(payload?.glosa || `Reversión del asiento ${originalId} - ${motivo}`).slice(0, 300);
 
-        const reverseTransaccion = await this.insertTransaccion(manager, {
-          tipo_transaccion: original.tipo_transaccion || 'GENERAL',
-          fecha_transaccion: payload?.fecha_transaccion || new Date().toISOString().slice(0, 10),
-          sub_tipo_transaccion: 'REVERSO',
-          glosa,
-          id_centro_costo_mapa: original.id_centro_costo_mapa,
-          id_bien: original.id_bien,
-          id_movimiento_detalle: original.id_movimiento_detalle,
-          id_deuda: original.id_deuda,
-          id_pago_deuda: original.id_pago_deuda,
-          id_empleado: original.id_empleado,
-          id_empleado_pago: original.id_empleado_pago,
-          id_departamento: original.id_departamento,
-          id_clase_por_hora: original.id_clase_por_hora,
-          id_producto_educativo: original.id_producto_educativo,
-          id_curso_version: original.id_curso_version,
-          id_sucursal: original.id_sucursal,
-          id_tienda: original.id_tienda,
-          id_proveedor: original.id_proveedor,
-          id_dividendo_pago: original.id_dividendo_pago,
-          id_emision_titulo: original.id_emision_titulo,
-          id_cliente: original.id_cliente,
-          id_pago_tutor: original.id_pago_tutor,
-        }, authUserId);
+        const reverseTransaccion = await this.insertTransaccion(
+          manager,
+          {
+            tipo_transaccion: original.tipo_transaccion || 'GENERAL',
+            fecha_transaccion: payload?.fecha_transaccion || new Date().toISOString().slice(0, 10),
+            sub_tipo_transaccion: 'REVERSO',
+            glosa,
+            id_centro_costo_mapa: original.id_centro_costo_mapa,
+            id_bien: original.id_bien,
+            id_movimiento_detalle: original.id_movimiento_detalle,
+            id_deuda: original.id_deuda,
+            id_pago_deuda: original.id_pago_deuda,
+            id_empleado: original.id_empleado,
+            id_empleado_pago: original.id_empleado_pago,
+            id_departamento: original.id_departamento,
+            id_clase_por_hora: original.id_clase_por_hora,
+            id_producto_educativo: original.id_producto_educativo,
+            id_curso_version: original.id_curso_version,
+            id_sucursal: original.id_sucursal,
+            id_tienda: original.id_tienda,
+            id_proveedor: original.id_proveedor,
+            id_dividendo_pago: original.id_dividendo_pago,
+            id_emision_titulo: original.id_emision_titulo,
+            id_cliente: original.id_cliente,
+            id_pago_tutor: original.id_pago_tutor,
+            id_transaccion_revertida: originalId,
+            motivo_reversion: motivo,
+            fecha_reversion: new Date().toISOString(),
+            id_usuario_reversion: authUserId ?? null,
+          },
+          authUserId,
+        );
 
         const reverseId = Number(reverseTransaccion.id_transaccion);
         const createdMovimientos: Record<string, unknown>[] = [];
@@ -315,9 +363,11 @@ export class ContabilidadAccountingService {
     const candidate = batch ? payload?.items : (payload?.items ?? [payload]);
 
     if (!Array.isArray(candidate) || candidate.length === 0) {
-      throw new BadRequestException(batch
-        ? 'items debe contener al menos una fila del parte de clases pasadas.'
-        : 'Debe enviar una fila o { items: [fila] } para registrar la venta de clase.');
+      throw new BadRequestException(
+        batch
+          ? 'items debe contener al menos una fila del parte de clases pasadas.'
+          : 'Debe enviar una fila o { items: [fila] } para registrar la venta de clase.',
+      );
     }
 
     if (!batch && candidate.length !== 1) {
@@ -334,7 +384,10 @@ export class ContabilidadAccountingService {
       }
 
       const item = raw as Record<string, unknown>;
-      const fecha = this.toDateString(item.fecha ?? item.fecha_transaccion ?? inheritedFecha ?? new Date().toISOString().slice(0, 10), `items[${index}].fecha`);
+      const fecha = this.toDateString(
+        item.fecha ?? item.fecha_transaccion ?? inheritedFecha ?? new Date().toISOString().slice(0, 10),
+        `items[${index}].fecha`,
+      );
       const montoEfectivo = this.toMoneyNumber(item.monto_efectivo ?? item.efectivo ?? 0);
       const montoQr = this.toMoneyNumber(item.monto_qr ?? item.qr ?? 0);
       const montoCxc = this.toMoneyNumber(item.monto_cxc ?? item.cxc ?? item.cuenta_por_cobrar ?? 0);
@@ -342,9 +395,10 @@ export class ContabilidadAccountingService {
       const montoPagoDeclarado = this.toMoneyNumber(montoEfectivo + montoQr + montoCxc + montoPaquete);
       const cantidad = this.toPositiveNumber(item.cantidad ?? 1, `items[${index}].cantidad`);
       const precioUnitarioRaw = item.precio_unitario ?? item.precio ?? item.monto_unitario;
-      const precioUnitario = precioUnitarioRaw === undefined || precioUnitarioRaw === null || precioUnitarioRaw === ''
-        ? this.toMoneyNumber(montoPagoDeclarado / cantidad)
-        : this.toMoneyNumber(precioUnitarioRaw);
+      const precioUnitario =
+        precioUnitarioRaw === undefined || precioUnitarioRaw === null || precioUnitarioRaw === ''
+          ? this.toMoneyNumber(montoPagoDeclarado / cantidad)
+          : this.toMoneyNumber(precioUnitarioRaw);
 
       for (const [label, value] of [
         ['monto_efectivo', montoEfectivo],
@@ -357,7 +411,9 @@ export class ContabilidadAccountingService {
       }
 
       if (precioUnitario <= 0 && montoPagoDeclarado <= 0) {
-        throw new BadRequestException(`La fila ${index + 1} debe tener importe positivo en efectivo, QR, CxC, paquete o precio_unitario.`);
+        throw new BadRequestException(
+          `La fila ${index + 1} debe tener importe positivo en efectivo, QR, CxC, paquete o precio_unitario.`,
+        );
       }
 
       return {
@@ -366,7 +422,9 @@ export class ContabilidadAccountingService {
         horaIngreso: this.toOptionalTimeString(item.hora_ingreso ?? item.hora_llegada),
         horaSalida: this.toOptionalTimeString(item.hora_salida),
         idEstudiante: this.toOptionalPositiveInt(item.id_estudiante ?? item.id_cliente),
-        estudianteTexto: this.toOptionalString(item.estudiante_texto ?? item.nombre_estudiante ?? item.nombre_completo_estudiante),
+        estudianteTexto: this.toOptionalString(
+          item.estudiante_texto ?? item.nombre_estudiante ?? item.nombre_completo_estudiante,
+        ),
         idTutor: this.toOptionalPositiveInt(item.id_tutor),
         tutorTexto: this.toOptionalString(item.tutor_texto ?? item.nombre_tutor),
         idAula: this.toOptionalPositiveInt(item.id_aula ?? item.id_espacio),
@@ -377,8 +435,11 @@ export class ContabilidadAccountingService {
         idSucursal: this.toOptionalPositiveInt(item.id_sucursal),
         idTienda: this.toOptionalPositiveInt(item.id_tienda),
         idClasePorHora: this.toOptionalPositiveInt(item.id_clase_por_hora ?? item.id_clase),
-        motivoClase: this.toOptionalString(item.motivo_clase ?? item.motivo) ?? 'Clase pasada registrada desde parte manual',
-        materiaTexto: this.toOptionalString(item.materia_texto ?? item.materia ?? item.producto ?? item.materia_producto),
+        motivoClase:
+          this.toOptionalString(item.motivo_clase ?? item.motivo) ?? 'Clase pasada registrada desde parte manual',
+        materiaTexto: this.toOptionalString(
+          item.materia_texto ?? item.materia ?? item.producto ?? item.materia_producto,
+        ),
         tema: this.toOptionalString(item.tema),
         subtema: this.toOptionalString(item.subtema),
         situacionBase: this.toOptionalString(item.situacion_base ?? item.sit_base) ?? 'CLASE_PASADA',
@@ -388,8 +449,14 @@ export class ContabilidadAccountingService {
         porcentajeDescuento: this.toMoneyNumber(item.porcentaje_descuento ?? 0),
         montoDescuento: this.inferMontoDescuento(cantidad, precioUnitario, montoPagoDeclarado, item),
         montoRecargo: this.inferMontoRecargo(cantidad, precioUnitario, montoPagoDeclarado, item),
-        porcentajeImpuesto: this.assertNoFiscalAmount(item.porcentaje_impuesto ?? 0, `items[${index}].porcentaje_impuesto`),
-        montoImpuesto: this.assertNoFiscalAmount(item.monto_impuesto ?? item.iva ?? item.impuesto ?? 0, `items[${index}].monto_impuesto`),
+        porcentajeImpuesto: this.assertNoFiscalAmount(
+          item.porcentaje_impuesto ?? 0,
+          `items[${index}].porcentaje_impuesto`,
+        ),
+        montoImpuesto: this.assertNoFiscalAmount(
+          item.monto_impuesto ?? item.iva ?? item.impuesto ?? 0,
+          `items[${index}].monto_impuesto`,
+        ),
         montoEfectivo,
         montoQr,
         montoCxc,
@@ -428,46 +495,91 @@ export class ContabilidadAccountingService {
       '4.1.01.001',
       'cuenta de ingreso por clases por hora',
     );
-    const idCuentaEfectivo = item.montoEfectivo > 0
-      ? await this.resolveCuentaOperativaId(manager, 'CANAL_COBRO_EFECTIVO', item.cuentaEfectivo, item.cuentaEfectivoCodigo, '1.1.01.001', 'cuenta de caja efectivo')
-      : undefined;
-    const idCuentaQr = item.montoQr > 0
-      ? await this.resolveCuentaOperativaId(manager, 'CANAL_COBRO_QR', item.cuentaQr, item.cuentaQrCodigo, '1.1.01.013', 'cuenta de QR / pagos móviles')
-      : undefined;
-    const idCuentaCxc = item.montoCxc > 0
-      ? await this.resolveCuentaEstudianteId(manager, item.idEstudiante, 'ESTUDIANTE_CXC', item.cuentaCxc, item.cuentaCxcCodigo, 'cuenta por cobrar del estudiante')
-      : undefined;
-    const idCuentaPaqueteDiferido = item.montoPaquete > 0
-      ? await this.resolveCuentaEstudianteId(manager, item.idEstudiante, 'ESTUDIANTE_PAQUETE_DIFERIDO', item.cuentaPaqueteDiferido, item.cuentaPaqueteDiferidoCodigo, 'cuenta de paquete/ingreso diferido del estudiante')
-      : undefined;
+    const idCuentaEfectivo =
+      item.montoEfectivo > 0
+        ? await this.resolveCuentaOperativaId(
+            manager,
+            'CANAL_COBRO_EFECTIVO',
+            item.cuentaEfectivo,
+            item.cuentaEfectivoCodigo,
+            '1.1.01.001',
+            'cuenta de caja efectivo',
+          )
+        : undefined;
+    const idCuentaQr =
+      item.montoQr > 0
+        ? await this.resolveCuentaOperativaId(
+            manager,
+            'CANAL_COBRO_QR',
+            item.cuentaQr,
+            item.cuentaQrCodigo,
+            '1.1.01.013',
+            'cuenta de QR / pagos móviles',
+          )
+        : undefined;
+    const idCuentaCxc =
+      item.montoCxc > 0
+        ? await this.resolveCuentaEstudianteId(
+            manager,
+            item.idEstudiante,
+            'ESTUDIANTE_CXC',
+            item.cuentaCxc,
+            item.cuentaCxcCodigo,
+            'cuenta por cobrar del estudiante',
+          )
+        : undefined;
+    const idCuentaPaqueteDiferido =
+      item.montoPaquete > 0
+        ? await this.resolveCuentaEstudianteId(
+            manager,
+            item.idEstudiante,
+            'ESTUDIANTE_PAQUETE_DIFERIDO',
+            item.cuentaPaqueteDiferido,
+            item.cuentaPaqueteDiferidoCodigo,
+            'cuenta de paquete/ingreso diferido del estudiante',
+          )
+        : undefined;
     const clase = await this.ensureClasePorHora(manager, item, warnings, authUserId);
     const idClasePorHora = item.idClasePorHora ?? this.toOptionalPositiveInt(clase?.id_clase);
     const descripcion = item.materiaTexto || item.motivoClase || 'Clase pasada';
-    const estudianteDescripcion = item.estudianteTexto || (item.idEstudiante ? `estudiante ${item.idEstudiante}` : 'estudiante no identificado');
+    const estudianteDescripcion =
+      item.estudianteTexto || (item.idEstudiante ? `estudiante ${item.idEstudiante}` : 'estudiante no identificado');
 
-    const transaccion = await this.insertTransaccion(manager, {
-      tipo_transaccion: 'VENTA',
-      fecha_transaccion: item.fecha,
-      sub_tipo_transaccion: 'VENTA_CLASE_PASADA',
-      glosa: `Venta clase pasada - ${estudianteDescripcion} - ${descripcion}`.slice(0, 300),
-      id_clase_por_hora: idClasePorHora,
-      id_producto_educativo: item.idProductoEducativo,
-      id_curso_version: item.idCursoVersion,
-      id_sucursal: item.idSucursal,
-      id_tienda: item.idTienda,
-      id_cliente: item.idEstudiante,
-    }, authUserId);
+    const transaccion = await this.insertTransaccion(
+      manager,
+      {
+        tipo_transaccion: 'VENTA',
+        fecha_transaccion: item.fecha,
+        sub_tipo_transaccion: 'VENTA_CLASE_PASADA',
+        glosa: `Venta clase pasada - ${estudianteDescripcion} - ${descripcion}`.slice(0, 300),
+        id_clase_por_hora: idClasePorHora,
+        id_producto_educativo: item.idProductoEducativo,
+        id_curso_version: item.idCursoVersion,
+        id_sucursal: item.idSucursal,
+        id_tienda: item.idTienda,
+        id_cliente: item.idEstudiante,
+      },
+      authUserId,
+    );
 
     const idTransaccion = Number(transaccion.id_transaccion);
-    const detalleVenta = await this.insertDetalleVentaClase(manager, idTransaccion, numeroLinea, item, idCuentaIngreso, idClasePorHora, authUserId);
+    const detalleVenta = await this.insertDetalleVentaClase(
+      manager,
+      idTransaccion,
+      numeroLinea,
+      item,
+      idCuentaIngreso,
+      idClasePorHora,
+      authUserId,
+    );
     const detalleTotal = this.toMoneyNumber(detalleVenta.monto_total);
     const detalleSubtotal = this.toMoneyNumber(detalleVenta.monto_subtotal);
     const detalleImpuesto = this.toMoneyNumber(detalleVenta.monto_impuesto);
 
-    let montoEfectivo = item.montoEfectivo;
-    let montoQr = item.montoQr;
+    const montoEfectivo = item.montoEfectivo;
+    const montoQr = item.montoQr;
     let montoCxc = item.montoCxc;
-    let montoPaquete = item.montoPaquete;
+    const montoPaquete = item.montoPaquete;
     let pagoDeclarado = this.toMoneyNumber(montoEfectivo + montoQr + montoCxc + montoPaquete);
 
     if (pagoDeclarado === 0) {
@@ -477,25 +589,45 @@ export class ContabilidadAccountingService {
     }
 
     if (Math.abs(pagoDeclarado - detalleTotal) > 0.009) {
-      throw new BadRequestException(`La fila ${numeroLinea} no cuadra: formas de pago=${pagoDeclarado}, total venta=${detalleTotal}.`);
+      throw new BadRequestException(
+        `La fila ${numeroLinea} no cuadra: formas de pago=${pagoDeclarado}, total venta=${detalleTotal}.`,
+      );
     }
 
-    const transaccionVenta = await this.insertTransaccionVenta(manager, idTransaccion, item, detalleVenta, {
-      idClasePorHora,
-      montoEfectivo,
-      montoQr,
-      montoCxc,
-      montoPaquete,
-    }, authUserId);
+    const transaccionVenta = await this.insertTransaccionVenta(
+      manager,
+      idTransaccion,
+      item,
+      detalleVenta,
+      {
+        idClasePorHora,
+        montoEfectivo,
+        montoQr,
+        montoCxc,
+        montoPaquete,
+      },
+      authUserId,
+    );
 
     const movimientos: NormalizedMovimiento[] = [];
-    if (montoEfectivo > 0 && idCuentaEfectivo) movimientos.push({ id_cuenta: idCuentaEfectivo, debe: montoEfectivo, haber: 0 });
+    if (montoEfectivo > 0 && idCuentaEfectivo)
+      movimientos.push({ id_cuenta: idCuentaEfectivo, debe: montoEfectivo, haber: 0 });
     if (montoQr > 0 && idCuentaQr) movimientos.push({ id_cuenta: idCuentaQr, debe: montoQr, haber: 0 });
     if (montoCxc > 0) {
-      const cuenta = idCuentaCxc ?? await this.resolveCuentaEstudianteId(manager, item.idEstudiante, 'ESTUDIANTE_CXC', undefined, undefined, 'cuenta por cobrar del estudiante');
+      const cuenta =
+        idCuentaCxc ??
+        (await this.resolveCuentaEstudianteId(
+          manager,
+          item.idEstudiante,
+          'ESTUDIANTE_CXC',
+          undefined,
+          undefined,
+          'cuenta por cobrar del estudiante',
+        ));
       movimientos.push({ id_cuenta: cuenta, debe: montoCxc, haber: 0 });
     }
-    if (montoPaquete > 0 && idCuentaPaqueteDiferido) movimientos.push({ id_cuenta: idCuentaPaqueteDiferido, debe: montoPaquete, haber: 0 });
+    if (montoPaquete > 0 && idCuentaPaqueteDiferido)
+      movimientos.push({ id_cuenta: idCuentaPaqueteDiferido, debe: montoPaquete, haber: 0 });
 
     const ingresoHaber = this.toMoneyNumber(detalleTotal);
     if (ingresoHaber > 0) movimientos.push({ id_cuenta: idCuentaIngreso, debe: 0, haber: ingresoHaber });
@@ -506,18 +638,23 @@ export class ContabilidadAccountingService {
       movimientosCreados.push(await this.insertMovimiento(manager, idTransaccion, movimiento, authUserId));
     }
 
-    const ventaClaseRegistro = await this.insertVentaClaseRegistro(manager, item, {
-      idClasePorHora,
-      idTransaccion,
-      idDetalleVenta: Number(detalleVenta.id_detalle_venta),
-      idTransaccionVenta: Number(transaccionVenta.id_transaccion),
-      montoEfectivo,
-      montoQr,
-      montoCxc,
-      montoPaquete,
-      montoTotal: detalleTotal,
-      warnings,
-    }, authUserId);
+    const ventaClaseRegistro = await this.insertVentaClaseRegistro(
+      manager,
+      item,
+      {
+        idClasePorHora,
+        idTransaccion,
+        idDetalleVenta: Number(detalleVenta.id_detalle_venta),
+        idTransaccionVenta: Number(transaccionVenta.id_transaccion),
+        montoEfectivo,
+        montoQr,
+        montoCxc,
+        montoPaquete,
+        montoTotal: detalleTotal,
+        warnings,
+      },
+      authUserId,
+    );
 
     return {
       venta_clase_registro: ventaClaseRegistro,
@@ -541,10 +678,10 @@ export class ContabilidadAccountingService {
     authUserId?: string,
   ): Promise<Record<string, unknown> | null> {
     if (item.idClasePorHora) {
-      const rows = await manager.query(
+      const rows = (await manager.query(
         `SELECT * FROM servicios_educativos.clase_por_hora WHERE id_clase = $1 LIMIT 1`,
         [item.idClasePorHora],
-      ) as Record<string, unknown>[];
+      )) as Record<string, unknown>[];
       if (!rows[0]) throw new BadRequestException(`No existe id_clase_por_hora=${item.idClasePorHora}.`);
       return rows[0];
     }
@@ -556,13 +693,17 @@ export class ContabilidadAccountingService {
       ['id_materia_tree', item.idMateriaTree],
       ['hora_ingreso', item.horaIngreso],
       ['motivo_clase', item.motivoClase],
-    ].filter(([, value]) => !value).map(([field]) => field);
+    ]
+      .filter(([, value]) => !value)
+      .map(([field]) => field);
 
     if (missingFields.length > 0) {
-      throw new BadRequestException(`Para registrar parte de clases pasadas se debe crear o vincular la clase. Faltan datos obligatorios: ${missingFields.join(', ')}.`);
+      throw new BadRequestException(
+        `Para registrar parte de clases pasadas se debe crear o vincular la clase. Faltan datos obligatorios: ${missingFields.join(', ')}.`,
+      );
     }
 
-    const rows = await manager.query(
+    const rows = (await manager.query(
       `INSERT INTO servicios_educativos.clase_por_hora
         (id_aula, id_estudiante, id_tutor, id_materia_tree, hora_llegada, hora_salida, motivo, modalidad, estado_operativo, estado_registro, id_usuario_creador)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'CERRADA', 'Activo', $9)
@@ -578,7 +719,7 @@ export class ContabilidadAccountingService {
         this.toOptionalString(item.source.modalidad) || 'PRESENCIAL',
         authUserId || null,
       ],
-    ) as Record<string, unknown>[];
+    )) as Record<string, unknown>[];
 
     return rows[0];
   }
@@ -592,7 +733,7 @@ export class ContabilidadAccountingService {
     idClasePorHora: number | undefined,
     authUserId?: string,
   ): Promise<Record<string, unknown>> {
-    const rows = await manager.query(
+    const rows = (await manager.query(
       `INSERT INTO contabilidad.transaccion_detalle_venta
         (id_transaccion, numero_linea, id_cliente, id_producto_educativo, id_producto_tienda, id_curso_version, id_clase_por_hora,
          id_tienda, id_sucursal, id_cuenta_ingreso, descripcion, cantidad, precio_unitario, porcentaje_descuento,
@@ -622,7 +763,7 @@ export class ContabilidadAccountingService {
         item.observaciones || null,
         authUserId || null,
       ],
-    ) as Record<string, unknown>[];
+    )) as Record<string, unknown>[];
 
     return rows[0];
   }
@@ -635,7 +776,7 @@ export class ContabilidadAccountingService {
     pagos: { idClasePorHora?: number; montoEfectivo: number; montoQr: number; montoCxc: number; montoPaquete: number },
     authUserId?: string,
   ): Promise<Record<string, unknown>> {
-    const rows = await manager.query(
+    const rows = (await manager.query(
       `INSERT INTO contabilidad.transaccion_venta
         (id_transaccion, fecha_venta, id_cliente, id_producto_educativo, id_producto_tienda, id_curso_version,
          id_clase_por_hora, id_tienda, id_sucursal, cantidad_total, precio_unitario_referencia,
@@ -695,7 +836,7 @@ export class ContabilidadAccountingService {
         item.observaciones || null,
         authUserId || null,
       ],
-    ) as Record<string, unknown>[];
+    )) as Record<string, unknown>[];
 
     return rows[0];
   }
@@ -717,7 +858,7 @@ export class ContabilidadAccountingService {
     },
     authUserId?: string,
   ): Promise<Record<string, unknown>> {
-    const rows = await manager.query(
+    const rows = (await manager.query(
       `INSERT INTO contabilidad.venta_clase_registro
         (fecha, hora_ingreso, hora_salida, id_estudiante, estudiante_texto, id_tutor, tutor_texto, id_aula,
          id_materia_tree, id_producto_educativo, id_curso_version, id_sucursal, id_tienda, motivo_clase,
@@ -763,7 +904,7 @@ export class ContabilidadAccountingService {
         JSON.stringify(item.source),
         authUserId || null,
       ],
-    ) as Record<string, unknown>[];
+    )) as Record<string, unknown>[];
 
     return rows[0];
   }
@@ -782,7 +923,7 @@ export class ContabilidadAccountingService {
     const code = this.toOptionalString(explicitCode);
     if (code) return this.resolveCuentaId(manager, undefined, code, defaultCode, label);
 
-    const configRows = await manager.query(
+    const configRows = (await manager.query(
       `SELECT cco.id_cuenta, c.codigo AS codigo_cuenta
          FROM contabilidad.configuracion_cuenta_operativa cco
          JOIN contabilidad.cuenta c ON c.id_cuenta = cco.id_cuenta
@@ -790,12 +931,18 @@ export class ContabilidadAccountingService {
           AND COALESCE(cco.estado_registro, 'Activo') IN ('Activo', 'ACTIVO', 'activo')
         LIMIT 1`,
       [codigoConfiguracion],
-    ) as Array<{ id_cuenta: unknown; codigo_cuenta: unknown }>;
+    )) as Array<{ id_cuenta: unknown; codigo_cuenta: unknown }>;
 
     const configuredId = this.toOptionalPositiveInt(configRows[0]?.id_cuenta);
     if (configuredId) return configuredId;
 
-    return this.resolveCuentaId(manager, undefined, undefined, defaultCode, `${label}. No hay configuración activa ${codigoConfiguracion}; se usó fallback por código`);
+    return this.resolveCuentaId(
+      manager,
+      undefined,
+      undefined,
+      defaultCode,
+      `${label}. No hay configuración activa ${codigoConfiguracion}; se usó fallback por código`,
+    );
   }
 
   private async resolveCuentaEstudianteId(
@@ -813,12 +960,14 @@ export class ContabilidadAccountingService {
     if (code) return this.resolveCuentaId(manager, undefined, code, code, label);
 
     if (!idEstudiante) {
-      throw new BadRequestException(`${label} requiere id_estudiante. No se debe usar una cuenta genérica para CxC o paquete.`);
+      throw new BadRequestException(
+        `${label} requiere id_estudiante. No se debe usar una cuenta genérica para CxC o paquete.`,
+      );
     }
 
     await this.ensureStudentAccountingAccounts(manager, idEstudiante);
 
-    const rows = await manager.query(
+    const rows = (await manager.query(
       `SELECT ca.id_cuenta
          FROM contabilidad.cuenta_asignacion ca
          JOIN contabilidad.cuenta c ON c.id_cuenta = ca.id_cuenta
@@ -830,7 +979,7 @@ export class ContabilidadAccountingService {
         ORDER BY ca.prioridad ASC, ca.id_cuenta_asignacion ASC
         LIMIT 1`,
       [entidadTipo, idEstudiante],
-    ) as Array<{ id_cuenta: unknown }>;
+    )) as Array<{ id_cuenta: unknown }>;
 
     const resolved = this.toOptionalPositiveInt(rows[0]?.id_cuenta);
     if (!resolved) {
@@ -839,8 +988,12 @@ export class ContabilidadAccountingService {
     return resolved;
   }
 
-  private async ensureStudentAccountingAccounts(manager: EntityManager, idEstudiante: number, authUserId?: string): Promise<void> {
-    const estudianteRows = await manager.query(
+  private async ensureStudentAccountingAccounts(
+    manager: EntityManager,
+    idEstudiante: number,
+    authUserId?: string,
+  ): Promise<void> {
+    const estudianteRows = (await manager.query(
       `SELECT pe.id_persona,
               COALESCE(NULLIF(TRIM(CONCAT_WS(' ', p.nombres, p.apellidos)), ''), 'Estudiante ' || pe.id_persona::text) AS nombre_completo
          FROM persona.persona_estudiante pe
@@ -848,18 +1001,42 @@ export class ContabilidadAccountingService {
         WHERE pe.id_persona = $1
         LIMIT 1`,
       [idEstudiante],
-    ) as Array<{ id_persona: unknown; nombre_completo: unknown }>;
+    )) as Array<{ id_persona: unknown; nombre_completo: unknown }>;
 
     if (!estudianteRows[0]) {
       throw new BadRequestException(`No existe persona.persona_estudiante con id_persona=${idEstudiante}.`);
     }
 
     const nombre = String(estudianteRows[0].nombre_completo || `Estudiante ${idEstudiante}`).slice(0, 120);
-    const idCuentaCxc = await this.ensureCuentaByGroupCode(manager, '1.1.02.01', `1.1.02.01.E${idEstudiante}`, `CxC estudiante ${idEstudiante} - ${nombre}`, authUserId);
-    await this.ensureCuentaAsignacion(manager, 'ESTUDIANTE_CXC', idCuentaCxc, { id_persona_estudiante: idEstudiante }, authUserId);
+    const idCuentaCxc = await this.ensureCuentaByGroupCode(
+      manager,
+      '1.1.02.01',
+      `1.1.02.01.E${idEstudiante}`,
+      `CxC estudiante ${idEstudiante} - ${nombre}`,
+      authUserId,
+    );
+    await this.ensureCuentaAsignacion(
+      manager,
+      'ESTUDIANTE_CXC',
+      idCuentaCxc,
+      { id_persona_estudiante: idEstudiante },
+      authUserId,
+    );
 
-    const idCuentaPaquete = await this.ensureCuentaByGroupCode(manager, '2.1.06', `2.1.06.E${idEstudiante}`, `Paquetes cobrados por anticipado estudiante ${idEstudiante} - ${nombre}`, authUserId);
-    await this.ensureCuentaAsignacion(manager, 'ESTUDIANTE_PAQUETE_DIFERIDO', idCuentaPaquete, { id_persona_estudiante: idEstudiante }, authUserId);
+    const idCuentaPaquete = await this.ensureCuentaByGroupCode(
+      manager,
+      '2.1.06',
+      `2.1.06.E${idEstudiante}`,
+      `Paquetes cobrados por anticipado estudiante ${idEstudiante} - ${nombre}`,
+      authUserId,
+    );
+    await this.ensureCuentaAsignacion(
+      manager,
+      'ESTUDIANTE_PAQUETE_DIFERIDO',
+      idCuentaPaquete,
+      { id_persona_estudiante: idEstudiante },
+      authUserId,
+    );
   }
 
   private async ensureCuentaByGroupCode(
@@ -869,21 +1046,30 @@ export class ContabilidadAccountingService {
     nombreCuenta: string,
     authUserId?: string,
   ): Promise<number> {
-    const existing = await manager.query(`SELECT id_cuenta FROM contabilidad.cuenta WHERE codigo = $1 LIMIT 1`, [codigoCuenta]) as Array<{ id_cuenta: unknown }>;
+    const existing = (await manager.query(`SELECT id_cuenta FROM contabilidad.cuenta WHERE codigo = $1 LIMIT 1`, [
+      codigoCuenta,
+    ])) as Array<{
+      id_cuenta: unknown;
+    }>;
     const existingId = this.toOptionalPositiveInt(existing[0]?.id_cuenta);
     if (existingId) return existingId;
 
-    const groupRows = await manager.query(`SELECT id_grupo_cuenta FROM contabilidad.grupo_cuenta WHERE codigo = $1 LIMIT 1`, [codigoGrupo]) as Array<{ id_grupo_cuenta: unknown }>;
+    const groupRows = (await manager.query(
+      `SELECT id_grupo_cuenta FROM contabilidad.grupo_cuenta WHERE codigo = $1 LIMIT 1`,
+      [codigoGrupo],
+    )) as Array<{
+      id_grupo_cuenta: unknown;
+    }>;
     const idGrupo = this.toOptionalPositiveInt(groupRows[0]?.id_grupo_cuenta);
     if (!idGrupo) throw new BadRequestException(`No existe grupo contable ${codigoGrupo}.`);
 
-    const rows = await manager.query(
+    const rows = (await manager.query(
       `INSERT INTO contabilidad.cuenta (codigo, nombre_cuenta, id_grupo_cuenta, estado_registro, id_usuario_creador)
        VALUES ($1, $2, $3, 'Activo', $4)
        ON CONFLICT (codigo) DO UPDATE SET nombre_cuenta = EXCLUDED.nombre_cuenta
        RETURNING id_cuenta`,
       [codigoCuenta, nombreCuenta.slice(0, 180), idGrupo, authUserId || null],
-    ) as Array<{ id_cuenta: unknown }>;
+    )) as Array<{ id_cuenta: unknown }>;
     return Number(rows[0].id_cuenta);
   }
 
@@ -894,7 +1080,7 @@ export class ContabilidadAccountingService {
     ids: { id_persona_estudiante?: number; id_persona_tutor?: number },
     authUserId?: string,
   ): Promise<void> {
-    const existing = await manager.query(
+    const existing = (await manager.query(
       `SELECT id_cuenta_asignacion
          FROM contabilidad.cuenta_asignacion
         WHERE entidad_tipo = $1
@@ -903,17 +1089,22 @@ export class ContabilidadAccountingService {
           AND COALESCE(estado_registro, 'Activo') IN ('Activo', 'ACTIVO', 'activo')
         LIMIT 1`,
       [entidadTipo, ids.id_persona_estudiante || null, ids.id_persona_tutor || null],
-    ) as Array<{ id_cuenta_asignacion: unknown }>;
+    )) as Array<{ id_cuenta_asignacion: unknown }>;
     if (existing[0]) return;
 
-    await manager.query(
-      `INSERT INTO contabilidad.cuenta_asignacion
-        (entidad_tipo, id_persona_estudiante, id_persona_tutor, id_cuenta, prioridad, vigente_desde, estado_registro, id_usuario_creador)
-       VALUES ($1, $2, $3, $4, 1, CURRENT_DATE, 'Activo', $5)`,
-      [entidadTipo, ids.id_persona_estudiante || null, ids.id_persona_tutor || null, idCuenta, authUserId || null],
-    );
+    try {
+      await manager.query(
+        `INSERT INTO contabilidad.cuenta_asignacion
+          (entidad_tipo, id_persona_estudiante, id_persona_tutor, id_cuenta, prioridad, vigente_desde, estado_registro, id_usuario_creador)
+         VALUES ($1, $2, $3, $4, 1, CURRENT_DATE, 'Activo', $5)`,
+        [entidadTipo, ids.id_persona_estudiante || null, ids.id_persona_tutor || null, idCuenta, authUserId || null],
+      );
+    } catch (error) {
+      // Carrera con otra transacción que creó la misma asignación: el índice único la
+      // detecta y el estado final es el deseado.
+      if ((error as { code?: string })?.code !== '23505') throw error;
+    }
   }
-
 
   private async resolveCuentaId(
     manager: EntityManager,
@@ -926,14 +1117,16 @@ export class ContabilidadAccountingService {
     if (id) return id;
 
     const code = this.toOptionalString(explicitCode) || defaultCode;
-    const rows = await manager.query(
+    const rows = (await manager.query(
       `SELECT id_cuenta FROM contabilidad.cuenta WHERE codigo = $1 AND COALESCE(estado_registro, 'Activo') IN ('Activo', 'ACTIVO', 'activo') LIMIT 1`,
       [code],
-    ) as Array<{ id_cuenta: unknown }>;
+    )) as Array<{ id_cuenta: unknown }>;
 
     const resolved = this.toOptionalPositiveInt(rows[0]?.id_cuenta);
     if (!resolved) {
-      throw new BadRequestException(`No se encontró ${label}. Código buscado: ${code}. Puedes enviar id_cuenta explícito en el payload.`);
+      throw new BadRequestException(
+        `No se encontró ${label}. Código buscado: ${code}. Puedes enviar id_cuenta explícito en el payload.`,
+      );
     }
     return resolved;
   }
@@ -947,7 +1140,7 @@ export class ContabilidadAccountingService {
     const explicit = this.toMoneyNumber(item.monto_descuento ?? 0);
     const porcentaje = this.toMoneyNumber(item.porcentaje_descuento ?? 0);
     const bruto = this.toMoneyNumber(cantidad * precioUnitario);
-    const porcentajeMonto = this.toMoneyNumber(bruto * porcentaje / 100);
+    const porcentajeMonto = this.toMoneyNumber((bruto * porcentaje) / 100);
     const baseDiscount = Math.max(explicit, porcentajeMonto);
     const explicitRecargo = this.toMoneyNumber(item.monto_recargo ?? item.recargo ?? 0);
 
@@ -969,7 +1162,13 @@ export class ContabilidadAccountingService {
     const porcentaje = this.toMoneyNumber(item.porcentaje_descuento ?? 0);
     const bruto = this.toMoneyNumber(cantidad * precioUnitario);
 
-    if (montoPagoDeclarado > 0 && explicit === 0 && explicitDiscount === 0 && porcentaje === 0 && montoPagoDeclarado > bruto) {
+    if (
+      montoPagoDeclarado > 0 &&
+      explicit === 0 &&
+      explicitDiscount === 0 &&
+      porcentaje === 0 &&
+      montoPagoDeclarado > bruto
+    ) {
       return this.toMoneyNumber(montoPagoDeclarado - bruto);
     }
 
@@ -979,7 +1178,9 @@ export class ContabilidadAccountingService {
   private assertNoFiscalAmount(value: unknown, label: string): number {
     const parsed = this.toMoneyNumber(value ?? 0);
     if (parsed !== 0) {
-      throw new BadRequestException(`${label} ya no se acepta en parte de clases pasadas. El registro automático de venta no usa IVA, crédito fiscal ni cuentas fiscales.`);
+      throw new BadRequestException(
+        `${label} ya no se acepta en parte de clases pasadas. El registro automático de venta no usa IVA, crédito fiscal ni cuentas fiscales.`,
+      );
     }
     return 0;
   }
@@ -1114,17 +1315,17 @@ export class ContabilidadAccountingService {
     if (!data.fecha_transaccion) data.fecha_transaccion = new Date().toISOString().slice(0, 10);
     if (authUserId && data.id_usuario_creador === undefined) data.id_usuario_creador = authUserId;
 
-    const allowedColumns = [...TRANSACCION_INSERT_COLUMNS, 'id_usuario_creador'];
+    const allowedColumns = [...TRANSACCION_INSERT_COLUMNS, ...TRANSACCION_REVERSAL_COLUMNS, 'id_usuario_creador'];
     const fields = allowedColumns.filter((column) => data[column] !== undefined && data[column] !== null);
 
     const columns = fields.map((field) => `"${field}"`).join(', ');
     const placeholders = fields.map((_, index) => `$${index + 1}`).join(', ');
     const values = fields.map((field) => data[field]);
 
-    const rows = await manager.query(
+    const rows = (await manager.query(
       `INSERT INTO contabilidad.transaccion (${columns}) VALUES (${placeholders}) RETURNING *`,
       values,
-    ) as Record<string, unknown>[];
+    )) as Record<string, unknown>[];
 
     return rows[0];
   }
@@ -1135,13 +1336,13 @@ export class ContabilidadAccountingService {
     movimiento: NormalizedMovimiento,
     authUserId?: string,
   ): Promise<Record<string, unknown>> {
-    const rows = await manager.query(
+    const rows = (await manager.query(
       `INSERT INTO contabilidad.transaccion_movimiento_cuenta
         (id_transaccion, id_cuenta, debe, haber, id_usuario_creador)
        VALUES ($1, $2, $3, $4, $5)
        RETURNING *`,
       [idTransaccion, movimiento.id_cuenta, movimiento.debe, movimiento.haber, authUserId || null],
-    ) as Record<string, unknown>[];
+    )) as Record<string, unknown>[];
 
     return rows[0];
   }

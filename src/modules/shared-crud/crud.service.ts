@@ -53,9 +53,16 @@ export class CrudService {
     };
   }
 
-  async update(moduleName: string, resourcePath: string, ids: string[], payload: Record<string, unknown>, authUserId?: string) {
+  async update(
+    moduleName: string,
+    resourcePath: string,
+    ids: string[],
+    payload: Record<string, unknown>,
+    authUserId?: string,
+  ) {
     const resource = this.findResource(moduleName, resourcePath);
     const idValues = this.mapIds(resource, ids);
+    this.assertNoLedgerUpdate(resource);
     this.assertWriteAllowedForSmoke('UPDATE', resource);
     await this.assertSecurityWriteAllowed(resource, payload, authUserId, idValues);
     const data = await this.repository.update(resource, idValues, payload, authUserId);
@@ -64,6 +71,7 @@ export class CrudService {
 
   async updateBatch(moduleName: string, resourcePath: string, payload: unknown, authUserId?: string) {
     const resource = this.findResource(moduleName, resourcePath);
+    this.assertNoLedgerUpdate(resource);
     this.assertWriteAllowedForSmoke('UPDATE', resource);
     const items = this.normalizeUpdateBatchPayload(resource, payload);
     for (const item of items) {
@@ -139,15 +147,21 @@ export class CrudService {
     };
   }
 
-
   async validateImportBatch(
     moduleName: string,
     resourcePath: string,
-    payload: { body?: Record<string, unknown>; files?: Array<{ buffer: Buffer; originalname?: string; mimetype?: string; size?: number }> },
+    payload: {
+      body?: Record<string, unknown>;
+      files?: Array<{ buffer: Buffer; originalname?: string; mimetype?: string; size?: number }>;
+    },
   ) {
     const resource = this.findResource(moduleName, resourcePath);
     const rows = this.extractImportRows(payload);
-    const validation = await this.validateRowsForResource(resource, rows, String(payload.body?.mode || payload.body?.modo || payload.body?.operation || 'create'));
+    const validation = await this.validateRowsForResource(
+      resource,
+      rows,
+      String(payload.body?.mode || payload.body?.modo || payload.body?.operation || 'create'),
+    );
     return {
       success: true,
       message: `Validación de importación para ${resource.entity} completada.`,
@@ -159,16 +173,23 @@ export class CrudService {
   async processImportBatch(
     moduleName: string,
     resourcePath: string,
-    payload: { body?: Record<string, unknown>; files?: Array<{ buffer: Buffer; originalname?: string; mimetype?: string; size?: number }> },
+    payload: {
+      body?: Record<string, unknown>;
+      files?: Array<{ buffer: Buffer; originalname?: string; mimetype?: string; size?: number }>;
+    },
     authUserId?: string,
   ) {
     const resource = this.findResource(moduleName, resourcePath);
     const rows = this.extractImportRows(payload);
-    const mode = this.normalizeImportMode(String(payload.body?.mode || payload.body?.modo || payload.body?.operation || 'create'));
+    const mode = this.normalizeImportMode(
+      String(payload.body?.mode || payload.body?.modo || payload.body?.operation || 'create'),
+    );
     const validation = await this.validateRowsForResource(resource, rows, mode);
 
     if (validation.errorRows > 0) {
-      throw new BadRequestException(`La importación contiene ${validation.errorRows} fila(s) con error. Corrige el archivo antes de procesar.`);
+      throw new BadRequestException(
+        `La importación contiene ${validation.errorRows} fila(s) con error. Corrige el archivo antes de procesar.`,
+      );
     }
 
     if (mode === 'update') {
@@ -184,12 +205,24 @@ export class CrudService {
       const createRows: Record<string, unknown>[] = [];
       const updateRows: Record<string, unknown>[] = [];
       for (const row of rows) {
-        const hasAllPrimaryKeys = resource.primaryKeys.every((primaryKey) => row[primaryKey] !== undefined && row[primaryKey] !== null && row[primaryKey] !== '');
+        const hasAllPrimaryKeys = resource.primaryKeys.every(
+          (primaryKey) => row[primaryKey] !== undefined && row[primaryKey] !== null && row[primaryKey] !== '',
+        );
         if (hasAllPrimaryKeys) updateRows.push(row);
         else createRows.push(row);
       }
-      const created = createRows.length ? (await this.createBatch(moduleName, resourcePath, { items: createRows }, authUserId)).data as Record<string, unknown>[] : [];
-      const updated = updateRows.length ? (await this.updateBatch(moduleName, resourcePath, { items: updateRows }, authUserId)).data as Record<string, unknown>[] : [];
+      const created = createRows.length
+        ? ((await this.createBatch(moduleName, resourcePath, { items: createRows }, authUserId)).data as Record<
+            string,
+            unknown
+          >[])
+        : [];
+      const updated = updateRows.length
+        ? ((await this.updateBatch(moduleName, resourcePath, { items: updateRows }, authUserId)).data as Record<
+            string,
+            unknown
+          >[])
+        : [];
       return {
         success: true,
         message: `Importación crear/actualizar procesada para ${resource.entity}.`,
@@ -207,30 +240,58 @@ export class CrudService {
     };
   }
 
+  /**
+   * El libro diario no se edita: se corrige con un asiento de reversión.
+   *
+   * Los triggers de la migración 014 ya impiden alterar el contenido económico de un
+   * movimiento, pero dejan mutable `estado_registro`. Como el trigger de balanceo solo
+   * suma los movimientos activos, desactivar un subconjunto balanceado (por ejemplo 2 de
+   * 4 líneas) anulaba parte del asiento sin dejar reversión ni rastro contable.
+   */
+  private assertNoLedgerUpdate(resource: ResourceConfig): void {
+    const ledgerTables = ['transaccion', 'transaccion_movimiento_cuenta'];
+    if (resource.schema !== 'contabilidad' || !ledgerTables.includes(resource.tableName)) return;
+
+    throw new BadRequestException(
+      `Los asientos contabilizados no se editan. Para corregir ${resource.entity} usa ` +
+        'POST /api/contabilidad/transaccion/:id/revert y registra el asiento correcto.',
+    );
+  }
 
   private assertNoFragmentedCreate(resource: ResourceConfig): void {
     const key = `${resource.routeModule}/${resource.routePath}`;
     const lifecycleEndpoints: Record<string, string> = {
-      'personas/persona': '/api/personas/estudiante/registrar, /api/personas/tutor/registrar, /api/personas/usuario/registrar o /api/administracion/empleado/registrar',
+      'personas/persona':
+        '/api/personas/estudiante/registrar, /api/personas/tutor/registrar, /api/personas/usuario/registrar o /api/administracion/empleado/registrar',
       'personas/estudiante': '/api/personas/estudiante/registrar',
       'personas/tutor': '/api/personas/tutor/registrar',
       'personas/usuario': '/api/personas/usuario/registrar',
       'administracion/empleado': '/api/administracion/empleado/registrar',
       'contabilidad/venta-clase-registro': '/api/contabilidad/venta-clase/registrar-batch',
-      'contabilidad/transaccion-venta': '/api/contabilidad/venta-clase/registrar-batch o un endpoint transaccional de venta específico',
-      'contabilidad/transaccion-detalle-venta': '/api/contabilidad/venta-clase/registrar-batch o un endpoint transaccional de venta específico',
+      'contabilidad/transaccion-venta':
+        '/api/contabilidad/venta-clase/registrar-batch o un endpoint transaccional de venta específico',
+      'contabilidad/transaccion-detalle-venta':
+        '/api/contabilidad/venta-clase/registrar-batch o un endpoint transaccional de venta específico',
+      // El asiento contable solo puede nacer completo. Creando cabecera y movimientos por
+      // separado se podía escribir en el libro mayor sin pasar por las reglas de partida
+      // doble del servicio contable: bastaba un lote de movimientos que netease a cero.
+      'contabilidad/transaccion': '/api/contabilidad/transaccion/con-movimientos',
+      'contabilidad/transaccion-movimiento-cuenta': '/api/contabilidad/transaccion/con-movimientos',
     };
 
     const endpoint = lifecycleEndpoints[key];
     if (!endpoint) return;
 
     throw new BadRequestException(
-      `Creación fragmentada no permitida para ${key}. Usa el endpoint transaccional ${endpoint}. `
-        + 'La lectura y actualización del recurso siguen disponibles para edición controlada.',
+      `Creación fragmentada no permitida para ${key}. Usa el endpoint transaccional ${endpoint}. ` +
+        'La lectura y actualización del recurso siguen disponibles para edición controlada.',
     );
   }
 
-  private extractImportRows(payload: { body?: Record<string, unknown>; files?: Array<{ buffer: Buffer; originalname?: string; mimetype?: string; size?: number }> }): Record<string, unknown>[] {
+  private extractImportRows(payload: {
+    body?: Record<string, unknown>;
+    files?: Array<{ buffer: Buffer; originalname?: string; mimetype?: string; size?: number }>;
+  }): Record<string, unknown>[] {
     const body = payload.body || {};
     const file = payload.files?.[0];
 
@@ -277,31 +338,36 @@ export class CrudService {
       .filter((row) => Object.values(row).some((value) => value !== null && value !== undefined && value !== ''));
 
     if (cleanRows.length === 0) throw new BadRequestException('La importación no contiene filas con datos.');
-    if (cleanRows.length > 200) throw new BadRequestException('La importación genérica no puede superar 200 filas por solicitud.');
+    if (cleanRows.length > 200)
+      throw new BadRequestException('La importación genérica no puede superar 200 filas por solicitud.');
     return cleanRows;
   }
 
   private normalizeImportMode(mode: string): 'create' | 'update' | 'upsert' {
     const normalized = mode.trim().toLowerCase();
     if (['update', 'actualizar', 'patch', 'put'].includes(normalized)) return 'update';
-    if (['upsert', 'crear_actualizar', 'crear-actualizar', 'create_update', 'crear/actualizar'].includes(normalized)) return 'upsert';
+    if (['upsert', 'crear_actualizar', 'crear-actualizar', 'create_update', 'crear/actualizar'].includes(normalized))
+      return 'upsert';
     return 'create';
   }
 
   private async validateRowsForResource(resource: ResourceConfig, rows: Record<string, unknown>[], rawMode: string) {
     const mode = this.normalizeImportMode(rawMode);
-    const columns = await this.dataSource.query(
+    const columns = (await this.dataSource.query(
       `SELECT column_name AS "columnName", is_nullable AS "isNullable", column_default AS "columnDefault"
          FROM information_schema.columns
         WHERE table_schema = $1 AND table_name = $2`,
       [resource.schema, resource.tableName],
-    ) as Array<{ columnName: string; isNullable: string; columnDefault: string | null }>;
+    )) as Array<{ columnName: string; isNullable: string; columnDefault: string | null }>;
     const columnNames = new Set(columns.map((column) => column.columnName));
     const requiredColumns = columns
-      .filter((column) => column.isNullable === 'NO'
-        && !column.columnDefault
-        && !resource.primaryKeys.includes(column.columnName)
-        && !['fecha_registro', 'version_registro', 'estado_registro'].includes(column.columnName))
+      .filter(
+        (column) =>
+          column.isNullable === 'NO' &&
+          !column.columnDefault &&
+          !resource.primaryKeys.includes(column.columnName) &&
+          !['fecha_registro', 'version_registro', 'estado_registro'].includes(column.columnName),
+      )
       .map((column) => column.columnName);
 
     const errors: Array<{ row: number; field?: string; message: string }> = [];
@@ -315,7 +381,8 @@ export class CrudService {
       }
 
       for (const key of Object.keys(row)) {
-        if (!columnNames.has(key)) warnings.push({ row: rowNumber, field: key, message: 'Columna ignorada: no existe en la tabla destino.' });
+        if (!columnNames.has(key))
+          warnings.push({ row: rowNumber, field: key, message: 'Columna ignorada: no existe en la tabla destino.' });
       }
 
       if (mode === 'update') {
@@ -328,8 +395,12 @@ export class CrudService {
 
       if (mode === 'create') {
         for (const requiredColumn of requiredColumns) {
-          const hasDefaultCreateValue = resource.defaultCreateValues && resource.defaultCreateValues[requiredColumn] !== undefined;
-          if (!hasDefaultCreateValue && (row[requiredColumn] === undefined || row[requiredColumn] === null || row[requiredColumn] === '')) {
+          const hasDefaultCreateValue =
+            resource.defaultCreateValues && resource.defaultCreateValues[requiredColumn] !== undefined;
+          if (
+            !hasDefaultCreateValue &&
+            (row[requiredColumn] === undefined || row[requiredColumn] === null || row[requiredColumn] === '')
+          ) {
             errors.push({ row: rowNumber, field: requiredColumn, message: 'Campo obligatorio para crear.' });
           }
         }
@@ -354,7 +425,6 @@ export class CrudService {
     };
   }
 
-
   private normalizeCreateBatchPayload(payload: unknown): Record<string, unknown>[] {
     const candidate = Array.isArray(payload) ? payload : (payload as { items?: unknown })?.items;
 
@@ -370,7 +440,10 @@ export class CrudService {
     });
   }
 
-  private normalizeUpdateBatchPayload(resource: ResourceConfig, payload: unknown): Array<{ ids: Record<string, unknown>; data: Record<string, unknown> }> {
+  private normalizeUpdateBatchPayload(
+    resource: ResourceConfig,
+    payload: unknown,
+  ): Array<{ ids: Record<string, unknown>; data: Record<string, unknown> }> {
     const candidate = Array.isArray(payload) ? payload : (payload as { items?: unknown })?.items;
 
     if (!Array.isArray(candidate) || candidate.length === 0) {
@@ -383,12 +456,14 @@ export class CrudService {
       }
 
       const source = item as Record<string, unknown>;
-      const idsSource = (source.ids && typeof source.ids === 'object' && !Array.isArray(source.ids))
-        ? source.ids as Record<string, unknown>
-        : source;
-      const dataSource = (source.data && typeof source.data === 'object' && !Array.isArray(source.data))
-        ? source.data as Record<string, unknown>
-        : source;
+      const idsSource =
+        source.ids && typeof source.ids === 'object' && !Array.isArray(source.ids)
+          ? (source.ids as Record<string, unknown>)
+          : source;
+      const dataSource =
+        source.data && typeof source.data === 'object' && !Array.isArray(source.data)
+          ? (source.data as Record<string, unknown>)
+          : source;
 
       const ids = resource.primaryKeys.reduce<Record<string, unknown>>((acc, primaryKey) => {
         acc[primaryKey] = idsSource[primaryKey];
@@ -398,8 +473,6 @@ export class CrudService {
       return { ids, data: dataSource };
     });
   }
-
-
 
   private async assertSecurityWriteAllowed(
     resource: ResourceConfig,
@@ -416,14 +489,18 @@ export class CrudService {
     if (resource.schema === 'seguridad' && resource.tableName === 'usuario_permiso') {
       const targetUserId = this.toOptionalString(ids.id_persona ?? payload.id_persona);
       if (targetUserId === String(authUserId) && this.isFalseish(payload.permitido)) {
-        throw new ForbiddenException('No puedes negarte permisos a ti mismo desde usuario_permiso. Usa otro administrador para cambios críticos.');
+        throw new ForbiddenException(
+          'No puedes negarte permisos a ti mismo desde usuario_permiso. Usa otro administrador para cambios críticos.',
+        );
       }
     }
 
     if (resource.schema === 'seguridad' && resource.tableName === 'usuario_rol') {
       const targetUserId = this.toOptionalString(ids.id_persona ?? payload.id_persona);
       if (targetUserId === String(authUserId) && this.isInactiveStatus(payload.estado_registro)) {
-        throw new ForbiddenException('No puedes desactivar tu propio rol. Usa otro administrador para cambios críticos.');
+        throw new ForbiddenException(
+          'No puedes desactivar tu propio rol. Usa otro administrador para cambios críticos.',
+        );
       }
     }
 
@@ -455,7 +532,9 @@ export class CrudService {
     const canAssignRoles = await this.permissions.hasPermission(String(authUserId), 'SISTEMA.USUARIOS.ASIGNAR_ROL');
 
     if (!canManagePermissions && !canManageRoles && !canAssignRoles) {
-      throw new ForbiddenException('Solo un usuario administrador puede modificar roles, permisos o asignaciones de seguridad.');
+      throw new ForbiddenException(
+        'Solo un usuario administrador puede modificar roles, permisos o asignaciones de seguridad.',
+      );
     }
   }
 
@@ -489,7 +568,7 @@ export class CrudService {
 
   private async ensureStudentAccountingAccounts(idEstudiante: number, authUserId?: string): Promise<void> {
     await this.dataSource.transaction(async (manager) => {
-      const estudianteRows = await manager.query(
+      const estudianteRows = (await manager.query(
         `SELECT pe.id_persona,
                 COALESCE(NULLIF(TRIM(CONCAT_WS(' ', p.nombres, p.apellidos)), ''), 'Estudiante ' || pe.id_persona::text) AS nombre_completo
            FROM persona.persona_estudiante pe
@@ -497,7 +576,7 @@ export class CrudService {
           WHERE pe.id_persona = $1
           LIMIT 1`,
         [idEstudiante],
-      ) as Array<{ id_persona: unknown; nombre_completo: unknown }>;
+      )) as Array<{ id_persona: unknown; nombre_completo: unknown }>;
 
       if (!estudianteRows[0]) return;
       const nombre = String(estudianteRows[0].nombre_completo || `Estudiante ${idEstudiante}`).slice(0, 120);
@@ -509,7 +588,13 @@ export class CrudService {
         `CxC estudiante ${idEstudiante} - ${nombre}`,
         authUserId,
       );
-      await this.ensureCuentaAsignacion(manager, 'ESTUDIANTE_CXC', idCuentaCxc, { id_persona_estudiante: idEstudiante }, authUserId);
+      await this.ensureCuentaAsignacion(
+        manager,
+        'ESTUDIANTE_CXC',
+        idCuentaCxc,
+        { id_persona_estudiante: idEstudiante },
+        authUserId,
+      );
 
       const idCuentaPaquete = await this.ensureCuentaByGroupCode(
         manager,
@@ -518,13 +603,19 @@ export class CrudService {
         `Paquetes cobrados por anticipado estudiante ${idEstudiante} - ${nombre}`,
         authUserId,
       );
-      await this.ensureCuentaAsignacion(manager, 'ESTUDIANTE_PAQUETE_DIFERIDO', idCuentaPaquete, { id_persona_estudiante: idEstudiante }, authUserId);
+      await this.ensureCuentaAsignacion(
+        manager,
+        'ESTUDIANTE_PAQUETE_DIFERIDO',
+        idCuentaPaquete,
+        { id_persona_estudiante: idEstudiante },
+        authUserId,
+      );
     });
   }
 
   private async ensureTutorAccountingAccounts(idTutor: number, authUserId?: string): Promise<void> {
     await this.dataSource.transaction(async (manager) => {
-      const tutorRows = await manager.query(
+      const tutorRows = (await manager.query(
         `SELECT pt.id_tutor,
                 COALESCE(NULLIF(TRIM(CONCAT_WS(' ', p.nombres, p.apellidos)), ''), 'Tutor ' || pt.id_tutor::text) AS nombre_completo
            FROM persona.persona_tutor pt
@@ -532,7 +623,7 @@ export class CrudService {
           WHERE pt.id_tutor = $1
           LIMIT 1`,
         [idTutor],
-      ) as Array<{ id_tutor: unknown; nombre_completo: unknown }>;
+      )) as Array<{ id_tutor: unknown; nombre_completo: unknown }>;
 
       if (!tutorRows[0]) return;
       const nombre = String(tutorRows[0].nombre_completo || `Tutor ${idTutor}`).slice(0, 120);
@@ -554,23 +645,28 @@ export class CrudService {
     nombreCuenta: string,
     authUserId?: string,
   ): Promise<number> {
-    const existing = await manager.query(
-      `SELECT id_cuenta FROM contabilidad.cuenta WHERE codigo = $1 LIMIT 1`,
-      [codigoCuenta],
-    ) as Array<{ id_cuenta: unknown }>;
+    const existing = (await manager.query(`SELECT id_cuenta FROM contabilidad.cuenta WHERE codigo = $1 LIMIT 1`, [
+      codigoCuenta,
+    ])) as Array<{
+      id_cuenta: unknown;
+    }>;
     const existingId = this.toOptionalPositiveInt(existing[0]?.id_cuenta);
     if (existingId) return existingId;
 
-    const groupRows = await manager.query(
+    const groupRows = (await manager.query(
       `SELECT id_grupo_cuenta FROM contabilidad.grupo_cuenta WHERE codigo = $1 LIMIT 1`,
       [codigoGrupo],
-    ) as Array<{ id_grupo_cuenta: unknown }>;
+    )) as Array<{
+      id_grupo_cuenta: unknown;
+    }>;
     const idGrupo = this.toOptionalPositiveInt(groupRows[0]?.id_grupo_cuenta);
     if (!idGrupo) {
-      throw new BadRequestException(`No existe el grupo contable ${codigoGrupo}; no se pudo crear la cuenta ${codigoCuenta}.`);
+      throw new BadRequestException(
+        `No existe el grupo contable ${codigoGrupo}; no se pudo crear la cuenta ${codigoCuenta}.`,
+      );
     }
 
-    const rows = await manager.query(
+    const rows = (await manager.query(
       `INSERT INTO contabilidad.cuenta
         (codigo, nombre_cuenta, id_grupo_cuenta, estado_registro, id_usuario_creador)
        VALUES ($1, $2, $3, 'Activo', $4)
@@ -578,7 +674,7 @@ export class CrudService {
          SET nombre_cuenta = EXCLUDED.nombre_cuenta
        RETURNING id_cuenta`,
       [codigoCuenta, nombreCuenta.slice(0, 180), idGrupo, authUserId || null],
-    ) as Array<{ id_cuenta: unknown }>;
+    )) as Array<{ id_cuenta: unknown }>;
 
     return Number(rows[0].id_cuenta);
   }
@@ -590,7 +686,7 @@ export class CrudService {
     ids: { id_persona_estudiante?: number; id_persona_tutor?: number },
     authUserId?: string,
   ): Promise<void> {
-    const rows = await manager.query(
+    const rows = (await manager.query(
       `SELECT id_cuenta_asignacion
          FROM contabilidad.cuenta_asignacion
         WHERE entidad_tipo = $1
@@ -600,16 +696,23 @@ export class CrudService {
           AND COALESCE(estado_registro, 'Activo') IN ('Activo', 'ACTIVO', 'activo')
         LIMIT 1`,
       [entidadTipo, idCuenta, ids.id_persona_estudiante || null, ids.id_persona_tutor || null],
-    ) as Array<{ id_cuenta_asignacion: unknown }>;
+    )) as Array<{ id_cuenta_asignacion: unknown }>;
 
     if (rows[0]) return;
 
-    await manager.query(
-      `INSERT INTO contabilidad.cuenta_asignacion
-        (entidad_tipo, id_persona_estudiante, id_persona_tutor, id_cuenta, prioridad, vigente_desde, estado_registro, id_usuario_creador)
-       VALUES ($1, $2, $3, $4, 1, CURRENT_DATE, 'Activo', $5)`,
-      [entidadTipo, ids.id_persona_estudiante || null, ids.id_persona_tutor || null, idCuenta, authUserId || null],
-    );
+    try {
+      await manager.query(
+        `INSERT INTO contabilidad.cuenta_asignacion
+          (entidad_tipo, id_persona_estudiante, id_persona_tutor, id_cuenta, prioridad, vigente_desde, estado_registro, id_usuario_creador)
+         VALUES ($1, $2, $3, $4, 1, CURRENT_DATE, 'Activo', $5)`,
+        [entidadTipo, ids.id_persona_estudiante || null, ids.id_persona_tutor || null, idCuenta, authUserId || null],
+      );
+    } catch (error) {
+      // Entre la comprobación anterior y este INSERT, otra transacción pudo crear la misma
+      // asignación. El índice único ux_cuenta_asignacion_entidad_cuenta lo detecta; que
+      // exista ya es exactamente el resultado buscado.
+      if ((error as { code?: string })?.code !== '23505') throw error;
+    }
   }
 
   private toOptionalString(value: unknown): string | undefined {
@@ -625,7 +728,6 @@ export class CrudService {
     return parsed;
   }
 
-
   private assertWriteAllowedForSmoke(method: 'POST' | 'UPDATE', resource: ResourceConfig): void {
     const isSmokeDryRun = this.config.get<string>('SMOKE_DRY_RUN_CRUD_WRITES', 'false') === 'true';
     const isTestEnvironment = this.config.get<string>('NODE_ENV', process.env.NODE_ENV || '') === 'test';
@@ -639,7 +741,9 @@ export class CrudService {
 
   private mapIds(resource: ResourceConfig, ids: string[]): Record<string, string> {
     if (ids.length !== resource.primaryKeys.length) {
-      throw new BadRequestException(`El recurso ${resource.entity} requiere ${resource.primaryKeys.length} identificador(es).`);
+      throw new BadRequestException(
+        `El recurso ${resource.entity} requiere ${resource.primaryKeys.length} identificador(es).`,
+      );
     }
 
     return resource.primaryKeys.reduce<Record<string, string>>((acc, primaryKey, index) => {

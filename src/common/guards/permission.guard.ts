@@ -1,14 +1,9 @@
-import {
-  CanActivate,
-  ExecutionContext,
-  ForbiddenException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { CanActivate, ExecutionContext, ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
+import { REQUIRE_PERMISSION_KEY } from '../decorators/require-permission.decorator';
 import { RESOURCE_MODULE_KEY } from '../decorators/resource-module.decorator';
 import { PermissionService } from '../services/permission.service';
 import { AuthUser } from '../types/auth-user.type';
@@ -48,6 +43,23 @@ export class PermissionGuard implements CanActivate {
 
     if (user.es_super_usuario) return true;
 
+    const userId = user.idPersona ?? user.id_persona;
+
+    /**
+     * Los endpoints de ruta literal (sin `:resourcePath`) declaran su permiso con
+     * @RequirePermission. Sin esto el guard no tenía nada que evaluar y dejaba pasar
+     * operaciones contables sensibles a cualquier usuario autenticado.
+     */
+    const explicitPermission = this.reflector.getAllAndOverride<string>(REQUIRE_PERMISSION_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+
+    if (explicitPermission) {
+      await this.assertPermission(String(userId), explicitPermission);
+      return true;
+    }
+
     const moduleName = this.reflector.getAllAndOverride<string>(RESOURCE_MODULE_KEY, [
       context.getHandler(),
       context.getClass(),
@@ -65,14 +77,17 @@ export class PermissionGuard implements CanActivate {
 
     if (!requiredPermission) return true;
 
-    const userId = user.idPersona ?? user.id_persona;
-    const hasPermission = await this.permissions.hasPermission(String(userId), requiredPermission);
-
-    if (!hasPermission) {
-      throw new ForbiddenException(`No tienes permiso para ejecutar ${requiredPermission}.`);
-    }
+    await this.assertPermission(String(userId), requiredPermission);
 
     return true;
+  }
+
+  private async assertPermission(userId: string, permission: string): Promise<void> {
+    const hasPermission = await this.permissions.hasPermission(userId, permission);
+
+    if (!hasPermission) {
+      throw new ForbiddenException(`No tienes permiso para ejecutar ${permission}.`);
+    }
   }
 
   private normalizeParam(value: string | string[] | undefined): string | undefined {

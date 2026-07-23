@@ -12,7 +12,9 @@ const failures = [];
 for (const filePath of walk(sourceRoot)) {
   if (!filePath.endsWith('.ts')) continue;
   const relativePath = path.relative(root, filePath).replaceAll(path.sep, '/');
-  const lineCount = fs.readFileSync(filePath, 'utf8').split(/\r?\n/).length;
+  // Un archivo terminado en salto de línea no tiene una línea final vacía adicional:
+  // `split` la contaba y desplazaba cada medición en +1 respecto a los baselines.
+  const lineCount = fs.readFileSync(filePath, 'utf8').replace(/\r?\n$/, '').split(/\r?\n/).length;
   const exception = exceptions[relativePath];
 
   if (lineCount >= 220) warnings.push(`${relativePath}: ${lineCount} lines`);

@@ -10,7 +10,9 @@ async function main() {
   console.log('Usuario oficial creado/actualizado correctamente.');
   console.log('Email:', officialUser.email);
   console.log('Usuario:', officialUser.username);
-  console.log('Password:', officialUser.password);
+  // La contraseña no se imprime: la salida de estos scripts acaba en registros de consola
+  // y en los logs de CI. Quien ejecuta el seed ya conoce el valor que proporcionó.
+  console.log('Contraseña: la definida en TEST_USER_PASSWORD (no se muestra).');
 }
 
 main().catch((error) => {

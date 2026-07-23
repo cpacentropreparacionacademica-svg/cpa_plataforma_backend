@@ -74,7 +74,10 @@ CREATE SCHEMA deuda;
 -- Name: infraestructura; Type: SCHEMA; Schema: -; Owner: -
 --
 
-CREATE SCHEMA infraestructura;
+-- El runner de migraciones (scripts/migrate-prod.js) crea este esquema antes de
+-- ejecutar cualquier migración, porque allí vive infraestructura.schema_migrations.
+-- Sin IF NOT EXISTS esta migración falla siempre sobre una base de datos vacía.
+CREATE SCHEMA IF NOT EXISTS infraestructura;
 
 
 --

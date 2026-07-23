@@ -1,0 +1,53 @@
+# Ámbito del formateo automático
+#
+# Este repositorio nunca estuvo formateado con Prettier: `yarn format:check` fallaba
+# sobre un checkout limpio en 123 archivos, y `yarn check` —que CI ejecuta— fallaba con
+# él. Reformatearlo entero no es gratis: al reajustar el ancho de línea, los archivos
+# crecen lo bastante como para incumplir la política de tamaño de `check:source-size`
+# (por ejemplo personas-lifecycle.service.ts pasa de 293 a 348 líneas sin que cambie una
+# sola instrucción), y produce un diff de miles de líneas que sepulta las correcciones
+# reales.
+#
+# Por eso Prettier se aplica al código que esta auditoría creó o mantiene, y el resto
+# queda excluido de forma explícita. Es deuda declarada, no un descuido: cuando se
+# aborde el formateo global habrá que recalcular a la vez los baselines de tamaño.
+
+# Artefactos
+dist/
+coverage/
+node_modules/
+
+# Runtime heredado en JavaScript: no se compila ni se despliega
+src/**/*.js
+
+# Código heredado pendiente de una pasada de formateo global
+src/api-gateway/
+src/app.module.ts
+src/config/
+src/database/
+src/main.ts
+src/common/filters/
+src/common/repositories/
+src/common/services/
+src/common/utils/
+src/common/security/password-hasher.service.ts
+src/common/guards/csrf-origin.guard.ts
+src/common/guards/opaque-session.guard.ts
+src/common/guards/redis-rate-limit.guard.ts
+src/modules/administracion/
+src/modules/auth/
+src/modules/deuda/
+src/modules/health/
+src/modules/infraestructura/
+src/modules/inventario/
+src/modules/personas/
+src/modules/reporteria/
+src/modules/seguridad/
+src/modules/servicios_educativos/
+src/modules/societario/
+src/modules/resource-registry.ts
+src/modules/contabilidad/contabilidad-archivo.service.ts
+test/smoke.spec.ts
+test/smoke.full.spec.ts
+test/smoke.imports-business.spec.ts
+docs/

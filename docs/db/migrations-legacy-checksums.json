@@ -1,0 +1,16 @@
+{
+  "_readme": [
+    "Checksums históricos aceptados para migraciones ya aplicadas en entornos existentes.",
+    "Solo debe usarse cuando una migración se corrige SIN cambiar su efecto sobre una base ya migrada",
+    "(por ejemplo, volver idempotente un CREATE SCHEMA que ya se ejecutó).",
+    "Nunca añadir aquí un cambio que altere datos o estructura de una base productiva:",
+    "en ese caso corresponde una migración nueva."
+  ],
+  "001_create_database_schema.sql": [
+    {
+      "checksum": "064017b80c35bee09b66ba1bd043a9e5a63237873bb5c012771f5618234d0746",
+      "reason": "Versión previa con 'CREATE SCHEMA infraestructura;' sin IF NOT EXISTS. Fallaba siempre en bases vacías porque el runner crea ese esquema antes de migrar. El cambio es idempotente y no altera bases ya migradas.",
+      "supersededOn": "2026-07-19"
+    }
+  ]
+}

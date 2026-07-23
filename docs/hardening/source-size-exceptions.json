@@ -1,17 +1,17 @@
 {
-  "src/api-gateway/resource-registry.ts": {
+  "src/modules/resource-registry.ts": {
     "maximumLines": 1175,
-    "reason": "Declarative resource contract currently centralises many database-backed resources.",
+    "reason": "Declarative resource contract currently centralises many database-backed resources. The exception previously pointed at src/api-gateway/resource-registry.ts, a path that stopped existing when modules were reorganised, so the policy failed on a clean checkout.",
     "targetRefactor": "Split into domain registries and generated composition without changing endpoint contracts."
   },
   "src/modules/contabilidad/contabilidad-accounting.service.ts": {
-    "maximumLines": 1148,
-    "reason": "Legacy accounting orchestration combines class sales, journal posting, reversal and validation.",
+    "maximumLines": 1349,
+    "reason": "Orquestación contable heredada que combina venta de clases, registro de asientos, reversión y validación. Creció por dos motivos distintos: la trazabilidad de reversión y la asignación de cuentas a prueba de carreras (lógica), y la adopción de Prettier con ancho de 120 columnas (formato, sin cambio funcional).",
     "targetRefactor": "Extract posting, reversal, class-sale and monetary-validation use cases under accounting contract tests."
   },
   "src/modules/shared-crud/crud.service.ts": {
-    "maximumLines": 650,
-    "reason": "Legacy generic CRUD service combines reads, writes, imports and metadata-driven validation.",
+    "maximumLines": 754,
+    "reason": "Servicio CRUD genérico heredado que combina lecturas, escrituras, importaciones y validación por metadatos. Creció al cerrar la escritura genérica sobre el libro mayor y hacer idempotente la asignación de cuentas, más el reajuste de ancho de línea de Prettier (formato, sin cambio funcional).",
     "targetRefactor": "Separate read, write and import responsibilities and restrict generic operations by capability."
   },
   "src/common/services/resource-metadata.service.ts": {

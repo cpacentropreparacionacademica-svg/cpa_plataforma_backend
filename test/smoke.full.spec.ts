@@ -25,22 +25,104 @@ type CriticalRoute = {
 };
 
 const EXPECTED_OFFICIAL_GROUP_CODES = [
-  '1', '1.1', '1.1.01', '1.1.02', '1.1.02.01', '1.1.02.02', '1.1.08', '1.2', '1.2.01', '1.2.02',
-  '2', '2.1', '2.1.02', '2.1.03', '2.1.04', '2.1.06', '2.2', '2.2.01',
-  '3', '3.1', '3.4', '3.5',
-  '4', '4.1', '4.1.01', '4.1.02', '4.1.03', '4.1.04', '4.2', '4.2.01', '4.2.02',
-  '5', '5.1', '5.2', '5.3', '5.4', '5.5', '5.6',
+  '1',
+  '1.1',
+  '1.1.01',
+  '1.1.02',
+  '1.1.02.01',
+  '1.1.02.02',
+  '1.1.08',
+  '1.2',
+  '1.2.01',
+  '1.2.02',
+  '2',
+  '2.1',
+  '2.1.02',
+  '2.1.03',
+  '2.1.04',
+  '2.1.06',
+  '2.2',
+  '2.2.01',
+  '3',
+  '3.1',
+  '3.4',
+  '3.5',
+  '4',
+  '4.1',
+  '4.1.01',
+  '4.1.02',
+  '4.1.03',
+  '4.1.04',
+  '4.2',
+  '4.2.01',
+  '4.2.02',
+  '5',
+  '5.1',
+  '5.2',
+  '5.3',
+  '5.4',
+  '5.5',
+  '5.6',
 ];
 
 const EXPECTED_OFFICIAL_ACCOUNT_CODES = [
-  '1.1.01.001', '1.1.01.002', '1.1.01.003', '1.1.01.013', '1.1.02.01.001', '1.1.02.02.001', '1.1.08.001',
-  '1.2.01.001', '1.2.01.002', '1.2.01.003', '1.2.01.004', '1.2.01.005', '1.2.01.006', '1.2.01.007', '1.2.01.008', '1.2.01.009', '1.2.01.010',
-  '1.2.02.001', '1.2.02.002', '1.2.02.003', '1.2.02.004',
-  '2.1.02.001', '2.1.03.001', '2.1.04.001', '2.1.04.002', '2.1.06.001', '2.2.01.001', '2.2.01.002',
-  '3.1.001', '3.4.001', '3.5.001',
-  '4.1.01.001', '4.1.02.001', '4.1.03.001', '4.1.04.001', '4.2.01.001', '4.2.02.001',
-  '5.1.001', '5.2.001', '5.2.002', '5.3.001', '5.3.002', '5.3.003', '5.3.004', '5.3.005', '5.3.006', '5.3.007', '5.3.008', '5.3.009',
-  '5.4.001', '5.4.002', '5.4.003', '5.4.004', '5.5.001', '5.5.002', '5.6.001', '5.6.002',
+  '1.1.01.001',
+  '1.1.01.002',
+  '1.1.01.003',
+  '1.1.01.013',
+  '1.1.02.01.001',
+  '1.1.02.02.001',
+  '1.1.08.001',
+  '1.2.01.001',
+  '1.2.01.002',
+  '1.2.01.003',
+  '1.2.01.004',
+  '1.2.01.005',
+  '1.2.01.006',
+  '1.2.01.007',
+  '1.2.01.008',
+  '1.2.01.009',
+  '1.2.01.010',
+  '1.2.02.001',
+  '1.2.02.002',
+  '1.2.02.003',
+  '1.2.02.004',
+  '2.1.02.001',
+  '2.1.03.001',
+  '2.1.04.001',
+  '2.1.04.002',
+  '2.1.06.001',
+  '2.2.01.001',
+  '2.2.01.002',
+  '3.1.001',
+  '3.4.001',
+  '3.5.001',
+  '4.1.01.001',
+  '4.1.02.001',
+  '4.1.03.001',
+  '4.1.04.001',
+  '4.2.01.001',
+  '4.2.02.001',
+  '5.1.001',
+  '5.2.001',
+  '5.2.002',
+  '5.3.001',
+  '5.3.002',
+  '5.3.003',
+  '5.3.004',
+  '5.3.005',
+  '5.3.006',
+  '5.3.007',
+  '5.3.008',
+  '5.3.009',
+  '5.4.001',
+  '5.4.002',
+  '5.4.003',
+  '5.4.004',
+  '5.5.001',
+  '5.5.002',
+  '5.6.001',
+  '5.6.002',
 ];
 
 function configureEnvForSmokeFull(): void {
@@ -70,12 +152,13 @@ async function configureApp(app: INestApplication): Promise<void> {
 
 function expectReached(response: SupertestResponse, label: string): void {
   const message = String(response.body?.message || '').toLowerCase();
-  const missingRoute = message.startsWith('cannot get')
-    || message.startsWith('cannot post')
-    || message.startsWith('cannot put')
-    || message.startsWith('cannot patch')
-    || message.includes('recurso no encontrado')
-    || message.includes('not found');
+  const missingRoute =
+    message.startsWith('cannot get') ||
+    message.startsWith('cannot post') ||
+    message.startsWith('cannot put') ||
+    message.startsWith('cannot patch') ||
+    message.includes('recurso no encontrado') ||
+    message.includes('not found');
   if ([401, 403, 429, 500].includes(response.status) || missingRoute) {
     throw new Error(`${label} devolvió ${response.status}: ${JSON.stringify(response.body)}`);
   }
@@ -91,20 +174,25 @@ function unwrapRows(body: any): unknown[] {
 }
 
 async function tableExists(dataSource: DataSource, schema: string, tableName: string): Promise<boolean> {
-  const rows = await dataSource.query(
+  const rows = (await dataSource.query(
     `SELECT EXISTS (
        SELECT 1 FROM information_schema.tables
        WHERE table_schema = $1 AND table_name = $2
      ) AS exists`,
     [schema, tableName],
-  ) as Array<{ exists: boolean }>;
+  )) as Array<{ exists: boolean }>;
   return Boolean(rows[0]?.exists);
 }
 
-
 async function cleanupSmokeFullData(dataSource: DataSource): Promise<void> {
-  await dataSource.query(`DELETE FROM contabilidad.venta_clase_registro WHERE estudiante_texto LIKE 'SMOKE FULL%' OR tutor_texto LIKE 'SMOKE FULL%'`).catch(() => undefined);
-  await dataSource.query(`
+  await dataSource
+    .query(
+      `DELETE FROM contabilidad.venta_clase_registro WHERE estudiante_texto LIKE 'SMOKE FULL%' OR tutor_texto LIKE 'SMOKE FULL%'`,
+    )
+    .catch(() => undefined);
+  await dataSource
+    .query(
+      `
     DELETE FROM contabilidad.cuenta_asignacion
      WHERE id_persona_estudiante IN (
        SELECT id_persona FROM persona.persona WHERE nombres = 'SMOKE FULL' AND email LIKE 'smoke.%@cpa.com'
@@ -115,16 +203,28 @@ async function cleanupSmokeFullData(dataSource: DataSource): Promise<void> {
             JOIN persona.persona p ON p.id_persona = t.id_persona
            WHERE p.nombres = 'SMOKE FULL' AND p.email LIKE 'smoke.%@cpa.com'
         )
-  `).catch(() => undefined);
-  await dataSource.query(`
+  `,
+    )
+    .catch(() => undefined);
+  await dataSource
+    .query(
+      `
     DELETE FROM persona.persona_tutor
      WHERE id_persona IN (SELECT id_persona FROM persona.persona WHERE nombres = 'SMOKE FULL' AND email LIKE 'smoke.%@cpa.com')
-  `).catch(() => undefined);
-  await dataSource.query(`
+  `,
+    )
+    .catch(() => undefined);
+  await dataSource
+    .query(
+      `
     DELETE FROM persona.persona_estudiante
      WHERE id_persona IN (SELECT id_persona FROM persona.persona WHERE nombres = 'SMOKE FULL' AND email LIKE 'smoke.%@cpa.com')
-  `).catch(() => undefined);
-  await dataSource.query(`DELETE FROM persona.persona WHERE nombres = 'SMOKE FULL' AND email LIKE 'smoke.%@cpa.com'`).catch(() => undefined);
+  `,
+    )
+    .catch(() => undefined);
+  await dataSource
+    .query(`DELETE FROM persona.persona WHERE nombres = 'SMOKE FULL' AND email LIKE 'smoke.%@cpa.com'`)
+    .catch(() => undefined);
 }
 
 describe('CPA Plataforma - smoke FULL sistema interno', () => {
@@ -158,13 +258,17 @@ describe('CPA Plataforma - smoke FULL sistema interno', () => {
     expect(health.status).toBe(200);
     expect(health.body?.success).toBe(true);
 
-    const signup = await agent.post('/api/auth/publicAuth/signup').send({ id_persona: '123', nombre_usuario: 'smoke.public.signup', password: 'SmokePublicSignup2026!' });
+    const signup = await agent
+      .post('/api/auth/publicAuth/signup')
+      .send({ id_persona: '123', nombre_usuario: 'smoke.public.signup', password: 'SmokePublicSignup2026!' });
     expect([400, 403]).toContain(signup.status);
     expect(signup.status).not.toBe(201);
   });
 
   it('hace login por email real @cpa.com y por nombre_usuario', async () => {
-    const emailLogin = await agent.post('/api/auth/publicAuth/login').send({ email: 'pablo.admin@cpa.com', password: 'PabloAdmin2026!' });
+    const emailLogin = await agent
+      .post('/api/auth/publicAuth/login')
+      .send({ email: 'pablo.admin@cpa.com', password: 'PabloAdmin2026!' });
     expectReached(emailLogin, 'login email pablo');
     expect(emailLogin.status).toBe(201);
     expect(emailLogin.body?.data?.sessionToken).toEqual(expect.any(String));
@@ -174,20 +278,22 @@ describe('CPA Plataforma - smoke FULL sistema interno', () => {
     expect(emailLogin.body?.data?.permissionCodes).toContain('SISTEMA.PERMISOS.VER');
     sessionToken = emailLogin.body.data.sessionToken;
 
-    const usernameLogin = await agent.post('/api/auth/publicAuth/login').send({ nombre_usuario: 'pablo.admin', password: 'PabloAdmin2026!' });
+    const usernameLogin = await agent
+      .post('/api/auth/publicAuth/login')
+      .send({ nombre_usuario: 'pablo.admin', password: 'PabloAdmin2026!' });
     expectReached(usernameLogin, 'login usuario pablo');
     expect(usernameLogin.status).toBe(201);
     expect(usernameLogin.body?.data?.sessionToken).toEqual(expect.any(String));
   });
 
   it('valida usuarios reales seed, roles y emails sin .test', async () => {
-    const rows = await dataSource.query(
+    const rows = (await dataSource.query(
       `SELECT p.email, u.nombre_usuario, u.es_super_usuario
          FROM persona.persona p
          JOIN persona.persona_usuario u ON u.id_persona = p.id_persona
         WHERE u.nombre_usuario IN ('pablo.admin', 'maria.contador', 'katia.admin')
         ORDER BY u.nombre_usuario`,
-    ) as Array<{ email: string; nombre_usuario: string; es_super_usuario: boolean }>;
+    )) as Array<{ email: string; nombre_usuario: string; es_super_usuario: boolean }>;
     expect(rows.map((row) => row.nombre_usuario).sort()).toEqual(['katia.admin', 'maria.contador', 'pablo.admin']);
     for (const row of rows) {
       expect(row.email).toMatch(/@cpa\.com$/);
@@ -195,17 +301,16 @@ describe('CPA Plataforma - smoke FULL sistema interno', () => {
     }
   });
 
-
   it('valida plan de cuentas oficial activo y sin cuentas sobrantes visibles', async () => {
-    const activeGroupRows = await dataSource.query(
+    const activeGroupRows = (await dataSource.query(
       `SELECT codigo
          FROM contabilidad.grupo_cuenta
         WHERE COALESCE(estado_registro, 'Activo') IN ('Activo', 'ACTIVO', 'activo')
         ORDER BY codigo`,
-    ) as Array<{ codigo: string }>;
+    )) as Array<{ codigo: string }>;
     expect(activeGroupRows.map((row) => row.codigo).sort()).toEqual([...EXPECTED_OFFICIAL_GROUP_CODES].sort());
 
-    const activeBaseAccountRows = await dataSource.query(
+    const activeBaseAccountRows = (await dataSource.query(
       `SELECT codigo
          FROM contabilidad.cuenta
         WHERE COALESCE(estado_registro, 'Activo') IN ('Activo', 'ACTIVO', 'activo')
@@ -214,30 +319,30 @@ describe('CPA Plataforma - smoke FULL sistema interno', () => {
           AND codigo NOT LIKE '2.1.06.E%'
           AND codigo NOT LIKE '2.1.03.T%'
         ORDER BY codigo`,
-    ) as Array<{ codigo: string }>;
+    )) as Array<{ codigo: string }>;
     expect(activeBaseAccountRows.map((row) => row.codigo).sort()).toEqual([...EXPECTED_OFFICIAL_ACCOUNT_CODES].sort());
 
-    const requiredRows = await dataSource.query(
+    const requiredRows = (await dataSource.query(
       `SELECT codigo, nombre_cuenta
          FROM contabilidad.cuenta
         WHERE codigo IN ('1.1.01.001', '1.1.01.013', '1.1.02.01.001', '2.1.06.001', '4.1.01.001', '5.1.001')
           AND COALESCE(estado_registro, 'Activo') IN ('Activo', 'ACTIVO', 'activo')
         ORDER BY codigo`,
-    ) as Array<{ codigo: string; nombre_cuenta: string }>;
+    )) as Array<{ codigo: string; nombre_cuenta: string }>;
     expect(requiredRows).toHaveLength(6);
     expect(requiredRows.map((row) => row.nombre_cuenta).join(' | ')).toContain('Ingresos por clases');
   });
 
   it('valida balance de apertura MAY26 seed balanceado y sin cuentas fiscales activas', async () => {
-    const fiscalRows = await dataSource.query(
+    const fiscalRows = (await dataSource.query(
       `SELECT codigo
          FROM contabilidad.cuenta
         WHERE COALESCE(estado_registro, 'Activo') IN ('Activo', 'ACTIVO', 'activo')
           AND (codigo LIKE '1.1.07.%' OR codigo LIKE '2.1.05.%' OR LOWER(nombre_cuenta) LIKE '%iva%' OR LOWER(nombre_cuenta) LIKE '%fiscal%')`,
-    ) as Array<{ codigo: string }>;
+    )) as Array<{ codigo: string }>;
     expect(fiscalRows).toHaveLength(0);
 
-    const rows = await dataSource.query(
+    const rows = (await dataSource.query(
       `SELECT t.id_transaccion,
               ROUND(COALESCE(SUM(m.debe), 0)::numeric, 2) AS debe,
               ROUND(COALESCE(SUM(m.haber), 0)::numeric, 2) AS haber
@@ -245,7 +350,7 @@ describe('CPA Plataforma - smoke FULL sistema interno', () => {
          JOIN contabilidad.transaccion_movimiento_cuenta m ON m.id_transaccion = t.id_transaccion
         WHERE t.sub_tipo_transaccion = 'BALANCE_APERTURA_MAY26'
         GROUP BY t.id_transaccion`,
-    ) as Array<{ id_transaccion: number; debe: string; haber: string }>;
+    )) as Array<{ id_transaccion: number; debe: string; haber: string }>;
     expect(rows).toHaveLength(1);
     expect(Number(rows[0].debe)).toBeCloseTo(446695.24, 2);
     expect(Number(rows[0].haber)).toBeCloseTo(446695.24, 2);
@@ -286,11 +391,11 @@ describe('CPA Plataforma - smoke FULL sistema interno', () => {
     const contadorToken = contadorLogin.body?.data?.sessionToken;
     expect(contadorToken).toEqual(expect.any(String));
 
-    const ids = await dataSource.query(
+    const ids = (await dataSource.query(
       `SELECT
          (SELECT id_rol FROM seguridad.rol WHERE codigo = 'CONTADOR' LIMIT 1) AS id_rol,
          (SELECT id_permiso FROM seguridad.permiso WHERE codigo = 'SISTEMA.PERMISOS.GESTIONAR' LIMIT 1) AS id_permiso`,
-    ) as Array<{ id_rol: number; id_permiso: number }>;
+    )) as Array<{ id_rol: number; id_permiso: number }>;
     expect(ids[0]?.id_rol).toBeTruthy();
     expect(ids[0]?.id_permiso).toBeTruthy();
 
@@ -355,7 +460,10 @@ describe('CPA Plataforma - smoke FULL sistema interno', () => {
     ];
 
     for (const route of criticalRoutes) {
-      const response = await agent.get(route.url).set('X-Session-Token', sessionToken).query({ limit: 50, orderDir: 'ASC' });
+      const response = await agent
+        .get(route.url)
+        .set('X-Session-Token', sessionToken)
+        .query({ limit: 50, orderDir: 'ASC' });
       expectReached(response, route.name);
       expect(response.status).toBe(200);
       const rows = unwrapRows(response.body);
@@ -372,22 +480,30 @@ describe('CPA Plataforma - smoke FULL sistema interno', () => {
 
     expectReached(response, 'reporteria contable powerbi movimientos');
     expect(response.status).toBe(200);
-    expect(response.body?.metadata?.origen || response.body?.data?.metadata?.origen).toBe('contabilidad.v_powerbi_contable_movimiento');
+    expect(response.body?.metadata?.origen || response.body?.data?.metadata?.origen).toBe(
+      'contabilidad.v_powerbi_contable_movimiento',
+    );
     const metadata = response.body?.metadata || response.body?.data?.metadata;
     const movimientos = response.body?.movimientos || response.body?.data?.movimientos;
     expect(Array.isArray(movimientos)).toBe(true);
-    expect(Array.isArray(metadata?.cuentasEfectivo || metadata?.cuentas_efectivo)).toBe(true);
-    expect((metadata?.cuentasEfectivo || metadata?.cuentas_efectivo).length).toBeGreaterThanOrEqual(1);
+    const cuentasEfectivo = metadata?.cuentasEfectivo || metadata?.cuentas_efectivo;
+    expect(Array.isArray(cuentasEfectivo)).toBe(true);
+    expect(cuentasEfectivo.length).toBeGreaterThanOrEqual(1);
   }, 60000);
 
   it('valida seeds académicos mínimos y configuración contable operativa', async () => {
-    const checks = await dataSource.query(
+    const checks = (await dataSource.query(
       `SELECT
         (SELECT COUNT(*)::int FROM servicios_educativos.materia_tree) AS materia_tree,
         (SELECT COUNT(*)::int FROM persona.unidad_educativa) AS unidad_educativa,
         (SELECT COUNT(*)::int FROM servicios_educativos.producto_educativo) AS producto_educativo,
         (SELECT COUNT(*)::int FROM contabilidad.configuracion_cuenta_operativa WHERE codigo IN ('CANAL_COBRO_EFECTIVO','CANAL_COBRO_QR','INGRESO_CLASE_POR_HORA')) AS cuentas_operativas`,
-    ) as Array<{ materia_tree: number; unidad_educativa: number; producto_educativo: number; cuentas_operativas: number }>;
+    )) as Array<{
+      materia_tree: number;
+      unidad_educativa: number;
+      producto_educativo: number;
+      cuentas_operativas: number;
+    }>;
     expect(checks[0].materia_tree).toBeGreaterThanOrEqual(180);
     expect(checks[0].unidad_educativa).toBeGreaterThanOrEqual(90);
     expect(checks[0].producto_educativo).toBeGreaterThanOrEqual(30);
@@ -397,16 +513,24 @@ describe('CPA Plataforma - smoke FULL sistema interno', () => {
   it('valida creación transaccional estudiante/tutor y generación automática de cuentas asociadas', async () => {
     await cleanupSmokeFullData(dataSource);
 
-    const directPersonaCreate = await agent.post('/api/personas/persona')
+    const directPersonaCreate = await agent
+      .post('/api/personas/persona')
       .set('X-Session-Token', sessionToken)
       .send({ nombres: 'SMOKE FULL', apellidos: 'FRAGMENTADO', email: `smoke.fragmentado.${smokeRunId}@cpa.com` });
     expect(directPersonaCreate.status).toBe(400);
     expect(String(directPersonaCreate.body?.message || '').toLowerCase()).toContain('creación fragmentada');
 
-    const estudiante = await agent.post('/api/personas/estudiante/registrar')
+    const estudiante = await agent
+      .post('/api/personas/estudiante/registrar')
       .set('X-Session-Token', sessionToken)
       .send({
-        persona: { id_persona: smokeEstudianteId, nombres: 'SMOKE FULL', apellidos: 'ESTUDIANTE', telefono: '70000001', email: `smoke.estudiante.${smokeRunId}@cpa.com` },
+        persona: {
+          id_persona: smokeEstudianteId,
+          nombres: 'SMOKE FULL',
+          apellidos: 'ESTUDIANTE',
+          telefono: '70000001',
+          email: `smoke.estudiante.${smokeRunId}@cpa.com`,
+        },
         estudiante: { tipo: 'COLEGIAL', nivel_actual: 'SECUNDARIA', curso_actual: 'SEXTO', turno_actual: 'MAÑANA' },
       });
     expectReached(estudiante, 'registrar estudiante smoke');
@@ -414,23 +538,35 @@ describe('CPA Plataforma - smoke FULL sistema interno', () => {
     expect(estudiante.body?.data?.persona?.id_persona).toBeTruthy();
     expect(estudiante.body?.data?.estudiante?.id_persona).toBeTruthy();
 
-    const tutor = await agent.post('/api/personas/tutor/registrar')
+    const tutor = await agent
+      .post('/api/personas/tutor/registrar')
       .set('X-Session-Token', sessionToken)
       .send({
-        persona: { id_persona: smokeTutorPersonaId, nombres: 'SMOKE FULL', apellidos: 'TUTOR', telefono: '70000002', email: `smoke.tutor.${smokeRunId}@cpa.com` },
-        tutor: { pago_por_hora: 45, nivel_experiencia: 'SENIOR', tipo_estudiante_especialidad: 'COLEGIAL', nivel_estudiante_especialidad: 'SECUNDARIA' },
+        persona: {
+          id_persona: smokeTutorPersonaId,
+          nombres: 'SMOKE FULL',
+          apellidos: 'TUTOR',
+          telefono: '70000002',
+          email: `smoke.tutor.${smokeRunId}@cpa.com`,
+        },
+        tutor: {
+          pago_por_hora: 45,
+          nivel_experiencia: 'SENIOR',
+          tipo_estudiante_especialidad: 'COLEGIAL',
+          nivel_estudiante_especialidad: 'SECUNDARIA',
+        },
       });
     expectReached(tutor, 'registrar tutor smoke');
     expect([201, 200]).toContain(tutor.status);
 
-    const rows = await dataSource.query(
+    const rows = (await dataSource.query(
       `SELECT entidad_tipo, COUNT(*)::int AS count
          FROM contabilidad.cuenta_asignacion
         WHERE (id_persona_estudiante = $1 OR id_persona_tutor = $2)
           AND entidad_tipo IN ('ESTUDIANTE_CXC','ESTUDIANTE_PAQUETE_DIFERIDO','TUTOR_CXP')
         GROUP BY entidad_tipo`,
       [smokeEstudianteId, Number(tutor.body?.data?.tutor?.id_tutor)],
-    ) as Array<{ entidad_tipo: string; count: number }>;
+    )) as Array<{ entidad_tipo: string; count: number }>;
     const map = Object.fromEntries(rows.map((row) => [row.entidad_tipo, row.count]));
     expect(map.ESTUDIANTE_CXC).toBeGreaterThanOrEqual(1);
     expect(map.ESTUDIANTE_PAQUETE_DIFERIDO).toBeGreaterThanOrEqual(1);
@@ -438,54 +574,67 @@ describe('CPA Plataforma - smoke FULL sistema interno', () => {
   }, 60000);
 
   it('valida flujo completo venta-clase: clase + venta + detalle + asiento balanceado', async () => {
-    const tutorRows = await dataSource.query(`SELECT id_tutor FROM persona.persona_tutor WHERE id_persona = $1 LIMIT 1`, [smokeTutorPersonaId]) as Array<{ id_tutor: number }>;
-    const materiaRows = await dataSource.query(`SELECT id_tree FROM servicios_educativos.materia_tree ORDER BY id_tree LIMIT 1`) as Array<{ id_tree: number }>;
-    const productoRows = await dataSource.query(`SELECT id_producto_educativo FROM servicios_educativos.producto_educativo ORDER BY id_producto_educativo LIMIT 1`) as Array<{ id_producto_educativo: number }>;
+    const tutorRows = (await dataSource.query(
+      `SELECT id_tutor FROM persona.persona_tutor WHERE id_persona = $1 LIMIT 1`,
+      [smokeTutorPersonaId],
+    )) as Array<{ id_tutor: number }>;
+    const materiaRows = (await dataSource.query(
+      `SELECT id_tree FROM servicios_educativos.materia_tree ORDER BY id_tree LIMIT 1`,
+    )) as Array<{ id_tree: number }>;
+    const productoRows = (await dataSource.query(
+      `SELECT id_producto_educativo FROM servicios_educativos.producto_educativo ORDER BY id_producto_educativo LIMIT 1`,
+    )) as Array<{ id_producto_educativo: number }>;
     const suffix = Date.now();
-    const sucursalRows = await dataSource.query(
+    const sucursalRows = (await dataSource.query(
       `INSERT INTO infraestructura.sucursal (codigo, nombre, estado_registro)
        VALUES ($1, 'Sucursal Smoke Full', 'Activo')
        RETURNING id_sucursal`,
       [`SMOKE-FULL-SUC-${suffix}`],
-    ) as Array<{ id_sucursal: number }>;
-    const edificioRows = await dataSource.query(
+    )) as Array<{ id_sucursal: number }>;
+    const edificioRows = (await dataSource.query(
       `INSERT INTO infraestructura.edificio (id_sucursal, codigo, nombre, estado_registro)
        VALUES ($1, $2, 'Edificio Smoke Full', 'Activo')
        RETURNING id_edificio`,
       [sucursalRows[0].id_sucursal, `SMOKE-FULL-EDI-${suffix}`],
-    ) as Array<{ id_edificio: number }>;
-    const aula = await agent.post('/api/infraestructura/aula')
-      .set('X-Session-Token', sessionToken)
-      .send({ id_edificio: edificioRows[0].id_edificio, tipo_aula: 'TEORIA', nombre: 'Aula Smoke Full', capacidad: 10 });
+    )) as Array<{ id_edificio: number }>;
+    const aula = await agent.post('/api/infraestructura/aula').set('X-Session-Token', sessionToken).send({
+      id_edificio: edificioRows[0].id_edificio,
+      tipo_aula: 'TEORIA',
+      nombre: 'Aula Smoke Full',
+      capacidad: 10,
+    });
     expectReached(aula, 'crear aula alias');
     expect([201, 200]).toContain(aula.status);
 
-    const response = await agent.post('/api/contabilidad/venta-clase/registrar-batch')
+    const response = await agent
+      .post('/api/contabilidad/venta-clase/registrar-batch')
       .set('X-Session-Token', sessionToken)
       .send({
         fecha: '2026-06-25',
-        items: [{
-          hora_ingreso: '08:00',
-          hora_salida: '09:00',
-          id_estudiante: smokeEstudianteId,
-          nombre_estudiante: 'SMOKE FULL ESTUDIANTE',
-          id_tutor: Number(tutorRows[0].id_tutor),
-          nombre_tutor: 'SMOKE FULL TUTOR',
-          id_aula: Number(aula.body?.data?.id_espacio),
-          id_materia_tree: Number(materiaRows[0].id_tree),
-          id_producto_educativo: Number(productoRows[0].id_producto_educativo),
-          materia: 'Matemáticas',
-          tema: 'Smoke',
-          subtema: 'Smoke',
-          motivo_clase: 'NIVELACIÓN',
-          efectivo: 50,
-          qr: 20,
-          cxc: 30,
-          paquete: 0,
-          precio_unitario: 100,
-          cantidad: 1,
-          situacion_base: 'SMOKE_FULL',
-        }],
+        items: [
+          {
+            hora_ingreso: '08:00',
+            hora_salida: '09:00',
+            id_estudiante: smokeEstudianteId,
+            nombre_estudiante: 'SMOKE FULL ESTUDIANTE',
+            id_tutor: Number(tutorRows[0].id_tutor),
+            nombre_tutor: 'SMOKE FULL TUTOR',
+            id_aula: Number(aula.body?.data?.id_espacio),
+            id_materia_tree: Number(materiaRows[0].id_tree),
+            id_producto_educativo: Number(productoRows[0].id_producto_educativo),
+            materia: 'Matemáticas',
+            tema: 'Smoke',
+            subtema: 'Smoke',
+            motivo_clase: 'NIVELACIÓN',
+            efectivo: 50,
+            qr: 20,
+            cxc: 30,
+            paquete: 0,
+            precio_unitario: 100,
+            cantidad: 1,
+            situacion_base: 'SMOKE_FULL',
+          },
+        ],
       });
     expectReached(response, 'venta clase batch');
     expect(response.status).toBe(201);
@@ -500,7 +649,9 @@ describe('CPA Plataforma - smoke FULL sistema interno', () => {
     expect(Number(registro.transaccion_venta?.monto_impuesto || 0)).toBe(0);
     expect(Number(registro.detalle_venta?.monto_impuesto || 0)).toBe(0);
     expect(registro.venta_clase_registro).toBeTruthy();
-    expect(Number(registro.venta_clase_registro?.id_transaccion_venta)).toBe(Number(registro.transaccion_venta?.id_transaccion));
+    expect(Number(registro.venta_clase_registro?.id_transaccion_venta)).toBe(
+      Number(registro.transaccion_venta?.id_transaccion),
+    );
   }, 60000);
 
   it('cierra sesión', async () => {

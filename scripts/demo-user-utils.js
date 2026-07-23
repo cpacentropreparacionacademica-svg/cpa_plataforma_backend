@@ -1,8 +1,7 @@
 /* eslint-disable no-console */
 const fs = require('fs');
 const path = require('path');
-const crypto = require('crypto');
-const { Client } = require('pg');
+const { assertNotProduction, createSecurePgClient, hashPassword } = require('./seed-security');
 
 function loadEnvFile(filePath) {
   if (!fs.existsSync(filePath)) return;
@@ -26,10 +25,10 @@ function loadEnvFile(filePath) {
   }
 }
 
+/** `.env.example` es una plantilla con valores de relleno, no configuración: no se carga. */
 function loadProjectEnv(rootDir = path.resolve(__dirname, '..')) {
   loadEnvFile(path.join(rootDir, '.env.test'));
   loadEnvFile(path.join(rootDir, '.env'));
-  loadEnvFile(path.join(rootDir, '.env.example'));
 }
 
 function firstEnv(...keys) {
@@ -40,15 +39,20 @@ function firstEnv(...keys) {
   return undefined;
 }
 
+/**
+ * Solo se leen nombres con prefijo TEST_USER_. Los alias genéricos (`USERNAME`,
+ * `PASSWORD`, `EMAIL`...) colisionan con variables del sistema operativo y de CI: en
+ * Windows `USERNAME` siempre está definida con la cuenta de la sesión.
+ */
 function getTestUserFromEnv() {
-  const email = firstEnv('TEST_USER_EMAIL', 'Email', 'EMAIL') || 'admin.demo@cpa.test';
-  const username = firstEnv('TEST_USER_USERNAME', 'Usuario', 'USUARIO', 'USERNAME') || 'admin.demo';
-  const password = firstEnv('TEST_USER_PASSWORD', 'Password', 'PASSWORD') || 'DemoAdmin123!';
-  const idPersona = Number(firstEnv('TEST_USER_ID', 'IdPersona', 'ID_PERSONA') || 900001);
-  const firstName = firstEnv('TEST_USER_FIRST_NAME', 'Nombres') || 'Admin';
-  const lastName = firstEnv('TEST_USER_LAST_NAME', 'Apellidos') || 'Demo';
-  const phone = firstEnv('TEST_USER_PHONE', 'Telefono') || '70000000';
-  const userType = firstEnv('TEST_USER_TYPE', 'TipoUsuario') || 'ADMIN_DEMO';
+  const email = firstEnv('TEST_USER_EMAIL') || 'admin.demo@cpa.test';
+  const username = firstEnv('TEST_USER_USERNAME') || 'admin.demo';
+  const password = firstEnv('TEST_USER_PASSWORD') || 'DemoAdmin123!';
+  const idPersona = Number(firstEnv('TEST_USER_ID') || 900001);
+  const firstName = firstEnv('TEST_USER_FIRST_NAME') || 'Admin';
+  const lastName = firstEnv('TEST_USER_LAST_NAME') || 'Demo';
+  const phone = firstEnv('TEST_USER_PHONE') || '70000000';
+  const userType = firstEnv('TEST_USER_TYPE') || 'ADMIN_DEMO';
 
   if (!Number.isInteger(idPersona) || idPersona <= 0) {
     throw new Error('TEST_USER_ID debe ser un entero positivo.');
@@ -57,28 +61,25 @@ function getTestUserFromEnv() {
   return { idPersona, email, username, password, firstName, lastName, phone, userType };
 }
 
-function sha256(value) {
-  return crypto.createHash('sha256').update(String(value)).digest('hex');
-}
-
 function createPgClient() {
-  return new Client({
-    host: process.env.PGHOST || 'localhost',
-    port: Number(process.env.PGPORT || 5432),
-    database: process.env.PGDATABASE || 'neondb',
-    user: process.env.PGUSER || 'postgres',
-    password: process.env.PGPASSWORD || 'postgres',
-    ssl: process.env.PGSSLMODE === 'require' ? { rejectUnauthorized: false } : false,
-  });
+  return createSecurePgClient('cpa-seed-demo');
 }
 
+/**
+ * Delimita la limpieza a la cuenta de demostración sembrada.
+ *
+ * El ámbito anterior seleccionaba por `tipo_usuario` ('DEMO', 'TEST', 'ADMIN_DEMO') y por
+ * nombres genéricos ('demo', 'test'), de modo que alcanzaba a cualquier cuenta que
+ * coincidiera, no solo a la creada por este seed. El rango
+ * TEST_USER_CLEAN_ID_FROM/TO se leía pero no se usaba en ninguna consulta.
+ */
 async function cleanDemoData(client, testUser = getTestUserFromEnv()) {
   const cleanIdFrom = Number(firstEnv('TEST_USER_CLEAN_ID_FROM') || 900001);
   const cleanIdTo = Number(firstEnv('TEST_USER_CLEAN_ID_TO') || 900099);
-  // No limpiar por dominio completo. En Neon/Render el mismo dominio puede contener usuarios reales
-  // (@cpa.com), y borrar por LIKE %@dominio vuelve el smoke peligroso y no idempotente.
-  const demoUsernames = [testUser.username, 'admin.demo', 'demo', 'test', 'usuario.demo'];
-  const demoTypes = [testUser.userType, 'ADMIN_DEMO', 'DEMO', 'TEST'];
+
+  if (!Number.isInteger(cleanIdFrom) || !Number.isInteger(cleanIdTo) || cleanIdFrom > cleanIdTo) {
+    throw new Error('TEST_USER_CLEAN_ID_FROM y TEST_USER_CLEAN_ID_TO deben ser enteros con FROM <= TO.');
+  }
 
   await client.query(`DROP TABLE IF EXISTS pg_temp.tmp_demo_personas`);
   await client.query(`CREATE TEMP TABLE tmp_demo_personas (id_persona bigint PRIMARY KEY) ON COMMIT DROP`);
@@ -90,21 +91,15 @@ async function cleanDemoData(client, testUser = getTestUserFromEnv()) {
        SELECT p.id_persona
        FROM persona.persona p
        WHERE p.id_persona = $1
-          OR LOWER(COALESCE(p.email, '')) = LOWER($2)
+          OR (LOWER(COALESCE(p.email, '')) = LOWER($2) AND p.id_persona BETWEEN $4 AND $5)
        UNION
        SELECT u.id_persona
        FROM persona.persona_usuario u
        WHERE u.id_persona = $1
-          OR LOWER(u.nombre_usuario) = ANY($3::text[])
-          OR UPPER(COALESCE(u.tipo_usuario, '')) = ANY($4::text[])
+          OR (LOWER(u.nombre_usuario) = LOWER($3) AND u.id_persona BETWEEN $4 AND $5)
      ) demo_scope
      ON CONFLICT (id_persona) DO NOTHING`,
-    [
-      testUser.idPersona,
-      testUser.email,
-      demoUsernames.map((value) => value.toLowerCase()),
-      demoTypes.map((value) => value.toUpperCase()),
-    ],
+    [testUser.idPersona, testUser.email, testUser.username, cleanIdFrom, cleanIdTo],
   );
 
   await client.query(
@@ -161,6 +156,8 @@ async function cleanDemoData(client, testUser = getTestUserFromEnv()) {
 }
 
 async function seedDemoUser(options = {}) {
+  assertNotProduction('El sembrado de datos de demostración');
+
   const rootDir = options.rootDir || path.resolve(__dirname, '..');
   loadProjectEnv(rootDir);
 
@@ -223,7 +220,7 @@ async function seedDemoUser(options = {}) {
          fecha_modificacion = NOW(),
          version_registro = COALESCE(persona.persona_usuario.version_registro, 1) + 1,
          es_super_usuario = true`,
-      [testUser.idPersona, testUser.username, sha256(testUser.password), testUser.userType],
+      [testUser.idPersona, testUser.username, hashPassword(testUser.password), testUser.userType],
     );
 
     await client.query(
@@ -267,6 +264,8 @@ async function seedDemoUser(options = {}) {
 }
 
 async function runCleanDemoData(options = {}) {
+  assertNotProduction('La limpieza de datos de demostración');
+
   const rootDir = options.rootDir || path.resolve(__dirname, '..');
   loadProjectEnv(rootDir);
 

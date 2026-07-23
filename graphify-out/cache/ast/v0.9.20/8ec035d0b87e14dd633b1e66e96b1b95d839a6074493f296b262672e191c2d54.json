@@ -1,0 +1,1 @@
+{"nodes": [{"id": "c_users_usuario_downloads_entrypoint_github_cpa_plataforma_backend_docs_db_reset_000_drop_existing_tables_if_exists_sql", "label": "000_drop_existing_tables_if_exists.sql", "file_type": "code", "source_file": "docs/db/reset/000_drop_existing_tables_if_exists.sql", "source_location": null}], "edges": []}
