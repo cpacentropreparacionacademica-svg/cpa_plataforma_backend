@@ -26,6 +26,14 @@ export interface ListResult {
   offset: number;
 }
 
+// Recursos "hijos" de persona (estudiante, tutor, usuario): esquema/tabla de la persona base
+// y columnas editables que se exponen en lectura y se aceptan en update. Ninguna de estas
+// columnas existe en las tablas hijas, por lo que el split de payload es inequívoco.
+const PERSONA_JOIN_SCHEMA = 'persona';
+const PERSONA_JOIN_TABLE = 'persona';
+const PERSONA_JOIN_COLUMNS = ['nombres', 'apellidos', 'telefono', 'fecha_nacimiento', 'email'] as const;
+const PERSONA_METADATA_RESOURCE = { schema: PERSONA_JOIN_SCHEMA, tableName: PERSONA_JOIN_TABLE } as ResourceConfig;
+
 @Injectable()
 export class CrudRepository {
   constructor(private readonly dataSource: DataSource, private readonly metadata: ResourceMetadataService) {}
@@ -66,6 +74,11 @@ export class CrudRepository {
 
   async update(resource: ResourceConfig, idValues: Record<string, unknown>, payload: Record<string, unknown>, authUserId?: string): Promise<Record<string, unknown>> {
     try {
+      // El update de un recurso hijo de persona toca dos tablas (hijo + persona): se
+      // ejecuta en una transacción para que ambos cambios sean atómicos.
+      if (resource.personaJoin) {
+        return await this.dataSource.transaction((manager) => this.updateOne(manager, resource, idValues, payload, authUserId));
+      }
       return await this.updateOne(this.dataSource.manager, resource, idValues, payload, authUserId);
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
@@ -106,6 +119,17 @@ export class CrudRepository {
 
   async get(resource: ResourceConfig, idValues: Record<string, unknown>): Promise<Record<string, unknown>> {
     const table = quoteTable(resource.schema, resource.tableName);
+
+    if (resource.personaJoin) {
+      const where = this.buildWhereSql(resource, idValues, 1, 'c');
+      const rows = await this.dataSource.query(
+        `SELECT c.*, ${this.personaSelectColumns()} FROM ${table} c ${this.personaJoinClause(resource)} WHERE ${where.sql} LIMIT 1`,
+        where.values,
+      ) as Record<string, unknown>[];
+      if (!rows[0]) throw new NotFoundException(`No se encontró el registro de ${resource.entity}.`);
+      return rows[0];
+    }
+
     const where = this.buildWhereSql(resource, idValues, 1);
     const rows = await this.dataSource.query(`SELECT * FROM ${table} WHERE ${where.sql} LIMIT 1`, where.values) as Record<string, unknown>[];
     if (!rows[0]) throw new NotFoundException(`No se encontró el registro de ${resource.entity}.`);
@@ -115,6 +139,11 @@ export class CrudRepository {
   async list(resource: ResourceConfig, query: Record<string, unknown>): Promise<ListResult> {
     const columnNames = await this.metadata.getColumnNames(resource);
     const table = quoteTable(resource.schema, resource.tableName);
+    // Cuando el recurso es hijo de persona, la tabla hija se aliasa como "c" para poder
+    // unir la persona base ("p"); las columnas del hijo deben cualificarse para evitar
+    // ambigüedad (p. ej. id_persona/estado_registro existen en ambas tablas).
+    const alias = resource.personaJoin ? 'c' : '';
+    const qualify = (column: string) => (alias ? `${alias}.${quoteIdentifier(column)}` : quoteIdentifier(column));
     // Los aliases lógicos, por ejemplo infraestructura/aula, pueden imponer filtros
     // no editables por frontend. Esto evita exponer salas cuando la pantalla pide aulas.
     const effectiveQuery: Record<string, unknown> = { ...query, ...(resource.defaultFilters || {}) };
@@ -134,19 +163,24 @@ export class CrudRepository {
       // estado_registro históricamente se guardó como 'Activo', 'ACTIVO' o 'activo'.
       // El frontend puede enviar cualquiera; el listado no debe ocultar registros por mayúsculas/minúsculas.
       if (key === 'estado_registro' && typeof value === 'string') {
-        filters.push(`LOWER(${quoteIdentifier(key)}) = LOWER($${paramIndex})`);
+        filters.push(`LOWER(${qualify(key)}) = LOWER($${paramIndex})`);
         continue;
       }
 
-      filters.push(`${quoteIdentifier(key)} = $${paramIndex}`);
+      filters.push(`${qualify(key)} = $${paramIndex}`);
     }
 
     const whereSql = filters.length > 0 ? `WHERE ${filters.join(' AND ')}` : '';
     const orderBy = typeof effectiveQuery.orderBy === 'string' && columnNames.has(effectiveQuery.orderBy) ? effectiveQuery.orderBy : resource.primaryKeys[0];
     const orderDir = String(effectiveQuery.orderDir || 'DESC').toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
-    const countRows = await this.dataSource.query(`SELECT COUNT(*)::int AS count FROM ${table} ${whereSql}`, values) as Array<{ count: number }>;
+
+    const selectColumns = resource.personaJoin ? `c.*, ${this.personaSelectColumns()}` : '*';
+    const fromSql = resource.personaJoin ? `${table} c ${this.personaJoinClause(resource)}` : `${table}`;
+    const countFromSql = resource.personaJoin ? `${table} c` : `${table}`;
+
+    const countRows = await this.dataSource.query(`SELECT COUNT(*)::int AS count FROM ${countFromSql} ${whereSql}`, values) as Array<{ count: number }>;
     const rows = await this.dataSource.query(
-      `SELECT * FROM ${table} ${whereSql} ORDER BY ${quoteIdentifier(orderBy)} ${orderDir} LIMIT $${values.length + 1} OFFSET $${values.length + 2}`,
+      `SELECT ${selectColumns} FROM ${fromSql} ${whereSql} ORDER BY ${qualify(orderBy)} ${orderDir} LIMIT $${values.length + 1} OFFSET $${values.length + 2}`,
       [...values, limit, offset],
     ) as Record<string, unknown>[];
 
@@ -191,6 +225,10 @@ export class CrudRepository {
     payload: Record<string, unknown>,
     authUserId?: string,
   ): Promise<Record<string, unknown>> {
+    if (resource.personaJoin) {
+      return this.updatePersonaChild(manager, resource, idValues, payload, authUserId);
+    }
+
     const columnNames = await this.metadata.getColumnNames(resource);
     const cleanPayload = this.cleanPayload(payload, columnNames, true);
 
@@ -225,6 +263,104 @@ export class CrudRepository {
     return rows[0];
   }
 
+  /**
+   * Update de un recurso hijo de persona (estudiante, tutor, usuario). Divide el payload:
+   * los campos de persona (nombres, apellidos, etc.) actualizan persona.persona; el resto,
+   * la tabla hija. Ambos writes ocurren con el mismo `manager` (transacción). Devuelve el
+   * registro hijo combinado con los datos actuales de persona.
+   */
+  private async updatePersonaChild(
+    manager: EntityManager,
+    resource: ResourceConfig,
+    idValues: Record<string, unknown>,
+    payload: Record<string, unknown>,
+    authUserId?: string,
+  ): Promise<Record<string, unknown>> {
+    const childColumns = await this.metadata.getColumnNames(resource);
+    const childClean = this.cleanPayload(payload, childColumns, true);
+    for (const primaryKey of resource.primaryKeys) {
+      delete childClean[primaryKey];
+    }
+
+    // Campos de persona presentes en el payload. No se solapan con columnas del hijo.
+    const personaClean: Record<string, unknown> = {};
+    for (const column of PERSONA_JOIN_COLUMNS) {
+      const value = payload[column];
+      if (value !== undefined && !childColumns.has(column)) personaClean[column] = value;
+    }
+
+    const hasChildChanges = Object.keys(childClean).length > 0;
+    const hasPersonaChanges = Object.keys(personaClean).length > 0;
+    if (!hasChildChanges && !hasPersonaChanges) {
+      throw new BadRequestException('No existen campos válidos para actualizar el registro.');
+    }
+
+    const table = quoteTable(resource.schema, resource.tableName);
+
+    // Actualiza (o localiza) la fila hija para conocer el id_persona y devolver el registro.
+    let childRow: Record<string, unknown> | undefined;
+    if (hasChildChanges) {
+      if (authUserId && childColumns.has('id_usuario_modificacion') && childClean.id_usuario_modificacion === undefined) {
+        childClean.id_usuario_modificacion = authUserId;
+      }
+      if (childColumns.has('fecha_modificacion') && childClean.fecha_modificacion === undefined) {
+        childClean.fecha_modificacion = new Date();
+      }
+      const fields = Object.keys(childClean);
+      const setSql = fields.map((field, index) => `${quoteIdentifier(field)} = $${index + 1}`).join(', ');
+      const values = fields.map((field) => childClean[field]);
+      const where = this.buildWhereSql(resource, idValues, values.length + 1);
+      const rows = await manager.query(`UPDATE ${table} SET ${setSql} WHERE ${where.sql} RETURNING *`, [...values, ...where.values]) as Record<string, unknown>[];
+      childRow = rows[0];
+    } else {
+      const where = this.buildWhereSql(resource, idValues, 1);
+      const rows = await manager.query(`SELECT * FROM ${table} WHERE ${where.sql} LIMIT 1`, where.values) as Record<string, unknown>[];
+      childRow = rows[0];
+    }
+
+    if (!childRow) throw new NotFoundException(`No se encontró el registro de ${resource.entity}.`);
+
+    const idPersona = childRow[resource.personaJoin!.personaFkColumn];
+    const personaTable = quoteTable(PERSONA_JOIN_SCHEMA, PERSONA_JOIN_TABLE);
+    const personaReturning = PERSONA_JOIN_COLUMNS.map((column) => quoteIdentifier(column)).join(', ');
+
+    if (hasPersonaChanges && idPersona !== undefined && idPersona !== null) {
+      const personaColumns = await this.metadata.getColumnNames(PERSONA_METADATA_RESOURCE);
+      if (authUserId && personaColumns.has('id_usuario_modificacion')) personaClean.id_usuario_modificacion = authUserId;
+      if (personaColumns.has('fecha_modificacion')) personaClean.fecha_modificacion = new Date();
+
+      const fields = Object.keys(personaClean).filter((field) => personaColumns.has(field));
+      const setSql = fields.map((field, index) => `${quoteIdentifier(field)} = $${index + 1}`).join(', ');
+      const values = fields.map((field) => personaClean[field]);
+      const personaRows = await manager.query(
+        `UPDATE ${personaTable} SET ${setSql} WHERE ${quoteIdentifier('id_persona')} = $${values.length + 1} RETURNING ${personaReturning}`,
+        [...values, idPersona],
+      ) as Record<string, unknown>[];
+      if (personaRows[0]) return { ...childRow, ...personaRows[0] };
+    }
+
+    // Sin cambios de persona (o sin id_persona): devuelve el hijo con los datos actuales de persona.
+    if (idPersona !== undefined && idPersona !== null) {
+      const personaRows = await manager.query(
+        `SELECT ${personaReturning} FROM ${personaTable} WHERE ${quoteIdentifier('id_persona')} = $1 LIMIT 1`,
+        [idPersona],
+      ) as Record<string, unknown>[];
+      if (personaRows[0]) return { ...childRow, ...personaRows[0] };
+    }
+
+    return childRow;
+  }
+
+  private personaSelectColumns(): string {
+    return PERSONA_JOIN_COLUMNS.map((column) => `p.${quoteIdentifier(column)}`).join(', ');
+  }
+
+  private personaJoinClause(resource: ResourceConfig): string {
+    const personaTable = quoteTable(PERSONA_JOIN_SCHEMA, PERSONA_JOIN_TABLE);
+    const fkColumn = quoteIdentifier(resource.personaJoin!.personaFkColumn);
+    return `LEFT JOIN ${personaTable} p ON p.${quoteIdentifier('id_persona')} = c.${fkColumn}`;
+  }
+
   private cleanPayload(payload: Record<string, unknown>, columnNames: Set<string>, stripProtected: boolean): Record<string, unknown> {
     if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
       throw new BadRequestException('El cuerpo de la solicitud debe ser un objeto JSON válido.');
@@ -239,7 +375,7 @@ export class CrudRepository {
     }, {});
   }
 
-  private buildWhereSql(resource: ResourceConfig, idValues: Record<string, unknown>, startIndex: number): { sql: string; values: unknown[] } {
+  private buildWhereSql(resource: ResourceConfig, idValues: Record<string, unknown>, startIndex: number, alias?: string): { sql: string; values: unknown[] } {
     const values: unknown[] = [];
     const clauses = resource.primaryKeys.map((primaryKey, index) => {
       const value = idValues[primaryKey];
@@ -247,7 +383,8 @@ export class CrudRepository {
         throw new BadRequestException(`El identificador ${primaryKey} es obligatorio.`);
       }
       values.push(value);
-      return `${quoteIdentifier(primaryKey)} = $${startIndex + index}`;
+      const column = alias ? `${alias}.${quoteIdentifier(primaryKey)}` : quoteIdentifier(primaryKey);
+      return `${column} = $${startIndex + index}`;
     });
 
     return { sql: clauses.join(' AND '), values };

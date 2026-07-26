@@ -13,6 +13,15 @@ export interface ResourceConfig {
   defaultFilters?: Record<string, unknown>;
   /** Valores forzados al crear por un alias lógico; sobreescriben el payload si existe conflicto. */
   defaultCreateValues?: Record<string, unknown>;
+  /**
+   * Marca un recurso como "hijo" de persona.persona (estudiante, tutor, usuario).
+   * Cuando está presente:
+   *  - get/list devuelven además los datos de la persona base (nombres, apellidos, etc.) vía JOIN.
+   *  - update divide el payload: los campos de persona actualizan persona.persona y los del hijo
+   *    su propia tabla, todo dentro de una transacción.
+   * `personaFkColumn` es la columna del hijo que referencia a persona.persona.id_persona.
+   */
+  personaJoin?: { personaFkColumn: string };
 }
 
 
@@ -721,7 +730,8 @@ export const RESOURCES: ResourceConfig[] = [
       "create": "PERSONAS.PERSONA_ESTUDIANTE.CREATE",
       "read": "PERSONAS.PERSONA_ESTUDIANTE.READ",
       "update": "PERSONAS.PERSONA_ESTUDIANTE.UPDATE"
-    }
+    },
+    "personaJoin": { "personaFkColumn": "id_persona" }
   },
   {
     "key": "estudiante_padre",
@@ -789,7 +799,8 @@ export const RESOURCES: ResourceConfig[] = [
       "create": "PERSONAS.PERSONA_TUTOR.CREATE",
       "read": "PERSONAS.PERSONA_TUTOR.READ",
       "update": "PERSONAS.PERSONA_TUTOR.UPDATE"
-    }
+    },
+    "personaJoin": { "personaFkColumn": "id_persona" }
   },
   {
     "key": "unidad_educativa",
@@ -823,7 +834,8 @@ export const RESOURCES: ResourceConfig[] = [
       "create": "PERSONAS.PERSONA_USUARIO.CREATE",
       "read": "PERSONAS.PERSONA_USUARIO.READ",
       "update": "PERSONAS.PERSONA_USUARIO.UPDATE"
-    }
+    },
+    "personaJoin": { "personaFkColumn": "id_persona" }
   },
   {
     "key": "permiso",
