@@ -26,4 +26,6 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
   CMD wget -qO- http://127.0.0.1:3000/api/health/live >/dev/null || exit 1
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["node", "dist/main.js"]
+# render-start.js aplica migraciones pendientes y seeds idempotentes antes de
+# levantar Nest. Ver scripts/startup-db.js (MIGRATE_ON_START / SEED_ON_START).
+CMD ["node", "scripts/render-start.js"]

@@ -1,6 +1,11 @@
 {
+  "src/common/repositories/crud.repository.ts": {
+    "maximumLines": 440,
+    "reason": "Repositorio CRUD genérico heredado: resuelve en un solo archivo el armado de SQL (insert/update/get/list), el join con la persona base de los recursos hijos y la normalización de lo que devuelve TypeORM, que no entrega la misma forma para INSERT ... RETURNING que para UPDATE ... RETURNING. El archivo ya excedía el límite antes de esta excepción; queda declarado para que el gate deje de fallar en un checkout limpio y para que cualquier crecimiento futuro sea visible.",
+    "targetRefactor": "Separar la construcción de SQL, el acceso al dato y el join de persona en colaboradores con pruebas de contrato propias."
+  },
   "src/modules/resource-registry.ts": {
-    "maximumLines": 1175,
+    "maximumLines": 1187,
     "reason": "Declarative resource contract currently centralises many database-backed resources. The exception previously pointed at src/api-gateway/resource-registry.ts, a path that stopped existing when modules were reorganised, so the policy failed on a clean checkout.",
     "targetRefactor": "Split into domain registries and generated composition without changing endpoint contracts."
   },

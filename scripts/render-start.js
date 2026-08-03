@@ -2,6 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 const { spawn } = require('child_process');
+const { prepareDatabase } = require('./startup-db');
 
 const root = process.cwd();
 const candidates = [
@@ -39,17 +40,36 @@ if (!entry) {
   process.exit(1);
 }
 
-console.log(`Arrancando backend desde ${path.relative(root, entry)}`);
+function startServer() {
+  console.log(`Arrancando backend desde ${path.relative(root, entry)}`);
 
-const child = spawn(process.execPath, [entry], {
-  stdio: 'inherit',
-  env: process.env,
-});
+  const child = spawn(process.execPath, [entry], {
+    stdio: 'inherit',
+    env: process.env,
+  });
 
-child.on('exit', (code, signal) => {
-  if (signal) {
-    process.kill(process.pid, signal);
-    return;
+  // Con dumb-init como PID 1 las señales llegan a este proceso, no al hijo:
+  // hay que reenviarlas para que Nest cierre ordenadamente.
+  for (const signal of ['SIGTERM', 'SIGINT']) {
+    process.on(signal, () => child.kill(signal));
   }
-  process.exit(code ?? 0);
-});
+
+  child.on('exit', (code, signal) => {
+    if (signal) {
+      process.kill(process.pid, signal);
+      return;
+    }
+    process.exit(code ?? 0);
+  });
+}
+
+// Migraciones pendientes + seeds idempotentes antes de aceptar tráfico.
+// Si esto falla, el proceso muere: es preferible a servir con un esquema o un
+// catálogo desactualizado. Se desactiva con MIGRATE_ON_START/SEED_ON_START=false.
+prepareDatabase(root)
+  .then(startServer)
+  .catch((error) => {
+    console.error('No se pudo preparar la base de datos; el backend no arrancará.');
+    console.error(error instanceof Error ? error.message : error);
+    process.exit(1);
+  });

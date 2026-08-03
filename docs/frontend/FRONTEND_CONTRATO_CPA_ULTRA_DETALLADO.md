@@ -448,15 +448,15 @@ GET /api/servicios_educativos/producto-educativo?page=1&limit=100
 Productos esperados:
 
 ```txt
-Clases de Matemáticas
-Clases de Física
-Clases de Química
+Clase por hora
 Curso de Becas CRE
 Curso de nivelación Matemáticas
 Curso de nivelación Física
 Curso de nivelación Química
 Paquetes de horas
 ```
+
+Existe un único producto de tipo `CLASE_POR_HORA` (`Clase por hora`). La materia de la clase **no** se elige en el producto: se selecciona desde `materia-tree` (`nombre` / `tema` / `subtema`) al registrar la clase.
 
 ## 4.6 Unidades educativas
 

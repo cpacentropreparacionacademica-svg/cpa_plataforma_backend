@@ -21,6 +21,7 @@
     "test:smoke": "jest --runTestsByPath test/smoke.spec.ts --runInBand",
     "start:dev:trace": "node --trace-deprecation ./node_modules/@nestjs/cli/bin/nest.js start --watch",
     "test:smoke:summary": "node -e \"process.env.SMOKE_PRINT_SUMMARY='true'; require('jest/bin/jest');\" --runTestsByPath test/smoke.spec.ts --runInBand",
+    "db:startup": "node scripts/startup-db.js",
     "db:migrate:prod": "node scripts/migrate-prod.js",
     "db:migrate:production": "node scripts/migrate-prod.js",
     "render:build": "bash scripts/render-build.sh",

@@ -109,7 +109,6 @@ export class PersonasLifecycleService {
 
   private async insertEstudiante(manager: EntityManager, idPersona: number, payload: Record<string, unknown>, authUserId?: string): Promise<Record<string, unknown>> {
     const tipo = this.requiredString(payload.tipo, 'estudiante.tipo').toUpperCase();
-    const codigo = this.optionalString(payload.codigo_estudiante);
     const idUnidadEducativa = this.optionalPositiveInt(payload.id_unidad_educativa);
     const nivel = this.optionalString(payload.nivel_actual)?.toUpperCase();
     const curso = this.optionalString(payload.curso_actual)?.toUpperCase();
@@ -124,14 +123,15 @@ export class PersonasLifecycleService {
       throw new BadRequestException('estudiante UNIVERSITARIO requiere carrera y anio_ingreso.');
     }
 
+    // codigo_estudiante no se envía: lo asigna el trigger trg_persona_estudiante_codigo
+    // con formato EST-AAAA-NNNNN (migración 020). Es un dato del sistema, no de captura.
     const rows = await manager.query(
       `INSERT INTO persona.persona_estudiante
-        (id_persona, codigo_estudiante, id_unidad_educativa, tipo, nivel_actual, curso_actual, turno_actual, carrera, anio_ingreso, id_usuario, estado_registro)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, true)
+        (id_persona, id_unidad_educativa, tipo, nivel_actual, curso_actual, turno_actual, carrera, anio_ingreso, id_usuario, estado_registro)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, true)
        RETURNING *`,
       [
         idPersona,
-        codigo || null,
         idUnidadEducativa || null,
         tipo,
         tipo === 'COLEGIAL' ? nivel : null,

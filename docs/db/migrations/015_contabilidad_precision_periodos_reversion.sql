@@ -15,25 +15,109 @@
 -- 1. Precisión monetaria del libro mayor
 -- ---------------------------------------------------------------------------
 
+-- PostgreSQL rechaza ALTER COLUMN ... TYPE sobre una columna usada por una vista
+-- ("cannot alter type of a column used by a view or rule"). El libro mayor tiene
+-- vistas encima —las de reportería PowerBI y las de detalle de venta/costo—, y su
+-- conjunto no es el mismo en todos los entornos. Por eso las vistas dependientes
+-- se recogen del catálogo, se guardan con su definición, se eliminan, se cambia el
+-- tipo y se vuelven a crear tal cual estaban. No se asume ninguna lista fija.
 DO $$
+DECLARE
+  v_vistas         jsonb := '[]'::jsonb;
+  v_pendientes     jsonb;
+  v_restantes      jsonb;
+  v_vista          jsonb;
+  v_avance         boolean;
+  v_error          text;
+  r                record;
 BEGIN
-  IF EXISTS (
+  IF NOT EXISTS (
     SELECT 1 FROM information_schema.columns
      WHERE table_schema = 'contabilidad'
        AND table_name = 'transaccion_movimiento_cuenta'
        AND column_name = 'debe'
        AND data_type = 'double precision'
   ) THEN
-    -- Los importes ya se redondeaban a céntimos en la capa de aplicación, por lo que
-    -- round(...,2) no destruye información: materializa la precisión ya asumida.
-    ALTER TABLE contabilidad.transaccion_movimiento_cuenta
-      ALTER COLUMN debe  TYPE numeric(18, 2) USING round(debe::numeric, 2),
-      ALTER COLUMN haber TYPE numeric(18, 2) USING round(haber::numeric, 2);
-
-    ALTER TABLE contabilidad.transaccion_movimiento_cuenta
-      ALTER COLUMN debe  SET DEFAULT 0,
-      ALTER COLUMN haber SET DEFAULT 0;
+    RAISE NOTICE 'El libro mayor ya usa numeric(18,2); no hay cambio de tipo que aplicar.';
+    RETURN;
   END IF;
+
+  -- Vistas que dependen de la tabla, directa o indirectamente.
+  FOR r IN
+    WITH RECURSIVE dependientes(oid) AS (
+      SELECT DISTINCT rw.ev_class
+        FROM pg_depend d
+        JOIN pg_rewrite rw ON rw.oid = d.objid
+       WHERE d.classid = 'pg_rewrite'::regclass
+         AND d.refclassid = 'pg_class'::regclass
+         AND d.refobjid = 'contabilidad.transaccion_movimiento_cuenta'::regclass
+         AND rw.ev_class <> 'contabilidad.transaccion_movimiento_cuenta'::regclass
+      UNION
+      SELECT DISTINCT rw.ev_class
+        FROM dependientes dep
+        JOIN pg_depend d ON d.refobjid = dep.oid AND d.refclassid = 'pg_class'::regclass
+        JOIN pg_rewrite rw ON rw.oid = d.objid AND d.classid = 'pg_rewrite'::regclass
+       WHERE rw.ev_class <> dep.oid
+    )
+    SELECT c.oid,
+           n.nspname AS esquema,
+           c.relname AS nombre,
+           pg_get_viewdef(c.oid, true) AS definicion
+      FROM dependientes dep
+      JOIN pg_class c ON c.oid = dep.oid
+      JOIN pg_namespace n ON n.oid = c.relnamespace
+     WHERE c.relkind = 'v'
+  LOOP
+    v_vistas := v_vistas || jsonb_build_object('esquema', r.esquema, 'nombre', r.nombre, 'definicion', r.definicion);
+    RAISE NOTICE 'Vista dependiente respaldada: %.%', r.esquema, r.nombre;
+  END LOOP;
+
+  FOR v_vista IN SELECT * FROM jsonb_array_elements(v_vistas) LOOP
+    EXECUTE format('DROP VIEW IF EXISTS %I.%I CASCADE', v_vista->>'esquema', v_vista->>'nombre');
+  END LOOP;
+
+  -- Los importes ya se redondeaban a céntimos en la capa de aplicación, por lo que
+  -- round(...,2) no destruye información: materializa la precisión ya asumida.
+  ALTER TABLE contabilidad.transaccion_movimiento_cuenta
+    ALTER COLUMN debe  TYPE numeric(18, 2) USING round(debe::numeric, 2),
+    ALTER COLUMN haber TYPE numeric(18, 2) USING round(haber::numeric, 2);
+
+  ALTER TABLE contabilidad.transaccion_movimiento_cuenta
+    ALTER COLUMN debe  SET DEFAULT 0,
+    ALTER COLUMN haber SET DEFAULT 0;
+
+  -- Recreación por pasadas: una vista puede apoyarse en otra de la lista y el
+  -- catálogo no da un orden garantizado. Se reintenta mientras haya avance; si una
+  -- pasada completa no crea ninguna, se aborta con el error real de la primera.
+  v_pendientes := v_vistas;
+  LOOP
+    EXIT WHEN jsonb_array_length(v_pendientes) = 0;
+    v_avance := false;
+    v_restantes := '[]'::jsonb;
+    v_error := NULL;
+
+    FOR v_vista IN SELECT * FROM jsonb_array_elements(v_pendientes) LOOP
+      BEGIN
+        EXECUTE format('CREATE OR REPLACE VIEW %I.%I AS %s',
+                       v_vista->>'esquema', v_vista->>'nombre', v_vista->>'definicion');
+        v_avance := true;
+      EXCEPTION WHEN others THEN
+        v_restantes := v_restantes || v_vista;
+        IF v_error IS NULL THEN
+          v_error := format('%s.%s: %s', v_vista->>'esquema', v_vista->>'nombre', SQLERRM);
+        END IF;
+      END;
+    END LOOP;
+
+    IF NOT v_avance THEN
+      RAISE EXCEPTION 'No se pudo recrear la vista dependiente del libro mayor. %', v_error;
+    END IF;
+
+    v_pendientes := v_restantes;
+  END LOOP;
+
+  RAISE NOTICE 'Libro mayor migrado a numeric(18,2); % vista(s) dependientes recreadas.',
+    jsonb_array_length(v_vistas);
 END $$;
 
 -- ---------------------------------------------------------------------------
