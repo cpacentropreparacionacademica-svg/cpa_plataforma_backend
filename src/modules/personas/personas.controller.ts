@@ -22,6 +22,11 @@ export class PersonasController {
     return this.lifecycle.registrarEstudiante(body, request.user?.idPersona);
   }
 
+  @Post('padre/registrar')
+  registrarPadre(@Body() body: Record<string, unknown>, @Req() request: Request) {
+    return this.lifecycle.registrarPadre(body, request.user?.idPersona);
+  }
+
   @Post('tutor/registrar')
   registrarTutor(@Body() body: Record<string, unknown>, @Req() request: Request) {
     return this.lifecycle.registrarTutor(body, request.user?.idPersona);
