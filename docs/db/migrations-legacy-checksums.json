@@ -11,6 +11,11 @@
       "checksum": "064017b80c35bee09b66ba1bd043a9e5a63237873bb5c012771f5618234d0746",
       "reason": "Versión previa con 'CREATE SCHEMA infraestructura;' sin IF NOT EXISTS. Fallaba siempre en bases vacías porque el runner crea ese esquema antes de migrar. El cambio es idempotente y no altera bases ya migradas.",
       "supersededOn": "2026-07-19"
+    },
+    {
+      "checksum": "62f4eecb7c251bbd0927904438102b5babacdde0eab3ad4423106e5c3fd0ba5e",
+      "reason": "Misma corrección que la entrada anterior, pero para la variante del archivo que quedó registrada en la base de producción (aplicada el 2026-06-27, commit fa15f55). El único cambio respecto del archivo actual es 'CREATE SCHEMA infraestructura;' -> 'CREATE SCHEMA IF NOT EXISTS infraestructura;' más su comentario: no toca datos ni estructura de una base ya migrada. Sin declararlo, el runner abortaba el arranque y ninguna migración posterior (013 en adelante) llegaba a aplicarse.",
+      "supersededOn": "2026-08-03"
     }
   ]
 }

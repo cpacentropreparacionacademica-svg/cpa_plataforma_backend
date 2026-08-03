@@ -497,16 +497,24 @@ describe('CPA Plataforma - smoke FULL sistema interno', () => {
         (SELECT COUNT(*)::int FROM servicios_educativos.materia_tree) AS materia_tree,
         (SELECT COUNT(*)::int FROM persona.unidad_educativa) AS unidad_educativa,
         (SELECT COUNT(*)::int FROM servicios_educativos.producto_educativo) AS producto_educativo,
+        (SELECT COUNT(*)::int FROM servicios_educativos.producto_educativo WHERE upper(trim(tipo_producto)) = 'CLASE_POR_HORA') AS producto_clase_por_hora,
         (SELECT COUNT(*)::int FROM contabilidad.configuracion_cuenta_operativa WHERE codigo IN ('CANAL_COBRO_EFECTIVO','CANAL_COBRO_QR','INGRESO_CLASE_POR_HORA')) AS cuentas_operativas`,
     )) as Array<{
       materia_tree: number;
       unidad_educativa: number;
       producto_educativo: number;
+      producto_clase_por_hora: number;
       cuentas_operativas: number;
     }>;
     expect(checks[0].materia_tree).toBeGreaterThanOrEqual(180);
     expect(checks[0].unidad_educativa).toBeGreaterThanOrEqual(90);
-    expect(checks[0].producto_educativo).toBeGreaterThanOrEqual(30);
+    // El catálogo bajó de 30+ a ~25 productos a propósito: la migración 019
+    // fusionó los productos CLASE_POR_HORA por materia ("Clase por hora - Física",
+    // "Clases de Química", ...) en uno solo. La materia se define en materia_tree,
+    // no en el producto, así que duplicarlo por materia rompía el catálogo de venta.
+    expect(checks[0].producto_educativo).toBeGreaterThanOrEqual(20);
+    // Invariante del catálogo: existe exactamente un producto de clase por hora.
+    expect(checks[0].producto_clase_por_hora).toBe(1);
     expect(checks[0].cuentas_operativas).toBeGreaterThanOrEqual(3);
   });
 
@@ -531,12 +539,35 @@ describe('CPA Plataforma - smoke FULL sistema interno', () => {
           telefono: '70000001',
           email: `smoke.estudiante.${smokeRunId}@cpa.com`,
         },
-        estudiante: { tipo: 'COLEGIAL', nivel_actual: 'SECUNDARIA', curso_actual: 'SEXTO', turno_actual: 'MAÑANA' },
+        // codigo_estudiante viaja a propósito para comprobar que el sistema lo ignora.
+        estudiante: {
+          tipo: 'COLEGIAL',
+          nivel_actual: 'SECUNDARIA',
+          curso_actual: 'SEXTO',
+          turno_actual: 'MAÑANA',
+          codigo_estudiante: 'CODIGO-ESCRITO-A-MANO',
+        },
       });
     expectReached(estudiante, 'registrar estudiante smoke');
     expect([201, 200]).toContain(estudiante.status);
     expect(estudiante.body?.data?.persona?.id_persona).toBeTruthy();
     expect(estudiante.body?.data?.estudiante?.id_persona).toBeTruthy();
+
+    // El código del estudiante lo genera la base (migración 020), no el cliente.
+    const codigoGenerado = String(estudiante.body?.data?.estudiante?.codigo_estudiante || '');
+    expect(codigoGenerado).toMatch(/^EST-\d{4}-\d{5}$/);
+
+    // Y es inmutable: un update que intente cambiarlo no lo mueve.
+    const intentoCambioCodigo = await agent
+      .put(`/api/personas/estudiante/${smokeEstudianteId}`)
+      .set('X-Session-Token', sessionToken)
+      .send({ codigo_estudiante: 'OTRO-CODIGO', curso_actual: 'QUINTO' });
+    expect([200, 201]).toContain(intentoCambioCodigo.status);
+    expect(intentoCambioCodigo.body?.data?.codigo_estudiante).toBe(codigoGenerado);
+    // El mismo update devuelve los datos de la persona base: la lectura del hijo
+    // nunca debe quedarse sin nombre, que es como se identifica al estudiante.
+    expect(intentoCambioCodigo.body?.data?.nombres).toBe('SMOKE FULL');
+    expect(intentoCambioCodigo.body?.data?.nombre_completo).toBe('SMOKE FULL ESTUDIANTE');
 
     const tutor = await agent
       .post('/api/personas/tutor/registrar')

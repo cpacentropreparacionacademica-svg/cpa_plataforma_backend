@@ -19,6 +19,34 @@ const PROTECTED_SYSTEM_FIELDS = new Set([
   'deleted_at',
 ]);
 
+/**
+ * Normaliza lo que devuelve `manager.query`.
+ *
+ * TypeORM no entrega la misma forma para toda sentencia con RETURNING: en un
+ * `INSERT` devuelve el arreglo de filas, pero en un `UPDATE` devuelve
+ * `[filas, cantidadAfectada]`. Sin normalizar, `rows[0]` de un update era el
+ * arreglo completo en vez de la fila, con dos consecuencias silenciosas:
+ *   * la respuesta HTTP salía con `data` anidado (`[[{...}]]` en batch);
+ *   * en los recursos hijos de persona, `id_persona` se leía del arreglo y salía
+ *     `undefined`, así que los campos de la persona base (nombres, apellidos,
+ *     teléfono, email) nunca llegaban a actualizarse ni a devolverse.
+ */
+function toRows(result: unknown): Record<string, unknown>[] {
+  if (!Array.isArray(result)) return [];
+  if (result.length === 2 && Array.isArray(result[0]) && typeof result[1] === 'number') {
+    return result[0] as Record<string, unknown>[];
+  }
+  return result as Record<string, unknown>[];
+}
+
+/** Formas equivalentes de un mismo estado, ya sea en texto o en boolean. */
+function statusFilterVariants(value: string): string[] {
+  const normalized = value.trim().toLowerCase();
+  if (['activo', 'active', 'true', 't'].includes(normalized)) return ['activo', 'active', 'true', 't'];
+  if (['inactivo', 'inactive', 'false', 'f'].includes(normalized)) return ['inactivo', 'inactive', 'false', 'f'];
+  return [normalized];
+}
+
 export interface ListResult {
   count: number;
   rows: Record<string, unknown>[];
@@ -157,17 +185,19 @@ export class CrudRepository {
       if (CONTROL_QUERY_FIELDS.has(key) || value === undefined || value === null || value === '') continue;
       if (!columnNames.has(key)) continue;
 
-      values.push(value);
-      const paramIndex = values.length;
-
-      // estado_registro históricamente se guardó como 'Activo', 'ACTIVO' o 'activo'.
-      // El frontend puede enviar cualquiera; el listado no debe ocultar registros por mayúsculas/minúsculas.
+      // estado_registro no tiene un único tipo en el esquema: en unas tablas es
+      // texto ('Activo', 'ACTIVO', 'activo') y en otras boolean (persona_estudiante,
+      // producto_educativo...). El frontend siempre envía el texto. Comparar sobre
+      // ::text contra la lista de equivalentes cubre ambas formas: sin el cast,
+      // lower(boolean) ni siquiera existe y el listado fallaba al filtrar por estado.
       if (key === 'estado_registro' && typeof value === 'string') {
-        filters.push(`LOWER(${qualify(key)}) = LOWER($${paramIndex})`);
+        values.push(statusFilterVariants(value));
+        filters.push(`LOWER(${qualify(key)}::text) = ANY($${values.length}::text[])`);
         continue;
       }
 
-      filters.push(`${qualify(key)} = $${paramIndex}`);
+      values.push(value);
+      filters.push(`${qualify(key)} = $${values.length}`);
     }
 
     const whereSql = filters.length > 0 ? `WHERE ${filters.join(' AND ')}` : '';
@@ -210,10 +240,10 @@ export class CrudRepository {
     const placeholders = fields.map((_, index) => `$${index + 1}`).join(', ');
     const values = fields.map((field) => cleanPayload[field]);
 
-    const rows = await manager.query(
+    const rows = toRows(await manager.query(
       `INSERT INTO ${table} (${columns}) VALUES (${placeholders}) RETURNING *`,
       values,
-    ) as Record<string, unknown>[];
+    ));
 
     return rows[0];
   }
@@ -254,10 +284,10 @@ export class CrudRepository {
     const values = fields.map((field) => cleanPayload[field]);
     const where = this.buildWhereSql(resource, idValues, values.length + 1);
 
-    const rows = await manager.query(
+    const rows = toRows(await manager.query(
       `UPDATE ${table} SET ${setSql} WHERE ${where.sql} RETURNING *`,
       [...values, ...where.values],
-    ) as Record<string, unknown>[];
+    ));
 
     if (!rows[0]) throw new NotFoundException(`No se encontró el registro de ${resource.entity}.`);
     return rows[0];
@@ -310,11 +340,11 @@ export class CrudRepository {
       const setSql = fields.map((field, index) => `${quoteIdentifier(field)} = $${index + 1}`).join(', ');
       const values = fields.map((field) => childClean[field]);
       const where = this.buildWhereSql(resource, idValues, values.length + 1);
-      const rows = await manager.query(`UPDATE ${table} SET ${setSql} WHERE ${where.sql} RETURNING *`, [...values, ...where.values]) as Record<string, unknown>[];
+      const rows = toRows(await manager.query(`UPDATE ${table} SET ${setSql} WHERE ${where.sql} RETURNING *`, [...values, ...where.values]));
       childRow = rows[0];
     } else {
       const where = this.buildWhereSql(resource, idValues, 1);
-      const rows = await manager.query(`SELECT * FROM ${table} WHERE ${where.sql} LIMIT 1`, where.values) as Record<string, unknown>[];
+      const rows = toRows(await manager.query(`SELECT * FROM ${table} WHERE ${where.sql} LIMIT 1`, where.values));
       childRow = rows[0];
     }
 
@@ -322,7 +352,10 @@ export class CrudRepository {
 
     const idPersona = childRow[resource.personaJoin!.personaFkColumn];
     const personaTable = quoteTable(PERSONA_JOIN_SCHEMA, PERSONA_JOIN_TABLE);
-    const personaReturning = PERSONA_JOIN_COLUMNS.map((column) => quoteIdentifier(column)).join(', ');
+    const personaReturning = [
+      ...PERSONA_JOIN_COLUMNS.map((column) => quoteIdentifier(column)),
+      `NULLIF(TRIM(CONCAT_WS(' ', ${quoteIdentifier('nombres')}, ${quoteIdentifier('apellidos')})), '') AS ${quoteIdentifier('nombre_completo')}`,
+    ].join(', ');
 
     if (hasPersonaChanges && idPersona !== undefined && idPersona !== null) {
       const personaColumns = await this.metadata.getColumnNames(PERSONA_METADATA_RESOURCE);
@@ -332,10 +365,10 @@ export class CrudRepository {
       const fields = Object.keys(personaClean).filter((field) => personaColumns.has(field));
       const setSql = fields.map((field, index) => `${quoteIdentifier(field)} = $${index + 1}`).join(', ');
       const values = fields.map((field) => personaClean[field]);
-      const personaRows = await manager.query(
+      const personaRows = toRows(await manager.query(
         `UPDATE ${personaTable} SET ${setSql} WHERE ${quoteIdentifier('id_persona')} = $${values.length + 1} RETURNING ${personaReturning}`,
         [...values, idPersona],
-      ) as Record<string, unknown>[];
+      ));
       if (personaRows[0]) return { ...childRow, ...personaRows[0] };
     }
 
@@ -351,8 +384,15 @@ export class CrudRepository {
     return childRow;
   }
 
+  /**
+   * Columnas de la persona base que acompañan a todo recurso hijo en get/list.
+   * Además de las columnas crudas se expone `nombre_completo`, porque las
+   * pantallas identifican al estudiante/tutor por su nombre y no por el id.
+   */
   private personaSelectColumns(): string {
-    return PERSONA_JOIN_COLUMNS.map((column) => `p.${quoteIdentifier(column)}`).join(', ');
+    const columns = PERSONA_JOIN_COLUMNS.map((column) => `p.${quoteIdentifier(column)}`);
+    columns.push(`NULLIF(TRIM(CONCAT_WS(' ', p.${quoteIdentifier('nombres')}, p.${quoteIdentifier('apellidos')})), '') AS ${quoteIdentifier('nombre_completo')}`);
+    return columns.join(', ');
   }
 
   private personaJoinClause(resource: ResourceConfig): string {
