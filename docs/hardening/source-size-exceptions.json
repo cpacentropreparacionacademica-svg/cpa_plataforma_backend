@@ -5,7 +5,7 @@
     "targetRefactor": "Separar la construcción de SQL, el acceso al dato y el join de persona en colaboradores con pruebas de contrato propias."
   },
   "src/modules/resource-registry.ts": {
-    "maximumLines": 1187,
+    "maximumLines": 1190,
     "reason": "Declarative resource contract currently centralises many database-backed resources. The exception previously pointed at src/api-gateway/resource-registry.ts, a path that stopped existing when modules were reorganised, so the policy failed on a clean checkout.",
     "targetRefactor": "Split into domain registries and generated composition without changing endpoint contracts."
   },
@@ -15,7 +15,7 @@
     "targetRefactor": "Extract posting, reversal, class-sale and monetary-validation use cases under accounting contract tests."
   },
   "src/modules/shared-crud/crud.service.ts": {
-    "maximumLines": 754,
+    "maximumLines": 760,
     "reason": "Servicio CRUD genérico heredado que combina lecturas, escrituras, importaciones y validación por metadatos. Creció al cerrar la escritura genérica sobre el libro mayor y hacer idempotente la asignación de cuentas, más el reajuste de ancho de línea de Prettier (formato, sin cambio funcional).",
     "targetRefactor": "Separate read, write and import responsibilities and restrict generic operations by capability."
   },
@@ -23,5 +23,10 @@
     "maximumLines": 400,
     "reason": "Metadata resolution and caching remain coupled from the pre-hardening implementation.",
     "targetRefactor": "Separate immutable registry lookup from request-scoped resolution and cache concerns."
+  },
+  "src/modules/personas/personas-lifecycle.service.ts": {
+    "maximumLines": 380,
+    "reason": "Altas transaccionales de persona y sus hijos (estudiante, tutor, usuario y padre). Viven juntas porque comparten la misma invariante: la persona base y el registro hijo nacen en la misma transaccion o no nacen. Separarlas por archivo duplicaria el armado del payload de persona sin ganar nada.",
+    "targetRefactor": "Extraer un colaborador por tipo de persona sobre una base comun de alta transaccional, con pruebas de contrato por cada alta."
   }
 }

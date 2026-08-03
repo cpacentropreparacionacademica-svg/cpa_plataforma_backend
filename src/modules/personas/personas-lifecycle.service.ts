@@ -28,6 +28,32 @@ export class PersonasLifecycleService {
     }
   }
 
+  /**
+   * Alta de padre o madre. Igual que estudiante y tutor, la persona base y el
+   * registro hijo nacen juntos: un padre sin persona no tiene nombre ni contacto
+   * y no sirve para relacionarlo con el estudiante.
+   */
+  async registrarPadre(payload: Record<string, unknown>, authUserId?: string) {
+    await this.assertPermission(authUserId, 'PERSONAS.PERSONA_PADRE.CREATE');
+    try {
+      const data = await this.dataSource.transaction(async (manager) => {
+        const persona = await this.insertPersona(manager, this.extractPersonaPayload(payload), authUserId);
+        const padre = await this.insertPadre(
+          manager,
+          Number(persona.id_persona),
+          this.extractChildPayload(payload, 'padre'),
+          authUserId,
+        );
+        return { persona, padre };
+      });
+      return { success: true, message: 'Padre registrado correctamente con su persona base.', data };
+    } catch (error) {
+      const httpException = toHttpDatabaseException(error);
+      if (httpException) throw httpException;
+      throw error;
+    }
+  }
+
   async registrarTutor(payload: Record<string, unknown>, authUserId?: string) {
     await this.assertPermission(authUserId, 'PERSONAS.TUTOR.REGISTRAR');
     try {
@@ -85,7 +111,10 @@ export class PersonasLifecycleService {
     };
   }
 
-  private extractChildPayload(payload: Record<string, unknown>, key: 'estudiante' | 'tutor' | 'usuario'): Record<string, unknown> {
+  private extractChildPayload(
+    payload: Record<string, unknown>,
+    key: 'estudiante' | 'tutor' | 'usuario' | 'padre',
+  ): Record<string, unknown> {
     const nested = payload[key];
     if (nested && typeof nested === 'object' && !Array.isArray(nested)) {
       return nested as Record<string, unknown>;
@@ -142,6 +171,25 @@ export class PersonasLifecycleService {
         authUserId || null,
       ],
     ) as Record<string, unknown>[];
+    return rows[0];
+  }
+
+  private async insertPadre(
+    manager: EntityManager,
+    idPersona: number,
+    payload: Record<string, unknown>,
+    authUserId?: string,
+  ): Promise<Record<string, unknown>> {
+    const esEmbajador = payload.es_embajador === true || String(payload.es_embajador).toLowerCase() === 'true';
+    const metadata = this.optionalJson(payload.metadata);
+
+    const rows = (await manager.query(
+      `INSERT INTO persona.persona_padre
+        (id_persona, es_embajador, metadata, estado_registro, id_usuario_creador)
+       VALUES ($1, $2, $3, 'Activo', $4)
+       RETURNING *`,
+      [idPersona, esEmbajador, metadata, authUserId || null],
+    )) as Record<string, unknown>[];
     return rows[0];
   }
 
@@ -276,6 +324,19 @@ export class PersonasLifecycleService {
     if (value === undefined || value === null) return undefined;
     const text = String(value).trim();
     return text.length > 0 ? text : undefined;
+  }
+
+  /** `metadata` es jsonb: se acepta objeto o texto JSON, y cualquier otra cosa se descarta. */
+  private optionalJson(value: unknown): string | null {
+    if (value === undefined || value === null || value === '') return null;
+    if (typeof value === 'object') return JSON.stringify(value);
+    const text = String(value).trim();
+    if (!text) return null;
+    try {
+      return JSON.stringify(JSON.parse(text));
+    } catch {
+      throw new BadRequestException('padre.metadata debe ser un objeto JSON válido.');
+    }
   }
 
   private optionalPositiveInt(value: unknown): number | undefined {

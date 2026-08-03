@@ -765,7 +765,8 @@ export const RESOURCES: ResourceConfig[] = [
       "create": "PERSONAS.PERSONA_PADRE.CREATE",
       "read": "PERSONAS.PERSONA_PADRE.READ",
       "update": "PERSONAS.PERSONA_PADRE.UPDATE"
-    }
+    },
+    "personaJoin": { "personaFkColumn": "id_persona" }
   },
   {
     "key": "proveedor",

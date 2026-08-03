@@ -264,6 +264,8 @@ export class CrudService {
       'personas/persona':
         '/api/personas/estudiante/registrar, /api/personas/tutor/registrar, /api/personas/usuario/registrar o /api/administracion/empleado/registrar',
       'personas/estudiante': '/api/personas/estudiante/registrar',
+      // Un padre sin persona base no tiene nombre ni contacto: nace inservible.
+      'personas/padre': '/api/personas/padre/registrar',
       'personas/tutor': '/api/personas/tutor/registrar',
       'personas/usuario': '/api/personas/usuario/registrar',
       'administracion/empleado': '/api/administracion/empleado/registrar',
