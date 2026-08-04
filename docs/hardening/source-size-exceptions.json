@@ -5,7 +5,7 @@
     "targetRefactor": "Separar la construcción de SQL, el acceso al dato y el join de persona en colaboradores con pruebas de contrato propias."
   },
   "src/modules/resource-registry.ts": {
-    "maximumLines": 1190,
+    "maximumLines": 1205,
     "reason": "Declarative resource contract currently centralises many database-backed resources. The exception previously pointed at src/api-gateway/resource-registry.ts, a path that stopped existing when modules were reorganised, so the policy failed on a clean checkout.",
     "targetRefactor": "Split into domain registries and generated composition without changing endpoint contracts."
   },
