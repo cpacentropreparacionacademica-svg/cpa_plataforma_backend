@@ -1,20 +1,21 @@
-# Graph Report - cpa_plataforma_backend  (2026-07-22)
+# Graph Report - cpa_plataforma_backend  (2026-08-03)
 
 ## Corpus Check
-- 207 files · ~323,495 words
+- 215 files · ~332,275 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 2540 nodes · 3975 edges · 199 communities (153 shown, 46 thin omitted)
-- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 21 edges (avg confidence: 0.54)
+- 1923 nodes · 3322 edges · 150 communities (118 shown, 32 thin omitted)
+- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 23 edges (avg confidence: 0.54)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `f127adca`
+- Built from commit: `17ee7643`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
+- 001_create_database_schema.sql
 - ddl.sql
 - ContabilidadAccountingService
 - auth.service.js
@@ -22,14 +23,14 @@
 - auth.controller.js
 - PersonasLifecycleService
 - app.module.ts
-- zString
+- OpaqueSessionService
 - Prompt final especializado para backend con NestJS, TypeScript, Zod, JWT y Sequelize
 - dependencies
-- contabilidad.fn_audit_bu_simple
+- PasswordHasherService
 - devDependencies
 - persona.persona
 - Lineamientos de programación profesional para código en producción
-- CrudService
+- AuthService
 - scripts
 - ResourceConfig
 - posicion.controller.js
@@ -41,70 +42,42 @@
 - asistencia_clase_curso.controller.js
 - clase_curso.controller.js
 - horarios.controller.js
-- materia_tree.controller.js
-- emision_titulo.controller.js
-- smoke.spec.ts
+- AuthRepository
+- AdministracionLifecycleService
+- HealthController
 - AdministracionController
-- DeudaController
+- RedisRateLimitGuard
 - InfraestructuraController
 - InventarioController
 - SeguridadController
-- ServiciosEducativosController
-- SocietarioController
 - Endpoint especializado: Parte de clases pasadas a venta contable
 - Contrato frontend - Parte de clases pasadas / Venta de clase
 - departamento.controller.js
 - compilerOptions
 - redis-rate-limit.guard.ts
-- OpaqueSessionService
-- persona.api_editar_unidad_educativa
 - toHttpDatabaseException
 - Contrato frontend - Parte de clases pasadas / Venta de clase
-- environment.schema.ts
-- transaccion_movimiento_cuenta.controller.js
 - persona_usuario.controller.js
 - ReporteriaContabilidadService
 - titular.controller.js
 - backup-postgres.js
-- zod.helpers.js
 - zText
-- zCode
 - Prompt maestro ajustado para centro de clases personalizadas, contabilidad y empleados
 - Instrucciones generales de generación del proyecto
-- RedisService
-- empleado_registro_pago.controller.js
 - objetivo_kpi.controller.js
-- centro_costo_mapa.controller.js
-- cuenta_asignacion.controller.js
-- edificio.controller.js
-- sucursal.controller.js
-- bien.controller.js
-- bien_lote.controller.js
-- estudiante_padre.controller.js
-- persona_padre.controller.js
-- proveedor.controller.js
-- unidad_educativa.controller.js
-- rol.controller.js
-- rol_permiso.controller.js
-- usuario_permiso.controller.js
 - demo-user-utils.js
 - official-user-utils.js
-- AuthController
-- persona.persona_tutor
 - Conciliación Backend ↔ Frontend — Reportería Contable CPA
 - Manual de cambios para frontend
 - Smoke de importaciones masivas, errores de negocio y backup Render
 - Módulos principales del sistema
 - ResourceModuleName
 - migrate-prod.js
-- inventario.bien
-- 004_patch_transaccion_detalle_venta_costo.sql
 - jest
 - tsconfig.build.json
 - AuthRepository
 - Endpoints mínimos sugeridos
 - CPA Plataforma Backend NestJS
-- smoke.full.spec.ts
 - Cobertura principal
 - Patch: cuentas operativas configurables y cuentas por estudiante/tutor
 - Documentación general ultra detallada - CPA Plataforma Backend
@@ -115,7 +88,6 @@
 - CPA backend hardening programme
 - Guía local rápida: instalación, smoke tests y puerto ocupado
 - package.json
-- 014_hardening_contabilidad_integridad.sql
 - Bootstrap de producción CPA Plataforma
 - Qué carga
 - Patch contable: detalle de transacción venta y costo
@@ -124,8 +96,6 @@
 - 8. Separación de responsabilidades
 - render-start.js
 - seed-reporteria-contable-permissions.js
-- contabilidad.cuenta
-- societario.emision_titulo
 - Plan de cuentas CPA estandarizado
 - Deploy en Render
 - FRONTEND_CONTRATO_CPA_ULTRA_DETALLADO.md
@@ -137,10 +107,8 @@
 - Smoke test FULL - CPA Plataforma Backend
 - Manejo de estados
 - smoke-live.js
-- auth-user.type.ts
 - Arquitectura NestJS aplicada
 - Fix migración 006 - función de auditoría faltante
-- 011_patch_venta_clase_sin_fiscal_apertura_lifecycle.sql
 - Base de datos
 - Fix definitivo de contrato de listados para frontend
 - Corrección de listado CRUD para frontend
@@ -151,7 +119,6 @@
 - Fix Render build: dist/main.js no generado
 - render-build.sh
 - Reporte de migración Express → NestJS
-- 012_patch_borradores_archivos_independientes.sql
 - Endpoints nuevos: detalle de venta y costo
 - 10. Errores comunes y cómo mostrarlos
 - 1.1 Login
@@ -162,10 +129,7 @@
 - Immediate credential incident response
 - PostgreSQL backup and restore verification
 - Production deployment runbook
-- Security policy
 - Flujos principales
-- 005_patch_venta_clase_registro_endpoint.sql
-- 006_patch_cuentas_operativas_por_persona.sql
 - Patch 011: venta-clase sin fiscal, apertura y lifecycle
 - Patch 005: venta_clase_registro
 - Auth session: permisos reales en respuesta de sesión
@@ -205,14 +169,14 @@
 ## God Nodes (most connected - your core abstractions)
 1. `CrudService` - 53 edges
 2. `Prompt final especializado para backend con NestJS, TypeScript, Zod, JWT y Sequelize` - 46 edges
-3. `contabilidad.fn_audit_bu_simple()` - 39 edges
-4. `ContabilidadAccountingService` - 38 edges
-5. `scripts` - 32 edges
+3. `ContabilidadAccountingService` - 38 edges
+4. `scripts` - 33 edges
+5. `PersonasLifecycleService` - 28 edges
 6. `ContabilidadController` - 27 edges
-7. `Lineamientos de programación profesional para código en producción` - 26 edges
-8. `PersonasLifecycleService` - 25 edges
-9. `Prompt maestro ajustado para centro de clases personalizadas, contabilidad y empleados` - 24 edges
-10. `persona.persona` - 23 edges
+7. `ResourceConfig` - 27 edges
+8. `Lineamientos de programación profesional para código en producción` - 26 edges
+9. `PersonasController` - 24 edges
+10. `Prompt maestro ajustado para centro de clases personalizadas, contabilidad y empleados` - 24 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `xlsxBuffer()` --references--> `xlsx`  [EXTRACTED]
@@ -224,64 +188,68 @@
 - `runCleanDemoData()` --calls--> `assertNotProduction()`  [EXTRACTED]
   scripts/demo-user-utils.js → scripts/seed-security.js
 - `main()` --calls--> `loadProjectEnv()`  [EXTRACTED]
-  scripts/migrate-prod.js → scripts/official-user-utils.js
+  scripts/list-migration-checksums.js → scripts/official-user-utils.js
 
 ## Import Cycles
 - None detected.
 
-## Communities (199 total, 46 thin omitted)
+## Communities (150 total, 32 thin omitted)
+
+### Community 0 - "001_create_database_schema.sql"
+Cohesion: 0.21
+Nodes (6): CrudAction, PermissionGuard, RequestWithAuth, Injectable, getResourceConfig(), RESOURCES
 
 ### Community 1 - "ddl.sql"
-Cohesion: 0.01
-Nodes (6): contabilidad.concepto_costo, contabilidad.trg_sync_archivos_transaccion_links(), inventario.check_es_producto_tienda(), servicios_educativos.paquetes_producto_educativo, trg_objetivo_kpi_check_es_producto_tienda, trg_sync_archivos_transaccion_links
+Cohesion: 0.18
+Nodes (14): InventarioController, ApiCookieAuth, ApiTags, Body, Controller, Get, Param, Patch (+6 more)
 
 ### Community 2 - "ContabilidadAccountingService"
 Cohesion: 0.11
 Nodes (11): ContabilidadAccountingService, CreateTransaccionConMovimientosBody, MovimientoPayload, NormalizedMovimiento, RevertirAsientoBody, TRANSACCION_INSERT_COLUMNS, TRANSACCION_REVERSAL_COLUMNS, TransaccionPayload (+3 more)
 
 ### Community 3 - "auth.service.js"
-Cohesion: 0.20
-Nodes (13): Patch, Put, ResourceModuleName, ContabilidadController, ApiCookieAuth, ApiTags, Body, Controller (+5 more)
+Cohesion: 0.10
+Nodes (18): ArchivoPayload, ContabilidadArchivoService, RegistrarArchivoTransaccionPayload, Injectable, ContabilidadController, ApiCookieAuth, ApiTags, Body (+10 more)
 
 ### Community 4 - "deuda.controller.js"
-Cohesion: 0.21
-Nodes (4): ArchivoPayload, ContabilidadArchivoService, RegistrarArchivoTransaccionPayload, Injectable
+Cohesion: 0.18
+Nodes (14): ServiciosEducativosController, ApiCookieAuth, ApiTags, Body, Controller, Get, Param, Patch (+6 more)
 
 ### Community 5 - "auth.controller.js"
 Cohesion: 0.17
 Nodes (11): 12. Checklist de producción, 13. Decisión final, 3. Mapa de procesos contables, 4. Matriz de errores contables, 5. Matriz de problemas técnicos, 7. Catálogo de vistas, 8.1 Contrato de paginación, 8. Catálogo de endpoints (+3 more)
 
 ### Community 6 - "PersonasLifecycleService"
-Cohesion: 0.18
-Nodes (14): PersonasController, ApiCookieAuth, ApiTags, Body, Controller, Get, Param, Patch (+6 more)
+Cohesion: 0.10
+Nodes (16): PersonasController, ApiCookieAuth, ApiTags, Body, Controller, Get, Param, Patch (+8 more)
 
 ### Community 7 - "app.module.ts"
 Cohesion: 0.09
 Nodes (28): ApiGatewayModule, Module, CommonModule, Module, RequestContextMiddleware, Injectable, AdministracionModule, Module (+20 more)
 
-### Community 8 - "zString"
-Cohesion: 0.33
-Nodes (8): contabilidad.fn_bloquear_periodo_cerrado(), contabilidad.fn_periodo_contable_sin_solape(), contabilidad.fn_periodo_estado_en(), contabilidad.periodo_contable, contabilidad.transaccion, trg_movimiento_periodo_cerrado, trg_periodo_contable_sin_solape, trg_transaccion_periodo_cerrado
+### Community 8 - "OpaqueSessionService"
+Cohesion: 0.24
+Nodes (4): OpaqueSessionService, Injectable, generateOpaqueToken(), sha256()
 
 ### Community 9 - "Prompt final especializado para backend con NestJS, TypeScript, Zod, JWT y Sequelize"
 Cohesion: 0.05
 Nodes (43): 0. Regla superior obligatoria sobre backend, 10. Migraciones y seeders, 11. Transacciones con Sequelize, 12. Auditoría estándar de entidades, 13. Repository genérico para CRUD con Sequelize, 14. Service genérico para CRUD: opcional y controlado, 15. Prohibición de controllers genéricos, 16. Validación con Zod (+35 more)
 
 ### Community 10 - "dependencies"
-Cohesion: 0.11
-Nodes (19): class-transformer, helmet, @nestjs/common, @nestjs/platform-express, @nestjs/swagger, dependencies, class-transformer, helmet (+11 more)
-
-### Community 11 - "contabilidad.fn_audit_bu_simple"
 Cohesion: 0.05
-Nodes (39): bu_archivos_transaccion, bu_bien, bu_ccm, bu_ccosto, bu_concepto, bu_cuenta, bu_cuenta_asignacion, bu_edificio (+31 more)
+Nodes (42): class-transformer, class-validator, compression, cookie-parser, dotenv, helmet, ioredis, multer (+34 more)
+
+### Community 11 - "PasswordHasherService"
+Cohesion: 0.18
+Nodes (7): PermissionService, Injectable, asQueryFailedErrorLike(), DatabaseErrorLike, QueryFailedErrorLike, sanitize(), toHttpDatabaseException()
 
 ### Community 12 - "devDependencies"
 Cohesion: 0.05
 Nodes (41): eslint, @eslint/js, jest, @nestjs/cli, @nestjs/schematics, @nestjs/testing, devDependencies, eslint (+33 more)
 
 ### Community 13 - "persona.persona"
-Cohesion: 0.14
-Nodes (36): administracion.api_listar_departamentos(), administracion.api_listar_empleado_posicion_pago(), administracion.api_listar_empleado_registro_pago(), administracion.api_listar_empleados(), administracion.api_listar_posiciones(), administracion.departamento, administracion.empleado, administracion.empleado_posicion_pago (+28 more)
+Cohesion: 0.27
+Nodes (9): checksum(), { Client }, crypto, fs, loadLegacyChecksums(), { loadProjectEnv }, main(), path (+1 more)
 
 ### Community 14 - "Lineamientos de programación profesional para código en producción"
 Cohesion: 0.06
@@ -289,19 +257,19 @@ Nodes (35): 0. Modo obligatorio: temperatura 0, precisión y cero adivinanzas, 1
 
 ### Community 16 - "scripts"
 Cohesion: 0.06
-Nodes (32): scripts, audit:dependencies, backup:postgres, build, check, check:source-size, db:clean:official, db:migrate:prod (+24 more)
+Nodes (33): scripts, audit:dependencies, backup:postgres, build, check, check:source-size, db:clean:official, db:migrate:prod (+25 more)
 
 ### Community 17 - "ResourceConfig"
-Cohesion: 0.06
-Nodes (24): CONTROL_QUERY_FIELDS, CrudRepository, ListResult, PROTECTED_SYSTEM_FIELDS, Injectable, PermissionService, Injectable, ResourceMetadataService (+16 more)
+Cohesion: 0.15
+Nodes (15): CONTROL_QUERY_FIELDS, CrudRepository, ListResult, PERSONA_JOIN_COLUMNS, PERSONA_METADATA_RESOURCE, PROTECTED_SYSTEM_FIELDS, statusFilterVariants(), toRows() (+7 more)
 
 ### Community 18 - "posicion.controller.js"
 Cohesion: 0.22
 Nodes (4): asegurarTutor(), CONEXION, crearPagoTutor(), HAY_CONFIGURACION
 
 ### Community 19 - "concepto_costo.controller.js"
-Cohesion: 0.25
-Nodes (5): expectEndpointWasReached(), HttpMethod, officialUtils, responseLooksLikeMissingRoute(), SmokeResult
+Cohesion: 0.05
+Nodes (37): Catch, AppModule, Module, AllExceptionsFilter, CsrfOriginGuard, SAFE_METHODS, Injectable, ResponseEnvelopeInterceptor (+29 more)
 
 ### Community 20 - "cuenta.controller.js"
 Cohesion: 0.25
@@ -312,16 +280,12 @@ Cohesion: 0.29
 Nodes (7): 10.1 Migraciones desde base vacía, 10.2 Pruebas de integridad contable — 30/30, 10.3 Ejecución real de los reportes, 10.4 Verificación de orden de rutas, 10.5 Calidad, 10.6 Reproducibilidad end-to-end, 10. Evidencias
 
 ### Community 22 - "pago_tutor.controller.js"
-Cohesion: 0.43
-Nodes (6): contabilidad.fn_pago_tutor_transicion_estado(), contabilidad.fn_proteger_cuenta_con_movimientos(), contabilidad.fn_proteger_detalle_pago_tutor(), trg_pago_tutor_transicion_estado, trg_proteger_cuenta_con_movimientos, trg_proteger_detalle_pago_tutor
+Cohesion: 0.25
+Nodes (3): ExtractedSessionToken, OpaqueSessionGuard, Injectable
 
 ### Community 23 - "transaccion.controller.js"
-Cohesion: 0.43
-Nodes (6): { createSecurePgClient, hashPassword }, listLegacyAccounts(), { loadProjectEnv }, main(), rotate(), hashPassword()
-
-### Community 24 - "asistencia_clase_curso.controller.js"
-Cohesion: 0.38
-Nodes (6): assertDestructiveOperationAllowed(), assertNotProduction(), { Client }, crypto, isProduction(), requireSeedPassword()
+Cohesion: 0.23
+Nodes (11): { createSecurePgClient, hashPassword }, listLegacyAccounts(), { loadProjectEnv }, main(), rotate(), assertDestructiveOperationAllowed(), assertNotProduction(), { Client } (+3 more)
 
 ### Community 25 - "clase_curso.controller.js"
 Cohesion: 0.33
@@ -331,37 +295,29 @@ Nodes (6): 11.1 Bloqueantes de seguridad — **resueltos**, 11.2 Acción de oper
 Cohesion: 0.33
 Nodes (6): 1.1 Estado inicial, 1.2 Errores contables principales corregidos, 1.3 Problemas técnicos principales corregidos, 1.4 Estado final, 1.5 Recomendación de producción, 1. Resumen ejecutivo
 
-### Community 29 - "smoke.spec.ts"
-Cohesion: 0.25
-Nodes (3): ResponseEnvelopeInterceptor, Injectable, officialUtils
+### Community 27 - "AuthRepository"
+Cohesion: 0.38
+Nodes (5): AuthUser, express-serve-static-core, Request, Express, Request
+
+### Community 29 - "HealthController"
+Cohesion: 0.33
+Nodes (3): HealthController, Controller, Get
 
 ### Community 30 - "AdministracionController"
 Cohesion: 0.19
 Nodes (14): AdministracionController, ApiCookieAuth, ApiTags, Body, Controller, Get, Param, Patch (+6 more)
-
-### Community 31 - "DeudaController"
-Cohesion: 0.18
-Nodes (14): DeudaController, ApiCookieAuth, ApiTags, Body, Controller, Get, Param, Patch (+6 more)
 
 ### Community 32 - "InfraestructuraController"
 Cohesion: 0.18
 Nodes (14): InfraestructuraController, ApiCookieAuth, ApiTags, Body, Controller, Get, Param, Patch (+6 more)
 
 ### Community 33 - "InventarioController"
-Cohesion: 0.18
-Nodes (14): InventarioController, ApiCookieAuth, ApiTags, Body, Controller, Get, Param, Patch (+6 more)
+Cohesion: 0.06
+Nodes (30): DeudaController, ApiCookieAuth, ApiTags, Body, Controller, Get, Param, Patch (+22 more)
 
 ### Community 34 - "SeguridadController"
 Cohesion: 0.18
 Nodes (14): SeguridadController, ApiCookieAuth, ApiTags, Body, Controller, Get, Param, Patch (+6 more)
-
-### Community 35 - "ServiciosEducativosController"
-Cohesion: 0.18
-Nodes (14): ServiciosEducativosController, ApiCookieAuth, ApiTags, Body, Controller, Get, Param, Patch (+6 more)
-
-### Community 36 - "SocietarioController"
-Cohesion: 0.18
-Nodes (14): SocietarioController, ApiCookieAuth, ApiTags, Body, Controller, Get, Param, Patch (+6 more)
 
 ### Community 37 - "Endpoint especializado: Parte de clases pasadas a venta contable"
 Cohesion: 0.07
@@ -380,16 +336,8 @@ Cohesion: 0.08
 Nodes (25): test/**/*.ts, compilerOptions, allowSyntheticDefaultImports, baseUrl, declaration, emitDecoratorMetadata, esModuleInterop, experimentalDecorators (+17 more)
 
 ### Community 41 - "redis-rate-limit.guard.ts"
-Cohesion: 0.13
-Nodes (11): AppModule, Module, InMemoryRateLimitGuard, Injectable, BoundedRateLimitStore, RateLimitBucket, getPositiveInteger(), getTrustProxy() (+3 more)
-
-### Community 42 - "OpaqueSessionService"
-Cohesion: 0.15
-Nodes (5): ExtractedSessionToken, OpaqueSessionGuard, Injectable, OpaqueSessionService, Injectable
-
-### Community 43 - "persona.api_editar_unidad_educativa"
-Cohesion: 0.16
-Nodes (24): contabilidad.api_actualizar_archivos_transaccion(), persona.api_editar_unidad_educativa(), persona.fn_asignar_padre_estudiante(), persona.fn_crear_persona_y_usuario(), persona.persona_usuario, seguridad.action_log, seguridad.api_listar_logs(), seguridad.api_listar_permisos() (+16 more)
+Cohesion: 0.23
+Nodes (5): InMemoryRateLimitGuard, Injectable, getPositiveInteger(), DatabaseModule, Module
 
 ### Community 44 - "toHttpDatabaseException"
 Cohesion: 0.40
@@ -398,14 +346,6 @@ Nodes (5): 6.1 Hallazgo estructural, 6.2 Matriz pantalla–vista–endpoint, 6.3
 ### Community 45 - "Contrato frontend - Parte de clases pasadas / Venta de clase"
 Cohesion: 0.09
 Nodes (22): Advertencias posibles, Campos alternativos aceptados por backend, Columnas recomendadas para la tabla frontend, Contrato frontend - Parte de clases pasadas / Venta de clase, CRUD de trazabilidad para mostrar historial, Cuenta contable no encontrada, Cuentas contables usadas por defecto, Ejemplo de integración con Axios (+14 more)
-
-### Community 46 - "environment.schema.ts"
-Cohesion: 0.17
-Nodes (18): CsrfOriginGuard, SAFE_METHODS, Injectable, BOOLEAN_VALUES, Environment, NODE_ENVIRONMENTS, parseCorsOrigins(), readBodyLimit() (+10 more)
-
-### Community 47 - "transaccion_movimiento_cuenta.controller.js"
-Cohesion: 0.50
-Nodes (4): contabilidad.v_asiento_integridad, contabilidad.v_movimiento_contable, contabilidad.v_plan_cuentas, contabilidad.v_powerbi_contable_movimiento
 
 ### Community 48 - "persona_usuario.controller.js"
 Cohesion: 0.40
@@ -423,14 +363,6 @@ Nodes (4): 2.1 Componentes, 2.2 Flujo contable, 2.3 Defensa en profundidad, 2. A
 Cohesion: 0.18
 Nodes (21): assertBinaryAvailable(), assertRestoreSafety(), backupSchemas(), dropTargetSchemas(), dumpSchemaArgs(), fs, gunzipToSqlFile(), isTrue() (+13 more)
 
-### Community 52 - "zod.helpers.js"
-Cohesion: 0.50
-Nodes (4): moduleFileExtensions, js, json, ts
-
-### Community 54 - "zCode"
-Cohesion: 0.67
-Nodes (3): xlsx, xlsxBuffer(), xlsx
-
 ### Community 55 - "Prompt maestro ajustado para centro de clases personalizadas, contabilidad y empleados"
 Cohesion: 0.10
 Nodes (20): Adaptación a la estructura existente del proyecto, Arquitectura requerida, Auditoría obligatoria, Contexto del proyecto, Criterio final, Diagramas PlantUML requeridos, Documentación Swagger / OpenAPI, Eventos importantes del dominio (+12 more)
@@ -439,30 +371,18 @@ Nodes (20): Adaptación a la estructura existente del proyecto, Arquitectura req
 Cohesion: 0.10
 Nodes (20): 0. Modo de trabajo obligatorio: precisión, temperatura 0 y cero adivinanzas, 10. Workers como procesos persistentes de producción, 1. Lectura obligatoria de prompts base, 2. Lectura y análisis de diagramas del sistema, 3. Criterios de interpretación de los diagramas, 4. Manejo de diagramas faltantes o incompletos, 5. Relación entre diagramas y arquitectura generada, 6. Generación de entregables (+12 more)
 
-### Community 57 - "RedisService"
-Cohesion: 0.14
-Nodes (7): RedisRateLimitGuard, Injectable, RedisService, Injectable, HealthController, Controller, Get
-
 ### Community 77 - "demo-user-utils.js"
 Cohesion: 0.25
 Nodes (16): { loadProjectEnv, getTestUserFromEnv, runCleanDemoData }, main(), { assertNotProduction, createSecurePgClient, hashPassword }, cleanDemoData(), createPgClient(), firstEnv(), fs, getTestUserFromEnv() (+8 more)
 
 ### Community 78 - "official-user-utils.js"
-Cohesion: 0.26
-Nodes (15): { loadProjectEnv, getOfficialUserFromEnv, runCleanOfficialUserData }, main(), {
-  assertDestructiveOperationAllowed,
-  createSecurePgClient,
-  hashPassword,
-  requireSeedPassword,
-}, cleanOfficialUserData(), createPgClient(), firstEnv(), fs, getOfficialUserFromEnv() (+7 more)
-
-### Community 80 - "AuthController"
-Cohesion: 0.07
-Nodes (29): IsEmail, IsNotEmpty, IsOptional, IsString, Matches, MaxLength, MinLength, Res (+21 more)
-
-### Community 89 - "persona.persona_tutor"
-Cohesion: 0.15
-Nodes (18): contabilidad.fn_generar_pago_tutor(), contabilidad.pago_tutor, contabilidad.pago_tutor_detalle, contabilidad.v_pendientes_pago_tutor, persona.estudiante_padre, persona.fn_editar_estudiante(), persona.fn_editar_padre(), persona.fn_editar_tutor() (+10 more)
+Cohesion: 0.25
+Nodes (16): { loadProjectEnv, getOfficialUserFromEnv, runCleanOfficialUserData }, main(), {
+  assertDestructiveOperationAllowed,
+  createSecurePgClient,
+  hashPassword,
+  requireSeedPassword,
+}, cleanOfficialUserData(), createPgClient(), firstEnv(), fs, getOfficialUserFromEnv() (+8 more)
 
 ### Community 91 - "Conciliación Backend ↔ Frontend — Reportería Contable CPA"
 Cohesion: 0.12
@@ -484,21 +404,17 @@ Nodes (16): 10. Servicio Infraestructura, 11. Servicio Inventario, 12. Servicio 
 Cohesion: 0.20
 Nodes (15): checksum(), { Client }, createPgClient(), crypto, destructiveResetRequested(), ensureMigrationTable(), findAppliedMigration(), fs (+7 more)
 
-### Community 127 - "inventario.bien"
-Cohesion: 0.20
-Nodes (14): administracion.api_listar_kpis(), administracion.api_listar_objetivos_kpi(), administracion.kpi, administracion.objetivo_kpi, inventario.api_crear_movimiento_detalle_batch(), inventario.bien, inventario.bien_instancia, inventario.bien_lote (+6 more)
-
-### Community 128 - "004_patch_transaccion_detalle_venta_costo.sql"
-Cohesion: 0.21
-Nodes (13): bu_transaccion_detalle_costo, bu_transaccion_detalle_venta, contabilidad.fn_calcular_transaccion_detalle_costo_totales(), contabilidad.fn_calcular_transaccion_detalle_venta_totales(), contabilidad.fn_validar_detalle_transaccion_tipo(), contabilidad.transaccion_detalle_costo, contabilidad.transaccion_detalle_venta, contabilidad.v_transaccion_detalle_costo (+5 more)
-
 ### Community 132 - "jest"
-Cohesion: 0.22
-Nodes (9): jest, collectCoverageFrom, coverageDirectory, rootDir, testEnvironment, testRegex, transform, ^.+\\.(t|j)s$ (+1 more)
+Cohesion: 0.15
+Nodes (13): jest, collectCoverageFrom, coverageDirectory, moduleFileExtensions, rootDir, testEnvironment, testRegex, transform (+5 more)
 
 ### Community 133 - "tsconfig.build.json"
 Cohesion: 0.15
 Nodes (12): **/*.spec.ts, test, ./tsconfig.json, compilerOptions, outDir, rootDir, exclude, extends (+4 more)
+
+### Community 134 - "AuthRepository"
+Cohesion: 0.06
+Nodes (34): IsEmail, IsNotEmpty, IsOptional, IsString, Matches, MaxLength, MinLength, Res (+26 more)
 
 ### Community 136 - "Endpoints mínimos sugeridos"
 Cohesion: 0.17
@@ -507,10 +423,6 @@ Nodes (12): Administración / RRHH, Asistencia, Contabilidad, Deuda y pagos, End
 ### Community 137 - "CPA Plataforma Backend NestJS"
 Cohesion: 0.17
 Nodes (11): Backup programado Render -> Neon backup, CPA Plataforma Backend NestJS, Documentación relevante, Documento principal para el frontend, Migraciones, Patch venta-clase, lifecycle y balance de apertura, QA avanzado: importaciones, errores de negocio y backup, Redis opcional para producción (+3 more)
-
-### Community 145 - "smoke.full.spec.ts"
-Cohesion: 0.17
-Nodes (5): CriticalRoute, EXPECTED_OFFICIAL_ACCOUNT_CODES, EXPECTED_OFFICIAL_GROUP_CODES, HttpMethod, officialUtils
 
 ### Community 146 - "Cobertura principal"
 Cohesion: 0.18
@@ -525,8 +437,8 @@ Cohesion: 0.18
 Nodes (10): 1. Propósito del sistema, 2. Módulos principales, 3. Convención de respuestas, 4. Batch genérico, 5. Aulas y espacios, 6. Venta clase, 7. Configuración contable, 8. Usuarios base (+2 more)
 
 ### Community 149 - "permission.guard.ts"
-Cohesion: 0.05
-Nodes (37): Module, RequirePermission(), CrudAction, PermissionGuard, RequestWithAuth, Injectable, ContabilidadModule, ContabilidadEstadosFinancierosService (+29 more)
+Cohesion: 0.07
+Nodes (33): RequirePermission(), ContabilidadModule, Module, ContabilidadEstadosFinancierosService, LineaEstado, Injectable, ContabilidadLibrosService, ORDEN_DIARIO (+25 more)
 
 ### Community 151 - "Endpoints batch y contabilidad avanzada"
 Cohesion: 0.20
@@ -552,17 +464,13 @@ Nodes (8): 1. Instalar dependencias siempre después de descargar un ZIP nuevo, 
 Cohesion: 0.22
 Nodes (8): description, engines, node, license, name, packageManager, private, version
 
-### Community 191 - "014_hardening_contabilidad_integridad.sql"
-Cohesion: 0.43
-Nodes (7): contabilidad.fn_proteger_cabecera_asiento(), contabilidad.fn_proteger_movimiento_contable(), contabilidad.fn_validar_asiento_balanceado(), contabilidad.transaccion_movimiento_cuenta, trg_proteger_cabecera_asiento, trg_proteger_movimiento_contable, trg_validar_asiento_balanceado
-
 ### Community 192 - "Bootstrap de producción CPA Plataforma"
 Cohesion: 0.25
 Nodes (7): Bootstrap de producción CPA Plataforma, Ejecutar desde cero, Ejecutar sin borrar datos, Maria Sonia Caballero, Pablo Arauz Caballero, Usuario adicional agregado, Usuarios iniciales
 
 ### Community 193 - "Qué carga"
-Cohesion: 0.25
-Nodes (7): Cómo aplicar, Endpoints útiles para frontend, `persona.unidad_educativa`, Qué carga, Seed de catálogos académicos Santa Cruz ampliado, `servicios_educativos.materia_tree`, `servicios_educativos.producto_educativo`
+Cohesion: 0.17
+Nodes (11): Correcciones aplicadas por `019_seed_catalogos_academicos_scz_correcciones.sql`, Cómo aplicar, Endpoints útiles para frontend, Más unidades educativas, `persona.unidad_educativa`, Qué carga, Se aplica solo, en cada arranque, Seed de catálogos académicos Santa Cruz ampliado (+3 more)
 
 ### Community 194 - "Patch contable: detalle de transacción venta y costo"
 Cohesion: 0.25
@@ -581,20 +489,12 @@ Cohesion: 0.25
 Nodes (8): 8. Separación de responsabilidades, Controllers, DTOs, Mappers, Modules, Repositories, Schemas, Services
 
 ### Community 198 - "render-start.js"
-Cohesion: 0.25
-Nodes (7): candidates, child, entry, fs, path, root, { spawn }
+Cohesion: 0.12
+Nodes (19): candidates, entry, fs, path, { prepareDatabase }, root, { spawn }, { Client } (+11 more)
 
 ### Community 199 - "seed-reporteria-contable-permissions.js"
 Cohesion: 0.27
 Nodes (9): countReporteriaPermissions(), createPgClient(), { createSecurePgClient }, crypto, fs, { loadProjectEnv }, main(), path (+1 more)
-
-### Community 234 - "contabilidad.cuenta"
-Cohesion: 0.38
-Nodes (7): contabilidad.centro_costo, contabilidad.cuenta, contabilidad.fn_obtener_grupo_cuenta(), contabilidad.grupo_cuenta, contabilidad.transaccion_movimiento_cuenta, contabilidad.v_cuenta, contabilidad.v_grupo_cuenta
-
-### Community 235 - "societario.emision_titulo"
-Cohesion: 0.38
-Nodes (7): societario.clase_titulo, societario.dividendo, societario.dividendo_pago, societario.emision_titulo, societario.tenencia, societario.titular, societario.transferencia_titulo
 
 ### Community 236 - "Plan de cuentas CPA estandarizado"
 Cohesion: 0.29
@@ -640,10 +540,6 @@ Nodes (7): Clase, Deuda, Liquidación de tutor, Manejo de estados, Pago, Transac
 Cohesion: 0.29
 Nodes (4): baseUrl, criticalRoutes, fs, path
 
-### Community 247 - "auth-user.type.ts"
-Cohesion: 0.17
-Nodes (10): AuthUser, express-serve-static-core, Request, Express, Request, generateNumericToken(), generateOpaqueToken(), sha256() (+2 more)
-
 ### Community 252 - "Arquitectura NestJS aplicada"
 Cohesion: 0.33
 Nodes (5): Arquitectura NestJS aplicada, Decisión principal, Estructura, Recursos migrados, Reglas aplicadas del prompt del proyecto
@@ -651,10 +547,6 @@ Nodes (5): Arquitectura NestJS aplicada, Decisión principal, Estructura, Recurs
 ### Community 253 - "Fix migración 006 - función de auditoría faltante"
 Cohesion: 0.33
 Nodes (5): Causa, Comando recomendado, Corrección, Fix migración 006 - función de auditoría faltante, Problema
-
-### Community 254 - "011_patch_venta_clase_sin_fiscal_apertura_lifecycle.sql"
-Cohesion: 0.53
-Nodes (4): contabilidad.transaccion_venta, contabilidad.v_transaccion_venta, contabilidad.v_venta_clase_registro, contabilidad.venta_clase_registro
 
 ### Community 255 - "Base de datos"
 Cohesion: 0.33
@@ -696,10 +588,6 @@ Nodes (5): COREPACK_HOME, render-build.sh script, YARN_ENABLE_GLOBAL_CACHE, YARN
 Cohesion: 0.40
 Nodes (4): Nota de ejecución local, Qué se corrigió, Reporte de migración Express → NestJS, Rutas conservadas
 
-### Community 283 - "012_patch_borradores_archivos_independientes.sql"
-Cohesion: 0.50
-Nodes (4): administracion.registro_borrador, contabilidad.archivo, contabilidad.archivo_transaccion, contabilidad.archivos_transaccion
-
 ### Community 284 - "Endpoints nuevos: detalle de venta y costo"
 Cohesion: 0.40
 Nodes (4): Detalle de transacción de costo, Detalle de transacción de venta, Endpoints nuevos: detalle de venta y costo, Nota para frontend
@@ -740,21 +628,9 @@ Nodes (4): Backup controls, Journal-integrity verification, PostgreSQL backup an
 Cohesion: 0.40
 Nodes (4): Deployment sequence, Preconditions, Production deployment runbook, Rollback
 
-### Community 294 - "Security policy"
-Cohesion: 0.40
-Nodes (4): Reporting a vulnerability, Secret handling, Security policy, Supported branch
-
 ### Community 295 - "Flujos principales"
 Cohesion: 0.50
 Nodes (3): CRUD protegido, Flujos principales, Login
-
-### Community 296 - "005_patch_venta_clase_registro_endpoint.sql"
-Cohesion: 0.67
-Nodes (3): bu_venta_clase_registro, contabilidad.v_venta_clase_registro, contabilidad.venta_clase_registro
-
-### Community 297 - "006_patch_cuentas_operativas_por_persona.sql"
-Cohesion: 0.67
-Nodes (3): bu_configuracion_cuenta_operativa, contabilidad.configuracion_cuenta_operativa, seguridad.fn_set_audit_update()
 
 ### Community 298 - "Patch 011: venta-clase sin fiscal, apertura y lifecycle"
 Cohesion: 0.50
@@ -797,24 +673,24 @@ Cohesion: 0.67
 Nodes (3): 7. Versionado de API, Opción A: prefijo por controller, Opción B: prefijo global y rutas versionadas
 
 ## Knowledge Gaps
-- **785 isolated node(s):** `singleQuote`, `printWidth`, `trailingComma`, `arrowParens`, `graphify` (+780 more)
+- **788 isolated node(s):** `singleQuote`, `printWidth`, `trailingComma`, `arrowParens`, `eslint` (+783 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **46 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **32 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `dependencies` connect `dependencies` to `package.json`, `bien.controller.js`, `bien_lote.controller.js`, `estudiante_padre.controller.js`, `persona_padre.controller.js`, `zCode`, `empleado_registro_pago.controller.js`, `centro_costo_mapa.controller.js`, `cuenta_asignacion.controller.js`, `edificio.controller.js`, `sucursal.controller.js`?**
-  _High betweenness centrality (0.044) - this node is a cross-community bridge._
-- **Why does `xlsx` connect `zCode` to `dependencies`, `CrudService`?**
-  _High betweenness centrality (0.042) - this node is a cross-community bridge._
-- **Why does `CrudService` connect `CrudService` to `InfraestructuraController`, `ResourceModuleName`, `InventarioController`, `SeguridadController`, `ServiciosEducativosController`, `SocietarioController`, `app.module.ts`, `ResourceConfig`, `permission.guard.ts`, `materia_tree.controller.js`, `DeudaController`?**
-  _High betweenness centrality (0.035) - this node is a cross-community bridge._
+- **Why does `xlsx` connect `dependencies` to `InventarioController`?**
+  _High betweenness centrality (0.072) - this node is a cross-community bridge._
+- **Why does `dependencies` connect `dependencies` to `package.json`?**
+  _High betweenness centrality (0.071) - this node is a cross-community bridge._
+- **Why does `CrudService` connect `InventarioController` to `InfraestructuraController`, `ResourceModuleName`, `ddl.sql`, `auth.service.js`, `SeguridadController`, `deuda.controller.js`, `PersonasLifecycleService`, `app.module.ts`, `PasswordHasherService`, `AdministracionLifecycleService`?**
+  _High betweenness centrality (0.043) - this node is a cross-community bridge._
 - **What connects `singleQuote`, `printWidth`, `trailingComma` to the rest of the system?**
-  _785 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `001_create_database_schema.sql` be split into smaller, more focused modules?**
-  _Cohesion score 0.00847457627118644 - nodes in this community are weakly interconnected._
-- **Should `ddl.sql` be split into smaller, more focused modules?**
-  _Cohesion score 0.010525741710296684 - nodes in this community are weakly interconnected._
+  _788 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `ContabilidadAccountingService` be split into smaller, more focused modules?**
   _Cohesion score 0.10707070707070707 - nodes in this community are weakly interconnected._
+- **Should `auth.service.js` be split into smaller, more focused modules?**
+  _Cohesion score 0.09653092006033183 - nodes in this community are weakly interconnected._
+- **Should `PersonasLifecycleService` be split into smaller, more focused modules?**
+  _Cohesion score 0.10064935064935066 - nodes in this community are weakly interconnected._

@@ -38,3 +38,6 @@ backups/
 .DS_Store
 .idea/
 .vscode/
+
+# Knowledge graph output (generated locally by graphify)
+graphify-out/

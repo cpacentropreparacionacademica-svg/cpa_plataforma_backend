@@ -258,6 +258,13 @@ async function seedOfficialUser(options = {}) {
       [testUser.idPersona, testUser.username, hashPassword(testUser.password), testUser.userType],
     );
 
+    // La limpieza previa borra todas las filas de `usuario_rol` de la persona sembrada.
+    // Al reponer sólo ADMIN_GENERAL, cada ejecución degradaba silenciosamente a la cuenta
+    // que las migraciones base siembran como SUPER_ADMIN, y como esas migraciones ya
+    // constan aplicadas nada volvía a concederle el rol. El seed repone el rol que
+    // corresponde a su `tipo_usuario` además del administrativo general.
+    const seededRoleCodes = Array.from(new Set(['ADMIN_GENERAL', testUser.userType].filter(Boolean)));
+
     await client.query(
       `INSERT INTO seguridad.usuario_rol (
          id_persona,
@@ -271,12 +278,12 @@ async function seedOfficialUser(options = {}) {
        )
        SELECT $1, r.id_rol, NOW(), 'Activo', NULL, 1, $1, NULL
        FROM seguridad.rol r
-       WHERE r.codigo = 'ADMIN_GENERAL'
+       WHERE r.codigo = ANY($2::text[])
        ON CONFLICT (id_persona, id_rol) DO UPDATE SET
          estado_registro = 'Activo',
          fecha_modificacion = NOW(),
          version_registro = COALESCE(seguridad.usuario_rol.version_registro, 1) + 1`,
-      [testUser.idPersona],
+      [testUser.idPersona, seededRoleCodes],
     );
 
     await client.query(
