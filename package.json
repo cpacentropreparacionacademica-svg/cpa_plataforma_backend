@@ -33,6 +33,7 @@
     "backup:postgres": "node scripts/backup-postgres.js",
     "db:seed:official": "node scripts/seed-official-user.js",
     "db:clean:official": "node scripts/clean-official-data.js",
+    "db:clean:smoke": "node scripts/clean-smoke-data.js",
     "db:seed:reporteria-contable": "node scripts/seed-reporteria-contable-permissions.js",
     "security:credentials:list": "node scripts/rotate-legacy-credentials.js --list",
     "security:credentials:rotate": "node scripts/rotate-legacy-credentials.js",

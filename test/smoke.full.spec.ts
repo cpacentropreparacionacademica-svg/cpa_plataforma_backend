@@ -13,6 +13,7 @@ import { AppModule } from '../src/app.module';
 import { AllExceptionsFilter } from '../src/common/filters/all-exceptions.filter';
 import { ResponseEnvelopeInterceptor } from '../src/common/interceptors/response-envelope.interceptor';
 import { RESOURCES } from '../src/modules/resource-registry';
+import { assertSmokeTargetIsLocal } from './smoke-db-guard';
 
 const officialUtils = require('../scripts/official-user-utils');
 
@@ -127,6 +128,9 @@ const EXPECTED_OFFICIAL_ACCOUNT_CODES = [
 
 function configureEnvForSmokeFull(): void {
   officialUtils.loadProjectEnv();
+  // Antes de levantar el módulo: el `.env` del proyecto apunta a producción y
+  // esta suite escribe con `SMOKE_DRY_RUN_CRUD_WRITES=false`.
+  assertSmokeTargetIsLocal('El smoke FULL');
   process.env.NODE_ENV = process.env.NODE_ENV || 'test';
   process.env.AUTH_REQUIRED = 'true';
   process.env.ENABLE_PUBLIC_SIGNUP = 'false';
@@ -184,47 +188,123 @@ async function tableExists(dataSource: DataSource, schema: string, tableName: st
   return Boolean(rows[0]?.exists);
 }
 
+/**
+ * Borra todo lo que crea este smoke. Cada consulta va marcada por un valor que
+ * solo produce el smoke ('SMOKE FULL', 'SMOKE_FULL', códigos 'SMOKE-FULL-*'),
+ * nunca por rango de ids ni por fecha, para no rozar datos reales.
+ *
+ * El filtro de personas usa solo `nombres = 'SMOKE FULL'`. Antes exigía además
+ * `email LIKE 'smoke.%@cpa.com'`, y como `persona.email` acepta nulos, cualquier
+ * fila que quedara sin correo era invisible para el DELETE y sobrevivía.
+ *
+ * El orden es hijo → padre: los movimientos y el detalle antes de la
+ * transacción, el espacio antes del edificio y el edificio antes de la
+ * sucursal. Si se invierte, la FK aborta el borrado y los datos se quedan.
+ */
 async function cleanupSmokeFullData(dataSource: DataSource): Promise<void> {
-  await dataSource
-    .query(
-      `DELETE FROM contabilidad.venta_clase_registro WHERE estudiante_texto LIKE 'SMOKE FULL%' OR tutor_texto LIKE 'SMOKE FULL%'`,
-    )
-    .catch(() => undefined);
-  await dataSource
-    .query(
-      `
-    DELETE FROM contabilidad.cuenta_asignacion
-     WHERE id_persona_estudiante IN (
-       SELECT id_persona FROM persona.persona WHERE nombres = 'SMOKE FULL' AND email LIKE 'smoke.%@cpa.com'
-     )
-        OR id_persona_tutor IN (
-          SELECT t.id_tutor
-            FROM persona.persona_tutor t
-            JOIN persona.persona p ON p.id_persona = t.id_persona
-           WHERE p.nombres = 'SMOKE FULL' AND p.email LIKE 'smoke.%@cpa.com'
-        )
-  `,
-    )
-    .catch(() => undefined);
-  await dataSource
-    .query(
-      `
-    DELETE FROM persona.persona_tutor
-     WHERE id_persona IN (SELECT id_persona FROM persona.persona WHERE nombres = 'SMOKE FULL' AND email LIKE 'smoke.%@cpa.com')
-  `,
-    )
-    .catch(() => undefined);
-  await dataSource
-    .query(
-      `
-    DELETE FROM persona.persona_estudiante
-     WHERE id_persona IN (SELECT id_persona FROM persona.persona WHERE nombres = 'SMOKE FULL' AND email LIKE 'smoke.%@cpa.com')
-  `,
-    )
-    .catch(() => undefined);
-  await dataSource
-    .query(`DELETE FROM persona.persona WHERE nombres = 'SMOKE FULL' AND email LIKE 'smoke.%@cpa.com'`)
-    .catch(() => undefined);
+  const failures: string[] = [];
+
+  async function run(label: string, sql: string, params: unknown[] = []): Promise<unknown[]> {
+    try {
+      return (await dataSource.query(sql, params)) as unknown[];
+    } catch (error) {
+      // Antes cada consulta terminaba en `.catch(() => undefined)`: si una
+      // fallaba por FK, las siguientes fallaban en cascada y el smoke pasaba
+      // igual, dejando la basura en la base sin una sola línea de aviso.
+      failures.push(`${label}: ${error instanceof Error ? error.message : String(error)}`);
+      return [];
+    }
+  }
+
+  // La transacción contable no se puede localizar una vez borrado el registro
+  // de venta-clase, que es quien la referencia. Se anotan los ids primero.
+  const ventaRows = (await run(
+    'leer venta_clase_registro',
+    `SELECT DISTINCT id_transaccion
+       FROM contabilidad.venta_clase_registro
+      WHERE situacion_base = 'SMOKE_FULL'
+         OR estudiante_texto LIKE 'SMOKE FULL%'
+         OR tutor_texto LIKE 'SMOKE FULL%'`,
+  )) as Array<{ id_transaccion: number | null }>;
+  const transaccionIds = ventaRows.map((row) => row.id_transaccion).filter((id): id is number => id !== null);
+
+  await run(
+    'venta_clase_registro',
+    `DELETE FROM contabilidad.venta_clase_registro
+      WHERE situacion_base = 'SMOKE_FULL'
+         OR estudiante_texto LIKE 'SMOKE FULL%'
+         OR tutor_texto LIKE 'SMOKE FULL%'`,
+  );
+
+  if (transaccionIds.length) {
+    await run(
+      'transaccion_movimiento_cuenta',
+      `DELETE FROM contabilidad.transaccion_movimiento_cuenta WHERE id_transaccion = ANY($1)`,
+      [transaccionIds],
+    );
+    await run(
+      'transaccion_detalle_venta',
+      `DELETE FROM contabilidad.transaccion_detalle_venta WHERE id_transaccion = ANY($1)`,
+      [transaccionIds],
+    );
+    await run('transaccion', `DELETE FROM contabilidad.transaccion WHERE id_transaccion = ANY($1)`, [transaccionIds]);
+  }
+
+  const personasSmoke = `SELECT id_persona FROM persona.persona WHERE nombres = 'SMOKE FULL'`;
+  const tutoresSmoke = `
+    SELECT t.id_tutor
+      FROM persona.persona_tutor t
+      JOIN persona.persona p ON p.id_persona = t.id_persona
+     WHERE p.nombres = 'SMOKE FULL'`;
+
+  await run(
+    'cuenta_asignacion',
+    `DELETE FROM contabilidad.cuenta_asignacion
+      WHERE id_persona_estudiante IN (${personasSmoke}) OR id_persona_tutor IN (${tutoresSmoke})`,
+  );
+
+  // Todo lo que referencia a persona_tutor/persona_estudiante y bloquearía su
+  // borrado por FK. `clase_curso.id_tutor` no hace falta: su FK es ON DELETE
+  // SET NULL, así que no bloquea.
+  await run(
+    'pago_tutor_detalle',
+    `DELETE FROM contabilidad.pago_tutor_detalle
+      WHERE id_pago_tutor IN (SELECT id_pago_tutor FROM contabilidad.pago_tutor WHERE id_tutor IN (${tutoresSmoke}))`,
+  );
+  await run('pago_tutor', `DELETE FROM contabilidad.pago_tutor WHERE id_tutor IN (${tutoresSmoke})`);
+  await run(
+    'clase_por_hora',
+    `DELETE FROM servicios_educativos.clase_por_hora
+      WHERE id_estudiante IN (${personasSmoke}) OR id_tutor IN (${tutoresSmoke})`,
+  );
+  await run(
+    'asistencia_clase_curso',
+    `DELETE FROM servicios_educativos.asistencia_clase_curso WHERE id_estudiante IN (${personasSmoke})`,
+  );
+  await run('estudiante_padre', `DELETE FROM persona.estudiante_padre WHERE id_estudiante IN (${personasSmoke})`);
+
+  await run(
+    'persona_tutor',
+    `DELETE FROM persona.persona_tutor
+      WHERE id_persona IN (SELECT id_persona FROM persona.persona WHERE nombres = 'SMOKE FULL')`,
+  );
+  await run(
+    'persona_estudiante',
+    `DELETE FROM persona.persona_estudiante
+      WHERE id_persona IN (SELECT id_persona FROM persona.persona WHERE nombres = 'SMOKE FULL')`,
+  );
+  await run('persona', `DELETE FROM persona.persona WHERE nombres = 'SMOKE FULL'`);
+
+  // Infraestructura: nunca se borraba, así que cada corrida dejaba una sucursal,
+  // un edificio y un aula nuevos —el código lleva sufijo `Date.now()`, de modo
+  // que jamás colisionaban y se iban acumulando corrida tras corrida.
+  await run('espacio', `DELETE FROM infraestructura.espacio WHERE nombre = 'Aula Smoke Full'`);
+  await run('edificio', `DELETE FROM infraestructura.edificio WHERE codigo LIKE 'SMOKE-FULL-EDI-%'`);
+  await run('sucursal', `DELETE FROM infraestructura.sucursal WHERE codigo LIKE 'SMOKE-FULL-SUC-%'`);
+
+  if (failures.length) {
+    throw new Error(`La limpieza del smoke FULL dejó datos sin borrar:\n- ${failures.join('\n- ')}`);
+  }
 }
 
 describe('CPA Plataforma - smoke FULL sistema interno', () => {
@@ -244,6 +324,11 @@ describe('CPA Plataforma - smoke FULL sistema interno', () => {
     await app.init();
     agent = request.agent(app.getHttpServer());
     dataSource = app.get(DataSource);
+    // Si una corrida anterior se cayó a mitad —timeout, Ctrl-C, un expect que
+    // falla antes de tiempo—, `afterAll` no llega a ejecutarse y su basura
+    // queda en la base. Limpiar también al entrar hace que el smoke arranque
+    // siempre desde el mismo estado en vez de acumular restos.
+    await cleanupSmokeFullData(dataSource);
   }, 90000);
 
   afterAll(async () => {
