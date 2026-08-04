@@ -10,7 +10,11 @@ services:
     # Postgres local. Redis sí es un servicio de esta composición.
     environment:
       HOST: 0.0.0.0
-      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
+      # Fijo, no heredado del .env: `redis` es el nombre del servicio de esta
+      # composición y sólo resuelve dentro de su red. El .env guarda la URL que
+      # ve el host (localhost), porque desde ahí corren los smokes y los scripts;
+      # al sustituirla aquí, el contenedor apuntaba a un Redis que no existe.
+      REDIS_URL: redis://redis:6379
     depends_on:
       redis:
         condition: service_healthy

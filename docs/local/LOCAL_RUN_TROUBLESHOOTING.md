@@ -121,3 +121,40 @@ yarn nest start
 ```
 
 Solo necesitas que PostgreSQL esté accesible y que las variables `.env` apunten a la base correcta.
+
+## 7. Smoke con `health` en 503 y el resto en verde
+
+Si `yarn test:smoke:all` falla solo en:
+
+```txt
+✕ valida health público
+Expected: 200
+Received: 503
+```
+
+el problema no es la base ni los seeds: `/api/health` también comprueba Redis, y `REDIS_URL`
+apunta a un host que tu máquina no resuelve.
+
+```txt
+ping: cannot resolve redis: Unknown host
+```
+
+`redis` es el nombre del servicio dentro de `docker-compose.yml` y solo existe en la red de
+Compose. Los smokes, en cambio, corren en el host. En `.env` la URL debe ser la que ve el host:
+
+```bash
+REDIS_URL=redis://localhost:6379
+```
+
+El contenedor no se ve afectado: `docker-compose.yml` fija `redis://redis:6379` en su bloque
+`environment`, que tiene prioridad sobre el `env_file`.
+
+Comprueba que Redis esté levantado y accesible desde el host:
+
+```bash
+docker compose up -d redis
+nc -z localhost 6379
+```
+
+Si prefieres correr los smokes sin Redis, deja `REDIS_URL` vacío: la aplicación cae a sus
+límites en memoria y `health` responde 200.
