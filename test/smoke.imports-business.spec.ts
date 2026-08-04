@@ -13,11 +13,14 @@ import { DataSource } from 'typeorm';
 import { AppModule } from '../src/app.module';
 import { AllExceptionsFilter } from '../src/common/filters/all-exceptions.filter';
 import { ResponseEnvelopeInterceptor } from '../src/common/interceptors/response-envelope.interceptor';
+import { assertSmokeTargetIsLocal } from './smoke-db-guard';
 
 const officialUtils = require('../scripts/official-user-utils');
 
 function configureEnvForSmokeImports(): void {
   officialUtils.loadProjectEnv();
+  // Esta suite también escribe de verdad: mismo freno que el smoke FULL.
+  assertSmokeTargetIsLocal('El smoke de importaciones');
   process.env.NODE_ENV = process.env.NODE_ENV || 'test';
   process.env.AUTH_REQUIRED = 'true';
   process.env.ENABLE_PUBLIC_SIGNUP = 'false';
