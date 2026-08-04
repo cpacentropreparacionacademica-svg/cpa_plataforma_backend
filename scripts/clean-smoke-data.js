@@ -24,6 +24,11 @@ const { createSecurePgClient } = require('./seed-security');
 const { loadProjectEnv } = require('./official-user-utils');
 
 const PERSONAS_SMOKE = `SELECT id_persona FROM persona.persona WHERE nombres = 'SMOKE FULL'`;
+const TUTORES_SMOKE = `
+  SELECT t.id_tutor
+    FROM persona.persona_tutor t
+    JOIN persona.persona p ON p.id_persona = t.id_persona
+   WHERE p.nombres = 'SMOKE FULL'`;
 const VENTAS_SMOKE = `
   SELECT DISTINCT id_transaccion
     FROM contabilidad.venta_clase_registro
@@ -56,12 +61,23 @@ const STEPS = [
   },
   {
     label: 'contabilidad.cuenta_asignacion',
-    where: `id_persona_estudiante IN (${PERSONAS_SMOKE})
-         OR id_persona_tutor IN (
-              SELECT t.id_tutor FROM persona.persona_tutor t
-                JOIN persona.persona p ON p.id_persona = t.id_persona
-               WHERE p.nombres = 'SMOKE FULL')`,
+    where: `id_persona_estudiante IN (${PERSONAS_SMOKE}) OR id_persona_tutor IN (${TUTORES_SMOKE})`,
   },
+  // Todo lo que referencia a persona_tutor/persona_estudiante y bloquearía su
+  // borrado. `clase_por_hora` fue la que abortó el primer intento de limpieza.
+  // `clase_curso.id_tutor` no está aquí a propósito: su FK es ON DELETE SET
+  // NULL, así que no bloquea y no hay por qué borrar la clase.
+  {
+    label: 'contabilidad.pago_tutor_detalle',
+    where: `id_pago_tutor IN (SELECT id_pago_tutor FROM contabilidad.pago_tutor WHERE id_tutor IN (${TUTORES_SMOKE}))`,
+  },
+  { label: 'contabilidad.pago_tutor', where: `id_tutor IN (${TUTORES_SMOKE})` },
+  {
+    label: 'servicios_educativos.clase_por_hora',
+    where: `id_estudiante IN (${PERSONAS_SMOKE}) OR id_tutor IN (${TUTORES_SMOKE})`,
+  },
+  { label: 'servicios_educativos.asistencia_clase_curso', where: `id_estudiante IN (${PERSONAS_SMOKE})` },
+  { label: 'persona.estudiante_padre', where: `id_estudiante IN (${PERSONAS_SMOKE})` },
   { label: 'persona.persona_tutor', where: `id_persona IN (${PERSONAS_SMOKE})` },
   { label: 'persona.persona_estudiante', where: `id_persona IN (${PERSONAS_SMOKE})` },
   { label: 'persona.persona', where: `nombres = 'SMOKE FULL'` },

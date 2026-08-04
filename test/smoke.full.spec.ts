@@ -250,17 +250,39 @@ async function cleanupSmokeFullData(dataSource: DataSource): Promise<void> {
     await run('transaccion', `DELETE FROM contabilidad.transaccion WHERE id_transaccion = ANY($1)`, [transaccionIds]);
   }
 
+  const personasSmoke = `SELECT id_persona FROM persona.persona WHERE nombres = 'SMOKE FULL'`;
+  const tutoresSmoke = `
+    SELECT t.id_tutor
+      FROM persona.persona_tutor t
+      JOIN persona.persona p ON p.id_persona = t.id_persona
+     WHERE p.nombres = 'SMOKE FULL'`;
+
   await run(
     'cuenta_asignacion',
     `DELETE FROM contabilidad.cuenta_asignacion
-      WHERE id_persona_estudiante IN (SELECT id_persona FROM persona.persona WHERE nombres = 'SMOKE FULL')
-         OR id_persona_tutor IN (
-           SELECT t.id_tutor
-             FROM persona.persona_tutor t
-             JOIN persona.persona p ON p.id_persona = t.id_persona
-            WHERE p.nombres = 'SMOKE FULL'
-         )`,
+      WHERE id_persona_estudiante IN (${personasSmoke}) OR id_persona_tutor IN (${tutoresSmoke})`,
   );
+
+  // Todo lo que referencia a persona_tutor/persona_estudiante y bloquearía su
+  // borrado por FK. `clase_curso.id_tutor` no hace falta: su FK es ON DELETE
+  // SET NULL, así que no bloquea.
+  await run(
+    'pago_tutor_detalle',
+    `DELETE FROM contabilidad.pago_tutor_detalle
+      WHERE id_pago_tutor IN (SELECT id_pago_tutor FROM contabilidad.pago_tutor WHERE id_tutor IN (${tutoresSmoke}))`,
+  );
+  await run('pago_tutor', `DELETE FROM contabilidad.pago_tutor WHERE id_tutor IN (${tutoresSmoke})`);
+  await run(
+    'clase_por_hora',
+    `DELETE FROM servicios_educativos.clase_por_hora
+      WHERE id_estudiante IN (${personasSmoke}) OR id_tutor IN (${tutoresSmoke})`,
+  );
+  await run(
+    'asistencia_clase_curso',
+    `DELETE FROM servicios_educativos.asistencia_clase_curso WHERE id_estudiante IN (${personasSmoke})`,
+  );
+  await run('estudiante_padre', `DELETE FROM persona.estudiante_padre WHERE id_estudiante IN (${personasSmoke})`);
+
   await run(
     'persona_tutor',
     `DELETE FROM persona.persona_tutor
