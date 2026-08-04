@@ -944,6 +944,23 @@ export const RESOURCES: ResourceConfig[] = [
     }
   },
   {
+    "key": "inscripcion_curso",
+    "entity": "inscripcion_curso",
+    "domainFolder": "servicios_educativos",
+    "routeModule": "servicios_educativos",
+    "routePath": "inscripcion-curso",
+    "schema": "servicios_educativos",
+    "tableName": "inscripcion_curso",
+    "primaryKeys": [
+      "id_inscripcion"
+    ],
+    "permissions": {
+      "create": "SERVICIOS_EDUCATIVOS.INSCRIPCION_CURSO.CREATE",
+      "read": "SERVICIOS_EDUCATIVOS.INSCRIPCION_CURSO.READ",
+      "update": "SERVICIOS_EDUCATIVOS.INSCRIPCION_CURSO.UPDATE"
+    }
+  },
+  {
     "key": "clase_curso",
     "entity": "clase_curso",
     "domainFolder": "servicios_educativos",
