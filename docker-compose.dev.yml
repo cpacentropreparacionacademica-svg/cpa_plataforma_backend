@@ -1,19 +1,39 @@
 # Despliegue en Coolify (entorno dev).
 #
-# `docker-compose.yml` levanta el stack en la máquina de un desarrollador.
-# Este archivo es para publicarlo: en Coolify se crea un recurso "Docker Compose",
-# se apunta a este repositorio y se selecciona este archivo. Los valores van en la
-# pestaña Environment Variables del recurso; aquí no se versiona ningún secreto.
+# En Coolify se crea un recurso "Docker Compose", se apunta a este repositorio y
+# se selecciona este archivo. Los valores van en la pestaña Environment Variables
+# del recurso; aquí no se versiona ningún secreto.
 #
-# SERVICE_FQDN_API_3000 es una variable mágica de Coolify: al verla declarada en
-# forma de lista y asignada con ${...}, genera el dominio público y enruta hacia
-# el puerto 3000 del contenedor. Por eso NO hay `ports:`: publicar el puerto
-# saltaría el proxy y dejaría el servicio sin dominio ni TLS.
+# El stack es autosuficiente: trae su propio Postgres y su propio Redis, de modo
+# que levanta sin depender de nada externo. Lo único obligatorio es PGPASSWORD.
 #
-# La base de datos es gestionada (Neon), igual que en docker-compose.yml: este
-# stack no levanta Postgres propio. Basta configurar PG* / DATABASE_URL.
+# Para usar una base gestionada (Neon, RDS, Supabase) en vez del Postgres de
+# aquí, basta con sobreescribir en el panel:
+#     PGHOST=<host gestionado>   PGSSLMODE=require   DATABASE_URL=<url completa>
+# El servicio `postgres` seguirá levantado pero la API ya no lo usará; si
+# molesta, se puede quitar del stack.
 #
-# Uso local:  docker compose -f docker-compose.dev.yml up --build
+# SERVICE_FQDN_API_3000 es una variable mágica de Coolify: declarada en forma de
+# lista y asignada con ${...}, genera el dominio público y enruta al puerto 3000.
+# Por eso NO hay `ports:`: publicarlo saltaría el proxy y dejaría el servicio sin
+# dominio ni TLS.
+#
+# Uso local:  PGPASSWORD=algo docker compose -f docker-compose.dev.yml up --build
+#
+# OJO en local: Docker Compose carga solo el `.env` del directorio y sus valores
+# ganan a los defaults de aquí. Si el `.env` de desarrollo tiene PGHOST=localhost,
+# el contenedor buscará la base en sí mismo y no en el servicio `postgres`.
+# Para probar los defaults tal como corren en Coolify: --env-file /dev/null
+
+x-postgres-env: &postgres-env
+  PGHOST: ${PGHOST:-postgres}
+  PGPORT: ${PGPORT:-5432}
+  PGDATABASE: ${PGDATABASE:-cpa_platform}
+  PGUSER: ${PGUSER:-cpa_backend}
+  PGPASSWORD: ${PGPASSWORD:?define PGPASSWORD en las variables del recurso}
+  # El Postgres de este stack no habla TLS. Con una base gestionada: require.
+  PGSSLMODE: ${PGSSLMODE:-disable}
+  DATABASE_URL: ${DATABASE_URL:-postgresql://${PGUSER:-cpa_backend}:${PGPASSWORD}@${PGHOST:-postgres}:${PGPORT:-5432}/${PGDATABASE:-cpa_platform}}
 
 services:
   api:
@@ -28,19 +48,22 @@ services:
       - PORT=3000
       - HOST=0.0.0.0
       - API_PREFIX=api
-      # Obligatorio en producción y sin comodines: los orígenes del frontend.
+      # Obligatorio en producción y sin comodines. Sin esquema, con barra final
+      # o con ruta, la aplicación aborta el arranque nombrando el valor.
+      #   correcto:   https://front.midominio.com
+      #   incorrecto: front.midominio.com   https://front.midominio.com/
       - CORS_ORIGINS=${CORS_ORIGINS:?define CORS_ORIGINS con el dominio del frontend}
       # Detrás del proxy de Coolify hay exactamente un salto de confianza.
       - TRUST_PROXY=${TRUST_PROXY:-1}
       - SWAGGER_ENABLED=${SWAGGER_ENABLED:-false}
 
-      - PGHOST=${PGHOST:?define PGHOST}
+      - PGHOST=${PGHOST:-postgres}
       - PGPORT=${PGPORT:-5432}
-      - PGDATABASE=${PGDATABASE:-neondb}
-      - PGUSER=${PGUSER:?define PGUSER}
-      - PGPASSWORD=${PGPASSWORD:?define PGPASSWORD}
-      - PGSSLMODE=${PGSSLMODE:-require}
-      - DATABASE_URL=${DATABASE_URL:?define DATABASE_URL}
+      - PGDATABASE=${PGDATABASE:-cpa_platform}
+      - PGUSER=${PGUSER:-cpa_backend}
+      - PGPASSWORD=${PGPASSWORD:?define PGPASSWORD en las variables del recurso}
+      - PGSSLMODE=${PGSSLMODE:-disable}
+      - DATABASE_URL=${DATABASE_URL:-postgresql://${PGUSER:-cpa_backend}:${PGPASSWORD}@${PGHOST:-postgres}:${PGPORT:-5432}/${PGDATABASE:-cpa_platform}}
 
       - AUTH_REQUIRED=${AUTH_REQUIRED:-true}
       - SESSION_COOKIE_NAME=${SESSION_COOKIE_NAME:-cpa_session}
@@ -51,7 +74,12 @@ services:
       # `redis` es el nombre del servicio y sólo resuelve dentro de esta red.
       - REDIS_URL=redis://redis:6379
       - REDIS_KEY_PREFIX=${REDIS_KEY_PREFIX:-cpa:backend}
+    # La API muere con código 1 si no alcanza la base al arrancar, y Coolify la
+    # reinicia hasta agotar el límite. Esperar a que Postgres esté sano evita
+    # justamente ese bucle.
     depends_on:
+      postgres:
+        condition: service_healthy
       redis:
         condition: service_healthy
     healthcheck:
@@ -70,14 +98,27 @@ services:
     restart: "no"
     entrypoint: ["node", "scripts/migrate-prod.js"]
     environment:
-      - NODE_ENV=${NODE_ENV:-production}
-      - PGHOST=${PGHOST:?define PGHOST}
-      - PGPORT=${PGPORT:-5432}
-      - PGDATABASE=${PGDATABASE:-neondb}
-      - PGUSER=${PGUSER:?define PGUSER}
-      - PGPASSWORD=${PGPASSWORD:?define PGPASSWORD}
-      - PGSSLMODE=${PGSSLMODE:-require}
-      - DATABASE_URL=${DATABASE_URL:?define DATABASE_URL}
+      NODE_ENV: ${NODE_ENV:-production}
+      <<: *postgres-env
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${PGDATABASE:-cpa_platform}
+      POSTGRES_USER: ${PGUSER:-cpa_backend}
+      POSTGRES_PASSWORD: ${PGPASSWORD:?define PGPASSWORD en las variables del recurso}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PGUSER:-cpa_backend} -d ${PGDATABASE:-cpa_platform}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 
   redis:
     image: redis:7-alpine
@@ -92,4 +133,5 @@ services:
       retries: 5
 
 volumes:
+  postgres_data:
   redis_data:
