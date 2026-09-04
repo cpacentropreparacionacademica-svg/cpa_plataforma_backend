@@ -63,6 +63,34 @@ export class VentaProductoRepository {
     return bienes;
   }
 
+  /**
+   * La cabecera de venta debe decir dónde se vendió: `ck_transaccion_venta_referencia`
+   * rechaza un encabezado que no apunte a nada, y en una venta de mostrador con
+   * varios productos ninguna de las referencias por producto aplica.
+   *
+   * Una caja siempre está en una tienda, así que cuando el cliente no la envía y
+   * existe una sola tienda activa, se usa esa: es determinista y cierto. Con cero
+   * o varias tiendas hay que declararla, porque adivinar falsearía el registro.
+   */
+  async resolveTiendaId(manager: EntityManager, idTienda?: number): Promise<number> {
+    if (idTienda) return idTienda;
+
+    const rows = (await manager.query(
+      `SELECT id_tienda FROM infraestructura.tienda
+        WHERE COALESCE(estado_registro, 'Activo') IN ('Activo', 'ACTIVO', 'activo')
+        ORDER BY id_tienda
+        LIMIT 2`,
+    )) as Array<{ id_tienda: unknown }>;
+
+    if (rows.length === 1) return Number(rows[0].id_tienda);
+
+    throw new BadRequestException(
+      rows.length === 0
+        ? 'No hay ninguna tienda activa registrada. Crea una en Infraestructura > Tienda para poder vender en caja.'
+        : 'Hay varias tiendas activas: envía id_tienda para indicar en cuál se hizo la venta.',
+    );
+  }
+
   async insertTransaccion(
     manager: EntityManager,
     venta: VentaProductoNormalized,

@@ -58,6 +58,7 @@ export class VentaProductoService {
     const totales = this.calcularTotales(lineas);
     this.assertPagoCuadra(venta, totales.total);
     const cobro = this.repartirCobro(venta, totales.total);
+    venta.idTienda = await this.repository.resolveTiendaId(manager, venta.idTienda);
 
     const transaccion = await this.repository.insertTransaccion(
       manager,
