@@ -77,11 +77,19 @@ services:
     # La API muere con código 1 si no alcanza la base al arrancar, y Coolify la
     # reinicia hasta agotar el límite. Esperar a que Postgres esté sano evita
     # justamente ese bucle.
+    #
+    # Y esperar a que las migraciones terminen evita el problema contrario: en un
+    # primer despliegue la base está sana desde el segundo cero pero todavía
+    # vacía, así que la API arrancaría y atendería peticiones contra un esquema
+    # inexistente. Si las migraciones fallan, la API no arranca, que es lo
+    # correcto: mejor un servicio caído que uno sirviendo datos a medias.
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/api/health/live >/dev/null || exit 1"]
       interval: 30s
