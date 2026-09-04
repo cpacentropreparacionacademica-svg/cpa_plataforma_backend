@@ -1,13 +1,17 @@
 # Despliegue en Coolify (entorno dev).
 #
-# `docker-compose.yml` es para levantar el stack en la máquina de un desarrollador.
+# `docker-compose.yml` levanta el stack en la máquina de un desarrollador.
 # Este archivo es para publicarlo: en Coolify se crea un recurso "Docker Compose",
-# se apunta a este repositorio y se selecciona este archivo. Las variables van en
-# la pestaña Environment Variables del recurso; aquí no se versiona ningún secreto.
+# se apunta a este repositorio y se selecciona este archivo. Los valores van en la
+# pestaña Environment Variables del recurso; aquí no se versiona ningún secreto.
 #
-# La base de datos es Neon (gestionada), igual que en docker-compose.yml: por eso
-# este stack NO levanta un Postgres propio. Basta con configurar PG* / DATABASE_URL
-# apuntando a Neon.
+# SERVICE_FQDN_API_3000 es una variable mágica de Coolify: al verla declarada en
+# forma de lista y asignada con ${...}, genera el dominio público y enruta hacia
+# el puerto 3000 del contenedor. Por eso NO hay `ports:`: publicar el puerto
+# saltaría el proxy y dejaría el servicio sin dominio ni TLS.
+#
+# La base de datos es gestionada (Neon), igual que en docker-compose.yml: este
+# stack no levanta Postgres propio. Basta configurar PG* / DATABASE_URL.
 #
 # Uso local:  docker compose -f docker-compose.dev.yml up --build
 
@@ -18,36 +22,35 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     environment:
-      # Coolify publica el servicio en este FQDN y lo inyecta de vuelta.
-      SERVICE_FQDN_API_3000: ${SERVICE_FQDN_API_3000:-}
+      - SERVICE_FQDN_API_3000=${SERVICE_FQDN_API_3000}
 
-      NODE_ENV: ${NODE_ENV:-production}
-      PORT: 3000
-      HOST: 0.0.0.0
-      API_PREFIX: api
-      # Obligatorio en produccion y sin comodines: son los origenes del frontend.
-      CORS_ORIGINS: ${CORS_ORIGINS:?define CORS_ORIGINS con el dominio del frontend}
-      # Detras del proxy de Coolify hay exactamente un salto de confianza.
-      TRUST_PROXY: ${TRUST_PROXY:-1}
-      SWAGGER_ENABLED: ${SWAGGER_ENABLED:-false}
+      - NODE_ENV=${NODE_ENV:-production}
+      - PORT=3000
+      - HOST=0.0.0.0
+      - API_PREFIX=api
+      # Obligatorio en producción y sin comodines: los orígenes del frontend.
+      - CORS_ORIGINS=${CORS_ORIGINS:?define CORS_ORIGINS con el dominio del frontend}
+      # Detrás del proxy de Coolify hay exactamente un salto de confianza.
+      - TRUST_PROXY=${TRUST_PROXY:-1}
+      - SWAGGER_ENABLED=${SWAGGER_ENABLED:-false}
 
-      PGHOST: ${PGHOST:?define PGHOST con el host de Neon}
-      PGPORT: ${PGPORT:-5432}
-      PGDATABASE: ${PGDATABASE:-neondb}
-      PGUSER: ${PGUSER:?define PGUSER}
-      PGPASSWORD: ${PGPASSWORD:?define PGPASSWORD}
-      PGSSLMODE: ${PGSSLMODE:-require}
-      DATABASE_URL: ${DATABASE_URL:?define DATABASE_URL}
+      - PGHOST=${PGHOST:?define PGHOST}
+      - PGPORT=${PGPORT:-5432}
+      - PGDATABASE=${PGDATABASE:-neondb}
+      - PGUSER=${PGUSER:?define PGUSER}
+      - PGPASSWORD=${PGPASSWORD:?define PGPASSWORD}
+      - PGSSLMODE=${PGSSLMODE:-require}
+      - DATABASE_URL=${DATABASE_URL:?define DATABASE_URL}
 
-      AUTH_REQUIRED: ${AUTH_REQUIRED:-true}
-      SESSION_COOKIE_NAME: ${SESSION_COOKIE_NAME:-cpa_session}
-      # Sobre HTTPS la cookie debe ser secure; con SameSite=none es obligatorio.
-      SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-true}
-      SESSION_SAME_SITE: ${SESSION_SAME_SITE:-lax}
+      - AUTH_REQUIRED=${AUTH_REQUIRED:-true}
+      - SESSION_COOKIE_NAME=${SESSION_COOKIE_NAME:-cpa_session}
+      # Coolify sirve por HTTPS: la cookie debe viajar como secure.
+      - SESSION_COOKIE_SECURE=${SESSION_COOKIE_SECURE:-true}
+      - SESSION_SAME_SITE=${SESSION_SAME_SITE:-lax}
 
-      # `redis` es el nombre del servicio y solo resuelve dentro de esta red.
-      REDIS_URL: redis://redis:6379
-      REDIS_KEY_PREFIX: ${REDIS_KEY_PREFIX:-cpa:backend}
+      # `redis` es el nombre del servicio y sólo resuelve dentro de esta red.
+      - REDIS_URL=redis://redis:6379
+      - REDIS_KEY_PREFIX=${REDIS_KEY_PREFIX:-cpa:backend}
     depends_on:
       redis:
         condition: service_healthy
@@ -67,14 +70,14 @@ services:
     restart: "no"
     entrypoint: ["node", "scripts/migrate-prod.js"]
     environment:
-      NODE_ENV: ${NODE_ENV:-production}
-      PGHOST: ${PGHOST:?define PGHOST con el host de Neon}
-      PGPORT: ${PGPORT:-5432}
-      PGDATABASE: ${PGDATABASE:-neondb}
-      PGUSER: ${PGUSER:?define PGUSER}
-      PGPASSWORD: ${PGPASSWORD:?define PGPASSWORD}
-      PGSSLMODE: ${PGSSLMODE:-require}
-      DATABASE_URL: ${DATABASE_URL:?define DATABASE_URL}
+      - NODE_ENV=${NODE_ENV:-production}
+      - PGHOST=${PGHOST:?define PGHOST}
+      - PGPORT=${PGPORT:-5432}
+      - PGDATABASE=${PGDATABASE:-neondb}
+      - PGUSER=${PGUSER:?define PGUSER}
+      - PGPASSWORD=${PGPASSWORD:?define PGPASSWORD}
+      - PGSSLMODE=${PGSSLMODE:-require}
+      - DATABASE_URL=${DATABASE_URL:?define DATABASE_URL}
 
   redis:
     image: redis:7-alpine
