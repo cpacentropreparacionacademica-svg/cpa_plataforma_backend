@@ -1,6 +1,6 @@
 # Modelo de datos del punto de venta
 
-Cambios introducidos por `018_punto_venta_tienda.sql` y `019_permisos_cajero_punto_venta.sql`.
+Cambios introducidos por `025_punto_venta_tienda.sql` y `026_permisos_cajero_punto_venta.sql`.
 
 ## Por qué hizo falta la migración
 
@@ -85,7 +85,7 @@ por línea en `transaccion_detalle_venta`. La restricción ahora acepta además
 
 ## Permisos
 
-`019` registra `INVENTARIO.CATALOGO_TIENDA.READ`,
+`026` registra `INVENTARIO.CATALOGO_TIENDA.READ`,
 `CONTABILIDAD.VENTA_PRODUCTO.REGISTRAR` y `CONTABILIDAD.VENTA_PRODUCTO.READ`,
 y los asigna a `CAJERO`, `ENCARGADO_TIENDA`, `ADMIN_GENERAL`, `SUPER_ADMIN` y
 `CONTADOR_GENERAL`.

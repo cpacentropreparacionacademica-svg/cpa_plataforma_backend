@@ -1,4 +1,4 @@
--- 019_permisos_cajero_punto_venta.sql
+-- 026_permisos_cajero_punto_venta.sql
 -- Propósito:
 --   1) Registrar los permisos que consume el módulo de punto de venta del cajero.
 --   2) Asignarlos al rol CAJERO, que hoy sólo tiene el vocabulario legacy CAJA.*

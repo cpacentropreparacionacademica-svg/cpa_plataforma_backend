@@ -1,4 +1,4 @@
--- 018_punto_venta_tienda.sql
+-- 025_punto_venta_tienda.sql
 -- Propósito:
 --   1) Permitir que un bien de tienda tenga imagen (Cloudinary) para el grid del cajero.
 --   2) Convertir inventario.movimiento_detalle en un movimiento trazable por transacción,
