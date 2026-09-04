@@ -5,6 +5,32 @@ describe('environment configuration', () => {
     expect(() => parseCorsOrigins('https://*.example.com')).toThrow('does not accept wildcards');
   });
 
+  /**
+   * Estos tres son los errores de configuración que más veces dejan el contenedor
+   * en bucle de reinicios. El mensaje debe nombrar el valor ofensor: un «Invalid URL»
+   * a secas no dice ni qué variable revisar.
+   */
+  it('rejects an origin without a scheme naming the offending value', () => {
+    expect(() => parseCorsOrigins('app.example.com')).toThrow(
+      'CORS origin must be an exact HTTP(S) origin: app.example.com',
+    );
+  });
+
+  it('rejects an origin with a trailing slash', () => {
+    expect(() => parseCorsOrigins('https://app.example.com/')).toThrow('must be an exact HTTP(S) origin');
+  });
+
+  it('rejects an origin that carries a path', () => {
+    expect(() => parseCorsOrigins('https://app.example.com/app')).toThrow('must be an exact HTTP(S) origin');
+  });
+
+  it('accepts several origins separated by commas, trimming spaces', () => {
+    expect(parseCorsOrigins('https://a.example.com, https://b.example.com')).toEqual([
+      'https://a.example.com',
+      'https://b.example.com',
+    ]);
+  });
+
   it('fails closed when production authentication or secure cookies are disabled', () => {
     expect(() => validateEnvironment({
       NODE_ENV: 'production',
