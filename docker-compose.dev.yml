@@ -1,11 +1,13 @@
-# Stack de desarrollo/staging desplegable en Coolify.
+# Despliegue en Coolify (entorno dev).
 #
-# Coolify: crear un recurso "Docker Compose", apuntar a este repositorio y
-# seleccionar este archivo. Las variables van en la pestaña de Environment
-# Variables del recurso; NO se commitea ningún secreto en este archivo.
+# `docker-compose.yml` es para levantar el stack en la máquina de un desarrollador.
+# Este archivo es para publicarlo: en Coolify se crea un recurso "Docker Compose",
+# se apunta a este repositorio y se selecciona este archivo. Las variables van en
+# la pestaña Environment Variables del recurso; aquí no se versiona ningún secreto.
 #
-# Las variables SERVICE_FQDN_* son magia de Coolify: generan el dominio público
-# y lo inyectan de vuelta. En local se pueden ignorar y usar los puertos.
+# La base de datos es Neon (gestionada), igual que en docker-compose.yml: por eso
+# este stack NO levanta un Postgres propio. Basta con configurar PG* / DATABASE_URL
+# apuntando a Neon.
 #
 # Uso local:  docker compose -f docker-compose.dev.yml up --build
 
@@ -16,49 +18,48 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     environment:
-      # Coolify publica el servicio en este FQDN y lo expone como variable.
+      # Coolify publica el servicio en este FQDN y lo inyecta de vuelta.
       SERVICE_FQDN_API_3000: ${SERVICE_FQDN_API_3000:-}
 
-      NODE_ENV: ${NODE_ENV:-development}
+      NODE_ENV: ${NODE_ENV:-production}
       PORT: 3000
       HOST: 0.0.0.0
       API_PREFIX: api
-      # En producción es obligatorio y no acepta comodines.
-      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173,http://localhost:8080}
+      # Obligatorio en produccion y sin comodines: son los origenes del frontend.
+      CORS_ORIGINS: ${CORS_ORIGINS:?define CORS_ORIGINS con el dominio del frontend}
+      # Detras del proxy de Coolify hay exactamente un salto de confianza.
       TRUST_PROXY: ${TRUST_PROXY:-1}
-      SWAGGER_ENABLED: ${SWAGGER_ENABLED:-true}
+      SWAGGER_ENABLED: ${SWAGGER_ENABLED:-false}
 
-      PGHOST: postgres
-      PGPORT: 5432
-      PGDATABASE: ${PGDATABASE:-cpa_platform}
-      PGUSER: ${PGUSER:-cpa_backend}
-      PGPASSWORD: ${PGPASSWORD:?define PGPASSWORD en las variables del recurso}
-      PGSSLMODE: disable
-      DATABASE_URL: postgresql://${PGUSER:-cpa_backend}:${PGPASSWORD}@postgres:5432/${PGDATABASE:-cpa_platform}?sslmode=disable
+      PGHOST: ${PGHOST:?define PGHOST con el host de Neon}
+      PGPORT: ${PGPORT:-5432}
+      PGDATABASE: ${PGDATABASE:-neondb}
+      PGUSER: ${PGUSER:?define PGUSER}
+      PGPASSWORD: ${PGPASSWORD:?define PGPASSWORD}
+      PGSSLMODE: ${PGSSLMODE:-require}
+      DATABASE_URL: ${DATABASE_URL:?define DATABASE_URL}
 
       AUTH_REQUIRED: ${AUTH_REQUIRED:-true}
       SESSION_COOKIE_NAME: ${SESSION_COOKIE_NAME:-cpa_session}
-      SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-false}
+      # Sobre HTTPS la cookie debe ser secure; con SameSite=none es obligatorio.
+      SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-true}
       SESSION_SAME_SITE: ${SESSION_SAME_SITE:-lax}
 
+      # `redis` es el nombre del servicio y solo resuelve dentro de esta red.
       REDIS_URL: redis://redis:6379
       REDIS_KEY_PREFIX: ${REDIS_KEY_PREFIX:-cpa:backend}
     depends_on:
-      postgres:
-        condition: service_healthy
       redis:
-        condition: service_started
-    ports:
-      - "${API_PORT:-3000}:3000"
+        condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/api/health/live"]
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/api/health/live >/dev/null || exit 1"]
       interval: 30s
       timeout: 5s
-      retries: 3
       start_period: 40s
+      retries: 3
 
-  # Ejecuta las migraciones una sola vez y termina. Coolify lo muestra como
-  # "exited (0)" cuando fue bien: es el comportamiento esperado.
+  # Aplica las migraciones y termina. En Coolify aparece como "exited (0)"
+  # cuando fue bien: es el comportamiento esperado, no un fallo.
   migrations:
     build:
       context: .
@@ -66,40 +67,26 @@ services:
     restart: "no"
     entrypoint: ["node", "scripts/migrate-prod.js"]
     environment:
-      NODE_ENV: ${NODE_ENV:-development}
-      PGHOST: postgres
-      PGPORT: 5432
-      PGDATABASE: ${PGDATABASE:-cpa_platform}
-      PGUSER: ${PGUSER:-cpa_backend}
-      PGPASSWORD: ${PGPASSWORD:?define PGPASSWORD en las variables del recurso}
-      PGSSLMODE: disable
-    depends_on:
-      postgres:
-        condition: service_healthy
-
-  postgres:
-    image: postgres:17-alpine
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: ${PGDATABASE:-cpa_platform}
-      POSTGRES_USER: ${PGUSER:-cpa_backend}
-      POSTGRES_PASSWORD: ${PGPASSWORD:?define PGPASSWORD en las variables del recurso}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${PGUSER:-cpa_backend} -d ${PGDATABASE:-cpa_platform}"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 20s
+      NODE_ENV: ${NODE_ENV:-production}
+      PGHOST: ${PGHOST:?define PGHOST con el host de Neon}
+      PGPORT: ${PGPORT:-5432}
+      PGDATABASE: ${PGDATABASE:-neondb}
+      PGUSER: ${PGUSER:?define PGUSER}
+      PGPASSWORD: ${PGPASSWORD:?define PGPASSWORD}
+      PGSSLMODE: ${PGSSLMODE:-require}
+      DATABASE_URL: ${DATABASE_URL:?define DATABASE_URL}
 
   redis:
     image: redis:7-alpine
     restart: unless-stopped
-    command: ["redis-server", "--save", "60", "1", "--loglevel", "warning"]
+    command: ["redis-server", "--appendonly", "yes"]
     volumes:
       - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
 
 volumes:
-  postgres_data:
   redis_data:
