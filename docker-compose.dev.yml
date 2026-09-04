@@ -1,0 +1,105 @@
+# Stack de desarrollo/staging desplegable en Coolify.
+#
+# Coolify: crear un recurso "Docker Compose", apuntar a este repositorio y
+# seleccionar este archivo. Las variables van en la pestaña de Environment
+# Variables del recurso; NO se commitea ningún secreto en este archivo.
+#
+# Las variables SERVICE_FQDN_* son magia de Coolify: generan el dominio público
+# y lo inyectan de vuelta. En local se pueden ignorar y usar los puertos.
+#
+# Uso local:  docker compose -f docker-compose.dev.yml up --build
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      # Coolify publica el servicio en este FQDN y lo expone como variable.
+      SERVICE_FQDN_API_3000: ${SERVICE_FQDN_API_3000:-}
+
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3000
+      HOST: 0.0.0.0
+      API_PREFIX: api
+      # En producción es obligatorio y no acepta comodines.
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173,http://localhost:8080}
+      TRUST_PROXY: ${TRUST_PROXY:-1}
+      SWAGGER_ENABLED: ${SWAGGER_ENABLED:-true}
+
+      PGHOST: postgres
+      PGPORT: 5432
+      PGDATABASE: ${PGDATABASE:-cpa_platform}
+      PGUSER: ${PGUSER:-cpa_backend}
+      PGPASSWORD: ${PGPASSWORD:?define PGPASSWORD en las variables del recurso}
+      PGSSLMODE: disable
+      DATABASE_URL: postgresql://${PGUSER:-cpa_backend}:${PGPASSWORD}@postgres:5432/${PGDATABASE:-cpa_platform}?sslmode=disable
+
+      AUTH_REQUIRED: ${AUTH_REQUIRED:-true}
+      SESSION_COOKIE_NAME: ${SESSION_COOKIE_NAME:-cpa_session}
+      SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-false}
+      SESSION_SAME_SITE: ${SESSION_SAME_SITE:-lax}
+
+      REDIS_URL: redis://redis:6379
+      REDIS_KEY_PREFIX: ${REDIS_KEY_PREFIX:-cpa:backend}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    ports:
+      - "${API_PORT:-3000}:3000"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/api/health/live"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
+
+  # Ejecuta las migraciones una sola vez y termina. Coolify lo muestra como
+  # "exited (0)" cuando fue bien: es el comportamiento esperado.
+  migrations:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: "no"
+    entrypoint: ["node", "scripts/migrate-prod.js"]
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PGHOST: postgres
+      PGPORT: 5432
+      PGDATABASE: ${PGDATABASE:-cpa_platform}
+      PGUSER: ${PGUSER:-cpa_backend}
+      PGPASSWORD: ${PGPASSWORD:?define PGPASSWORD en las variables del recurso}
+      PGSSLMODE: disable
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${PGDATABASE:-cpa_platform}
+      POSTGRES_USER: ${PGUSER:-cpa_backend}
+      POSTGRES_PASSWORD: ${PGPASSWORD:?define PGPASSWORD en las variables del recurso}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PGUSER:-cpa_backend} -d ${PGDATABASE:-cpa_platform}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--save", "60", "1", "--loglevel", "warning"]
+    volumes:
+      - redis_data:/data
+
+volumes:
+  postgres_data:
+  redis_data:

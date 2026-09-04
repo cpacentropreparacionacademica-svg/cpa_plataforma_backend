@@ -732,3 +732,25 @@ Ver contrato completo en:
 ```txt
 docs/endpoints/reporteria-contable-powerbi.md
 ```
+
+## Punto de venta de productos de tienda
+
+Endpoints que consume el módulo de cajero.
+
+```http
+GET  /api/inventario/catalogo-tienda?limit=200&search=&soloConStock=true
+POST /api/contabilidad/venta-producto/registrar
+```
+
+Permisos: `INVENTARIO.CATALOGO_TIENDA.READ` y `CONTABILIDAD.VENTA_PRODUCTO.REGISTRAR`.
+
+Confirmar una venta escribe, en una sola transacción SQL, la transacción contable,
+el detalle por línea, la cabecera de venta, la salida de inventario por lote y el
+asiento (cobro + costo de venta). Cualquier fallo revierte todo.
+
+Ver contrato completo en:
+
+```txt
+docs/endpoints/venta-producto-tienda.md
+docs/db/venta-producto-tienda.md
+```

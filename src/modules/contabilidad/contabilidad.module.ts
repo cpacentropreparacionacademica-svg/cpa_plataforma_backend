@@ -8,6 +8,12 @@ import { ContabilidadLibrosService } from './reportes/contabilidad-libros.servic
 import { ContabilidadPeriodosService } from './reportes/contabilidad-periodos.service';
 import { ContabilidadReportesController } from './reportes/contabilidad-reportes.controller';
 import { ContabilidadSelectoresService } from './reportes/contabilidad-selectores.service';
+import { VentaProductoAsientoService } from './venta-producto/venta-producto-asiento.service';
+import { VentaProductoController } from './venta-producto/venta-producto.controller';
+import { VentaProductoNormalizer } from './venta-producto/venta-producto.normalizer';
+import { VentaProductoRepository } from './venta-producto/venta-producto.repository';
+import { VentaProductoService } from './venta-producto/venta-producto.service';
+import { VentaProductoValuacionService } from './venta-producto/venta-producto-valuacion.service';
 
 @Module({
   imports: [SharedCrudModule],
@@ -17,7 +23,7 @@ import { ContabilidadSelectoresService } from './reportes/contabilidad-selectore
    * `GET /api/contabilidad/reportes/libro-diario` y responderían «recurso no encontrado».
    * Nest resuelve las rutas en el orden en que se registran los controladores.
    */
-  controllers: [ContabilidadReportesController, ContabilidadController],
+  controllers: [ContabilidadReportesController, VentaProductoController, ContabilidadController],
   providers: [
     ContabilidadAccountingService,
     ContabilidadArchivoService,
@@ -25,6 +31,11 @@ import { ContabilidadSelectoresService } from './reportes/contabilidad-selectore
     ContabilidadEstadosFinancierosService,
     ContabilidadPeriodosService,
     ContabilidadSelectoresService,
+    VentaProductoNormalizer,
+    VentaProductoRepository,
+    VentaProductoValuacionService,
+    VentaProductoAsientoService,
+    VentaProductoService,
   ],
 })
 export class ContabilidadModule {}
