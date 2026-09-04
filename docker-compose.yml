@@ -1,3 +1,10 @@
+# Composición para desarrollo en la máquina de un desarrollador.
+#
+# PARA DESPLEGAR EN COOLIFY USA `docker-compose.dev.yml`, no este archivo:
+# aquel trae su propia base, declara el dominio público (SERVICE_FQDN) y no
+# publica puertos, de modo que el tráfico pasa por el proxy con TLS.
+# Este archivo publica el puerto y depende del `.env` local.
+
 services:
   api:
     build: .
@@ -5,7 +12,11 @@ services:
     ports:
       - "${PORT:-3000}:3000"
     env_file:
-      - .env
+      # `.env` no se versiona. Sin `required: false`, en cualquier checkout
+      # limpio —un servidor de despliegue, por ejemplo— Compose aborta con
+      # «env file .env not found» antes siquiera de construir la imagen.
+      - path: .env
+        required: false
     # El .env apunta PGHOST/DATABASE_URL a Neon, así que la API no depende de un
     # Postgres local. Redis sí es un servicio de esta composición.
     environment:
