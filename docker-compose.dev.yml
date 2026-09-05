@@ -122,11 +122,18 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${PGUSER:-cpa_backend} -d ${PGDATABASE:-cpa_platform}"]
-      interval: 10s
+      # -h y -p son obligatorios aquí: `pg_isready` lee PGHOST y PGPORT del
+      # entorno, y Coolify inyecta las variables del recurso en TODOS los
+      # servicios del compose. Sin fijar el destino, este contenedor acababa
+      # comprobando el host que dijera PGHOST en vez de su propio listener, y
+      # nunca llegaba a estar sano: el despliegue moría con
+      # «dependency failed to start: container postgres ... is unhealthy».
+      test: ["CMD-SHELL", "pg_isready -q -h 127.0.0.1 -p 5432 -U ${PGUSER:-cpa_backend} -d ${PGDATABASE:-cpa_platform}"]
+      interval: 5s
       timeout: 5s
-      retries: 10
-      start_period: 30s
+      retries: 12
+      # El primer arranque ejecuta initdb sobre un volumen vacío y puede tardar.
+      start_period: 60s
 
   redis:
     image: redis:7-alpine
