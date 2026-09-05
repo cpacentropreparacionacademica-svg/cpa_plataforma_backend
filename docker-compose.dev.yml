@@ -25,15 +25,10 @@
 # el contenedor buscará la base en sí mismo y no en el servicio `postgres`.
 # Para probar los defaults tal como corren en Coolify: --env-file /dev/null
 
-x-postgres-env: &postgres-env
-  PGHOST: ${PGHOST:-postgres}
-  PGPORT: ${PGPORT:-5432}
-  PGDATABASE: ${PGDATABASE:-cpa_platform}
-  PGUSER: ${PGUSER:-cpa_backend}
-  PGPASSWORD: ${PGPASSWORD:?define PGPASSWORD en las variables del recurso}
-  # El Postgres de este stack no habla TLS. Con una base gestionada: require.
-  PGSSLMODE: ${PGSSLMODE:-disable}
-  DATABASE_URL: ${DATABASE_URL:-postgresql://${PGUSER:-cpa_backend}:${PGPASSWORD}@${PGHOST:-postgres}:${PGPORT:-5432}/${PGDATABASE:-cpa_platform}}
+# No se usan anclas YAML a propósito, aunque la configuración de Postgres se
+# repita entre `api` y `migrations`: Coolify reescribe este archivo antes de
+# ejecutarlo y las claves de fusión no sobreviven, dejando servicios sin sus
+# variables. La repetición es fea pero es la que arranca.
 
 services:
   api:
@@ -105,9 +100,20 @@ services:
       dockerfile: Dockerfile
     restart: "no"
     entrypoint: ["node", "scripts/migrate-prod.js"]
+    # Escrito en forma de lista y sin anclas YAML, igual que `api`. Coolify
+    # reescribe el compose antes de ejecutarlo (añade ARG al Dockerfile, entre
+    # otras cosas) y las claves de fusión `<<:` no sobreviven esa reescritura:
+    # el contenedor se quedaba sin las PG* y `migrate-prod.js` abortaba al
+    # instante con «PGDATABASE es obligatorio para ejecutar migraciones».
     environment:
-      NODE_ENV: ${NODE_ENV:-production}
-      <<: *postgres-env
+      - NODE_ENV=${NODE_ENV:-production}
+      - PGHOST=${PGHOST:-postgres}
+      - PGPORT=${PGPORT:-5432}
+      - PGDATABASE=${PGDATABASE:-cpa_platform}
+      - PGUSER=${PGUSER:-cpa_backend}
+      - PGPASSWORD=${PGPASSWORD:?define PGPASSWORD en las variables del recurso}
+      - PGSSLMODE=${PGSSLMODE:-disable}
+      - DATABASE_URL=${DATABASE_URL:-postgresql://${PGUSER:-cpa_backend}:${PGPASSWORD}@${PGHOST:-postgres}:${PGPORT:-5432}/${PGDATABASE:-cpa_platform}}
     depends_on:
       postgres:
         condition: service_healthy
