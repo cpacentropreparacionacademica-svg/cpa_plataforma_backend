@@ -101,6 +101,37 @@ límite. La última línea del log nombra la causa:
 | `SESSION_COOKIE_SECURE must be true in production.` | Lo pusiste en `false`. |
 | `Unable to connect to the database. Retrying (9)...` | La base no responde: revisa `PGHOST` y credenciales. |
 | `env file .env not found` | Estás desplegando `docker-compose.yml` en vez del `.dev.yml`. |
+| `getaddrinfo ENOTFOUND <uuid>` | `PGHOST` apunta a otro recurso de Coolify. Ver abajo. |
+| `dependency failed to start: container postgres ... is unhealthy` | Postgres no pasa su healthcheck; mira sus logs. |
+
+### `getaddrinfo ENOTFOUND` con un hostname que parece un UUID
+
+Significa que `PGHOST` apunta a una base creada como **otro recurso de Coolify**.
+Cada recurso vive en su propia red de Docker, así que ese nombre no resuelve
+desde este stack. Hay dos salidas coherentes; elige una:
+
+**Usar la base de este stack (lo más simple).** Borra de las variables del
+recurso `PGHOST`, `PGPORT`, `PGUSER`, `PGDATABASE`, `PGSSLMODE` y `DATABASE_URL`.
+Con sólo `PGPASSWORD` y `CORS_ORIGINS`, el servicio `postgres` de esta
+composición se usa solo y todo resuelve por el nombre interno `postgres`.
+
+**Usar la base que ya tienes en Coolify.** Conecta este recurso a la red de esa
+base —en Coolify, *Connect to Predefined Network*, o añadiendo esa red al
+compose— y deja `PGHOST` con el UUID, `PGUSER`, `PGPASSWORD` y `PGDATABASE` de
+ese recurso. El servicio `postgres` de aquí queda sin usar y conviene quitarlo
+para no levantar una base que nadie consulta.
+
+Mezclar ambas —apuntar a la base externa sin conectar su red— es justo lo que
+produce este error.
+
+### Cómo leer el error real de las migraciones
+
+El log de despliegue sólo dice `service "migrations" didn't complete
+successfully: exit 1`. El mensaje concreto está en el contenedor:
+
+```bash
+docker logs $(docker ps -a --filter name=migrations- --format '{{.Names}}' | head -1)
+```
 
 Si el frontend carga pero sin datos, casi siempre es una de dos: `VITE_API_BASE_URL`
 quedó vacía o apunta a otro sitio (hay que **reconstruir**, no reiniciar), o el
