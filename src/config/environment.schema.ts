@@ -74,7 +74,17 @@ export function parseCorsOrigins(value: string): string[] {
   const origins = value.split(',').map((origin) => origin.trim()).filter(Boolean);
   for (const origin of origins) {
     if (origin.includes('*')) throw new Error('CORS_ORIGINS does not accept wildcards.');
-    const parsed = new URL(origin);
+    /**
+     * Un valor sin esquema (`ejemplo.com`) hacía que `new URL` lanzara un escueto
+     * «Invalid URL» que ni nombra la variable. Al arrancar en un contenedor eso
+     * deja un bucle de reinicios sin pista de qué corregir.
+     */
+    let parsed: URL;
+    try {
+      parsed = new URL(origin);
+    } catch {
+      throw new Error(`CORS origin must be an exact HTTP(S) origin: ${origin}`);
+    }
     if (!['http:', 'https:'].includes(parsed.protocol) || parsed.origin !== origin) {
       throw new Error(`CORS origin must be an exact HTTP(S) origin: ${origin}`);
     }

@@ -1,0 +1,165 @@
+# Despliegue en Coolify (entorno dev).
+#
+# En Coolify se crea un recurso "Docker Compose", se apunta a este repositorio y
+# se selecciona este archivo. Los valores van en la pestaña Environment Variables
+# del recurso; aquí no se versiona ningún secreto.
+#
+# El stack es autosuficiente: trae su propio Postgres y su propio Redis, de modo
+# que levanta sin depender de nada externo. Lo único obligatorio es PGPASSWORD.
+#
+# Para usar una base gestionada (Neon, RDS, Supabase) en vez del Postgres de
+# aquí, basta con sobreescribir en el panel:
+#     PGHOST=<host gestionado>   PGSSLMODE=require   DATABASE_URL=<url completa>
+# El servicio `postgres` seguirá levantado pero la API ya no lo usará; si
+# molesta, se puede quitar del stack.
+#
+# SERVICE_FQDN_API_3000 es una variable mágica de Coolify: declarada en forma de
+# lista y asignada con ${...}, genera el dominio público y enruta al puerto 3000.
+# Por eso NO hay `ports:`: publicarlo saltaría el proxy y dejaría el servicio sin
+# dominio ni TLS.
+#
+# Uso local:  PGPASSWORD=algo docker compose -f docker-compose.dev.yml up --build
+#
+# OJO en local: Docker Compose carga solo el `.env` del directorio y sus valores
+# ganan a los defaults de aquí. Si el `.env` de desarrollo tiene PGHOST=localhost,
+# el contenedor buscará la base en sí mismo y no en el servicio `postgres`.
+# Para probar los defaults tal como corren en Coolify: --env-file /dev/null
+
+# No se usan anclas YAML a propósito, aunque la configuración de Postgres se
+# repita entre `api` y `migrations`: Coolify reescribe este archivo antes de
+# ejecutarlo y las claves de fusión no sobreviven, dejando servicios sin sus
+# variables. La repetición es fea pero es la que arranca.
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      - SERVICE_FQDN_API_3000=${SERVICE_FQDN_API_3000}
+
+      - NODE_ENV=${NODE_ENV:-production}
+      - PORT=3000
+      - HOST=0.0.0.0
+      - API_PREFIX=api
+      # Obligatorio en producción y sin comodines. Sin esquema, con barra final
+      # o con ruta, la aplicación aborta el arranque nombrando el valor.
+      #   correcto:   https://front.midominio.com
+      #   incorrecto: front.midominio.com   https://front.midominio.com/
+      - CORS_ORIGINS=${CORS_ORIGINS:?define CORS_ORIGINS con el dominio del frontend}
+      # Detrás del proxy de Coolify hay exactamente un salto de confianza.
+      - TRUST_PROXY=${TRUST_PROXY:-1}
+      - SWAGGER_ENABLED=${SWAGGER_ENABLED:-false}
+
+      - PGHOST=${PGHOST:-postgres}
+      - PGPORT=${PGPORT:-5432}
+      - PGDATABASE=${PGDATABASE:-cpa_platform}
+      - PGUSER=${PGUSER:-cpa_backend}
+      - PGPASSWORD=${PGPASSWORD:?define PGPASSWORD en las variables del recurso}
+      - PGSSLMODE=${PGSSLMODE:-disable}
+      - DATABASE_URL=${DATABASE_URL:-postgresql://${PGUSER:-cpa_backend}:${PGPASSWORD}@${PGHOST:-postgres}:${PGPORT:-5432}/${PGDATABASE:-cpa_platform}}
+
+      - AUTH_REQUIRED=${AUTH_REQUIRED:-true}
+      - SESSION_COOKIE_NAME=${SESSION_COOKIE_NAME:-cpa_session}
+      # Coolify sirve por HTTPS: la cookie debe viajar como secure.
+      - SESSION_COOKIE_SECURE=${SESSION_COOKIE_SECURE:-true}
+      - SESSION_SAME_SITE=${SESSION_SAME_SITE:-lax}
+
+      # `redis` es el nombre del servicio y sólo resuelve dentro de esta red.
+      - REDIS_URL=redis://redis:6379
+      - REDIS_KEY_PREFIX=${REDIS_KEY_PREFIX:-cpa:backend}
+    # La API muere con código 1 si no alcanza la base al arrancar, y Coolify la
+    # reinicia hasta agotar el límite. Esperar a que Postgres esté sano evita
+    # justamente ese bucle.
+    #
+    # Y esperar a que las migraciones terminen evita el problema contrario: en un
+    # primer despliegue la base está sana desde el segundo cero pero todavía
+    # vacía, así que la API arrancaría y atendería peticiones contra un esquema
+    # inexistente. Si las migraciones fallan, la API no arranca, que es lo
+    # correcto: mejor un servicio caído que uno sirviendo datos a medias.
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/api/health/live >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      start_period: 40s
+      retries: 3
+
+  # Aplica las migraciones y termina. En Coolify aparece como "exited (0)"
+  # cuando fue bien: es el comportamiento esperado, no un fallo.
+  migrations:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: "no"
+    entrypoint: ["node", "scripts/migrate-prod.js"]
+    # Escrito en forma de lista y sin anclas YAML, igual que `api`. Coolify
+    # reescribe el compose antes de ejecutarlo (añade ARG al Dockerfile, entre
+    # otras cosas) y las claves de fusión `<<:` no sobreviven esa reescritura:
+    # el contenedor se quedaba sin las PG* y `migrate-prod.js` abortaba al
+    # instante con «PGDATABASE es obligatorio para ejecutar migraciones».
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - PGHOST=${PGHOST:-postgres}
+      - PGPORT=${PGPORT:-5432}
+      - PGDATABASE=${PGDATABASE:-cpa_platform}
+      - PGUSER=${PGUSER:-cpa_backend}
+      - PGPASSWORD=${PGPASSWORD:?define PGPASSWORD en las variables del recurso}
+      - PGSSLMODE=${PGSSLMODE:-disable}
+      - DATABASE_URL=${DATABASE_URL:-postgresql://${PGUSER:-cpa_backend}:${PGPASSWORD}@${PGHOST:-postgres}:${PGPORT:-5432}/${PGDATABASE:-cpa_platform}}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${PGDATABASE:-cpa_platform}
+      POSTGRES_USER: ${PGUSER:-cpa_backend}
+      POSTGRES_PASSWORD: ${PGPASSWORD:?define PGPASSWORD en las variables del recurso}
+    # Publicado SOLO en el loopback del servidor, nunca en 0.0.0.0: desde fuera
+    # no hay forma de alcanzarlo. Para conectarse con DBeaver u otro cliente se
+    # abre un túnel SSH contra este puerto; así la base nunca queda expuesta a
+    # internet ni depende de una contraseña como única defensa.
+    #   ssh -N -L 55432:127.0.0.1:${DB_LOCAL_PORT:-55432} usuario@servidor
+    ports:
+      - "127.0.0.1:${DB_LOCAL_PORT:-55432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      # -h y -p son obligatorios aquí: `pg_isready` lee PGHOST y PGPORT del
+      # entorno, y Coolify inyecta las variables del recurso en TODOS los
+      # servicios del compose. Sin fijar el destino, este contenedor acababa
+      # comprobando el host que dijera PGHOST en vez de su propio listener, y
+      # nunca llegaba a estar sano: el despliegue moría con
+      # «dependency failed to start: container postgres ... is unhealthy».
+      test: ["CMD-SHELL", "pg_isready -q -h 127.0.0.1 -p 5432 -U ${PGUSER:-cpa_backend} -d ${PGDATABASE:-cpa_platform}"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      # El primer arranque ejecuta initdb sobre un volumen vacío y puede tardar.
+      start_period: 60s
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  postgres_data:
+  redis_data:

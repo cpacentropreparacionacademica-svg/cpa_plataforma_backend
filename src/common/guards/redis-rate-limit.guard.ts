@@ -5,6 +5,7 @@ import { getPositiveInteger } from '../../config/runtime-config.util';
 import { BoundedRateLimitStore } from '../security/bounded-rate-limit.store';
 import { RedisService } from '../services/redis.service';
 import { sha256 } from '../utils/crypto.util';
+import { isHealthProbe } from './in-memory-rate-limit.guard';
 
 @Injectable()
 export class RedisRateLimitGuard implements CanActivate {
@@ -17,7 +18,10 @@ export class RedisRateLimitGuard implements CanActivate {
     const request = httpContext.getRequest<Request>();
     const response = httpContext.getResponse<Response>();
     if (request.method === 'OPTIONS') return true;
-
+    // Las sondas de salud no cuentan: el healthcheck de Docker pega cada 30 s desde 127.0.0.1 y,
+    // sumado al tráfico del proxy, agotaba el cupo de 100 por ventana y dejaba el contenedor
+    // «unhealthy» con un 429 que no era del negocio.
+    if (isHealthProbe(request.path)) return true;
     const isLogin = request.path.endsWith('/auth/publicAuth/login');
     const windowMs = getPositiveInteger(this.config, isLogin ? 'LOGIN_RATE_LIMIT_WINDOW_MS' : 'RATE_LIMIT_WINDOW_MS', 900000);
     const maximumRequests = getPositiveInteger(this.config, isLogin ? 'LOGIN_RATE_LIMIT_MAX' : 'RATE_LIMIT_MAX', isLogin ? 10 : 100);

@@ -29,12 +29,33 @@ const TUTORES_SMOKE = `
     FROM persona.persona_tutor t
     JOIN persona.persona p ON p.id_persona = t.id_persona
    WHERE p.nombres = 'SMOKE FULL'`;
+const CLASES_SMOKE = `
+  SELECT id_clase
+    FROM servicios_educativos.clase_por_hora
+   WHERE id_estudiante IN (${PERSONAS_SMOKE}) OR id_tutor IN (${TUTORES_SMOKE})`;
+
+/**
+ * Transacciones que dejó el smoke, por dos caminos distintos.
+ *
+ * `venta_clase_registro` es el que se ve a simple vista, pero no es el único:
+ * `contabilidad.transaccion` también apunta a la clase con `id_clase_por_hora`,
+ * y esa FK bloquea el borrado de `clase_por_hora`. Al mirar sólo el primero, la
+ * limpieza abortaba con
+ *   violates foreign key constraint "transaccion_id_clase_por_hora_fkey"
+ */
 const VENTAS_SMOKE = `
-  SELECT DISTINCT id_transaccion
-    FROM contabilidad.venta_clase_registro
-   WHERE situacion_base = 'SMOKE_FULL'
-      OR estudiante_texto LIKE 'SMOKE FULL%'
-      OR tutor_texto LIKE 'SMOKE FULL%'`;
+  SELECT DISTINCT id_transaccion FROM (
+    SELECT id_transaccion
+      FROM contabilidad.venta_clase_registro
+     WHERE situacion_base = 'SMOKE_FULL'
+        OR estudiante_texto LIKE 'SMOKE FULL%'
+        OR tutor_texto LIKE 'SMOKE FULL%'
+    UNION
+    SELECT id_transaccion
+      FROM contabilidad.transaccion
+     WHERE id_clase_por_hora IN (${CLASES_SMOKE})
+  ) t
+   WHERE id_transaccion IS NOT NULL`;
 
 /**
  * Orden hijo → padre. Invertirlo hace que la FK aborte el borrado y los datos
@@ -92,14 +113,37 @@ const STEPS = [
   { label: 'contabilidad.archivo', where: `url_archivo LIKE 'https://smoke.cpa/%'` },
 ];
 
+/**
+ * Los dos triggers que impiden borrar en el libro contable.
+ *
+ * Son deliberados: un asiento no se borra, se corrige con un asiento reverso.
+ * La regla es correcta para actividad contable real, pero estas 18 transacciones
+ * no lo son: las genero el smoke corriendo por error contra produccion y nunca
+ * debieron entrar al libro. Revertirlas seria peor, porque dejaria 18 asientos
+ * reversos igual de falsos y ademas no liberaria la FK que bloquea el resto de
+ * la limpieza.
+ *
+ * Los de periodo cerrado (trg_transaccion_periodo_cerrado y
+ * trg_movimiento_periodo_cerrado) no hace falta tocarlos: son BEFORE INSERT OR
+ * UPDATE y no intervienen en un DELETE.
+ */
+const TRIGGERS_CONTABLES = [
+  { table: 'contabilidad.transaccion_movimiento_cuenta', trigger: 'trg_proteger_movimiento_contable' },
+  { table: 'contabilidad.transaccion', trigger: 'trg_proteger_cabecera_asiento' },
+];
+
 async function main() {
   loadProjectEnv();
   const apply = process.argv.includes('--apply');
+  const bypassContabilidad = process.argv.includes('--contabilidad');
   const client = createSecurePgClient('cpa-clean-smoke');
   await client.connect();
 
   console.log(`Base: ${process.env.PGHOST}/${process.env.PGDATABASE}`);
   console.log(apply ? 'Modo: BORRADO REAL (--apply)' : 'Modo: solo conteo. Agrega --apply para borrar.');
+  if (bypassContabilidad) {
+    console.log('Proteccion contable: desactivada durante la transaccion (--contabilidad).');
+  }
   console.log('');
 
   // La transacción contable deja de ser localizable en cuanto se borra el
