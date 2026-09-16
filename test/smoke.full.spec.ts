@@ -13,6 +13,7 @@ import { AppModule } from '../src/app.module';
 import { AllExceptionsFilter } from '../src/common/filters/all-exceptions.filter';
 import { ResponseEnvelopeInterceptor } from '../src/common/interceptors/response-envelope.interceptor';
 import { RESOURCES } from '../src/modules/resource-registry';
+import { deleteSmokeAsientos } from './smoke-accounting-cleanup';
 import { assertSmokeTargetIsLocal } from './smoke-db-guard';
 
 const officialUtils = require('../scripts/official-user-utils');
@@ -54,6 +55,8 @@ const EXPECTED_OFFICIAL_GROUP_CODES = [
   '4.1.02',
   '4.1.03',
   '4.1.04',
+  // Activada por la migración 027 para las ventas del punto de venta.
+  '4.1.05',
   '4.2',
   '4.2.01',
   '4.2.02',
@@ -64,6 +67,8 @@ const EXPECTED_OFFICIAL_GROUP_CODES = [
   '5.4',
   '5.5',
   '5.6',
+  // Activada por la migración 027 para el costo de lo vendido en tienda.
+  '5.7',
 ];
 
 const EXPECTED_OFFICIAL_ACCOUNT_CODES = [
@@ -102,6 +107,7 @@ const EXPECTED_OFFICIAL_ACCOUNT_CODES = [
   '4.1.02.001',
   '4.1.03.001',
   '4.1.04.001',
+  '4.1.05.001',
   '4.2.01.001',
   '4.2.02.001',
   '5.1.001',
@@ -124,6 +130,7 @@ const EXPECTED_OFFICIAL_ACCOUNT_CODES = [
   '5.5.002',
   '5.6.001',
   '5.6.002',
+  '5.7.001',
 ];
 
 function configureEnvForSmokeFull(): void {
@@ -220,11 +227,28 @@ async function cleanupSmokeFullData(dataSource: DataSource): Promise<void> {
   // de venta-clase, que es quien la referencia. Se anotan los ids primero.
   const ventaRows = (await run(
     'leer venta_clase_registro',
-    `SELECT DISTINCT id_transaccion
-       FROM contabilidad.venta_clase_registro
-      WHERE situacion_base = 'SMOKE_FULL'
-         OR estudiante_texto LIKE 'SMOKE FULL%'
-         OR tutor_texto LIKE 'SMOKE FULL%'`,
+    // Tres caminos: el registro de venta-clase, y las dos FK de `transaccion`
+    // que bloquean borrar la clase y la persona. Si una corrida anterior ya
+    // borró el registro de venta, sólo los dos últimos encuentran el asiento.
+    `SELECT DISTINCT id_transaccion FROM (
+       SELECT id_transaccion
+         FROM contabilidad.venta_clase_registro
+        WHERE situacion_base = 'SMOKE_FULL'
+           OR estudiante_texto LIKE 'SMOKE FULL%'
+           OR tutor_texto LIKE 'SMOKE FULL%'
+       UNION
+       SELECT tr.id_transaccion
+         FROM contabilidad.transaccion tr
+         JOIN servicios_educativos.clase_por_hora c ON c.id_clase = tr.id_clase_por_hora
+         JOIN persona.persona p ON p.id_persona = c.id_estudiante
+        WHERE p.nombres = 'SMOKE FULL'
+       UNION
+       SELECT tr.id_transaccion
+         FROM contabilidad.transaccion tr
+         JOIN persona.persona p ON p.id_persona = tr.id_cliente
+        WHERE p.nombres = 'SMOKE FULL'
+     ) t
+     WHERE id_transaccion IS NOT NULL`,
   )) as Array<{ id_transaccion: number | null }>;
   const transaccionIds = ventaRows.map((row) => row.id_transaccion).filter((id): id is number => id !== null);
 
@@ -237,17 +261,9 @@ async function cleanupSmokeFullData(dataSource: DataSource): Promise<void> {
   );
 
   if (transaccionIds.length) {
-    await run(
-      'transaccion_movimiento_cuenta',
-      `DELETE FROM contabilidad.transaccion_movimiento_cuenta WHERE id_transaccion = ANY($1)`,
-      [transaccionIds],
-    );
-    await run(
-      'transaccion_detalle_venta',
-      `DELETE FROM contabilidad.transaccion_detalle_venta WHERE id_transaccion = ANY($1)`,
-      [transaccionIds],
-    );
-    await run('transaccion', `DELETE FROM contabilidad.transaccion WHERE id_transaccion = ANY($1)`, [transaccionIds]);
+    await deleteSmokeAsientos(dataSource, transaccionIds).catch((error: unknown) => {
+      failures.push(`transaccion: ${error instanceof Error ? error.message : String(error)}`);
+    });
   }
 
   const personasSmoke = `SELECT id_persona FROM persona.persona WHERE nombres = 'SMOKE FULL'`;

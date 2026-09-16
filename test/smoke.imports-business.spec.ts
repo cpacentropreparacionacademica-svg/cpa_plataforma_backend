@@ -13,6 +13,7 @@ import { DataSource } from 'typeorm';
 import { AppModule } from '../src/app.module';
 import { AllExceptionsFilter } from '../src/common/filters/all-exceptions.filter';
 import { ResponseEnvelopeInterceptor } from '../src/common/interceptors/response-envelope.interceptor';
+import { deleteSmokeAsientos } from './smoke-accounting-cleanup';
 import { assertSmokeTargetIsLocal } from './smoke-db-guard';
 
 const officialUtils = require('../scripts/official-user-utils');
@@ -64,6 +65,24 @@ function xlsxBuffer(rows: Record<string, unknown>[]): Buffer {
   return XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' }) as Buffer;
 }
 
+/**
+ * El caso de archivo-transacción crea un asiento real con esta glosa. Sin
+ * borrarlo, cada corrida sumaba un asiento de 100 al libro de la base local.
+ * Se busca también al entrar, por si una corrida anterior murió antes de
+ * `afterAll`.
+ */
+async function deleteSmokeImportAsientos(dataSource: DataSource): Promise<void> {
+  const rows = (await dataSource.query(
+    `SELECT id_transaccion FROM contabilidad.transaccion WHERE glosa = 'SMOKE ARCHIVO TRANSACCION'`,
+  )) as Array<{ id_transaccion: number }>;
+  if (!rows.length) return;
+  await dataSource.query(
+    `DELETE FROM contabilidad.archivo_transaccion WHERE id_transaccion = ANY($1)`,
+    [rows.map((row) => row.id_transaccion)],
+  );
+  await deleteSmokeAsientos(dataSource, rows.map((row) => row.id_transaccion));
+}
+
 describe('CPA Plataforma - smoke importaciones masivas y errores de negocio', () => {
   let app: INestApplication;
   let agent: any;
@@ -78,6 +97,7 @@ describe('CPA Plataforma - smoke importaciones masivas y errores de negocio', ()
     await app.init();
     agent = request.agent(app.getHttpServer());
     dataSource = app.get(DataSource);
+    await deleteSmokeImportAsientos(dataSource);
 
     const login = await agent
       .post('/api/auth/publicAuth/login')
@@ -92,6 +112,8 @@ describe('CPA Plataforma - smoke importaciones masivas y errores de negocio', ()
       await dataSource.query(`DELETE FROM persona.unidad_educativa WHERE nombre LIKE 'SMOKE IMPORT %'`).catch(() => undefined);
       await dataSource.query(`DELETE FROM contabilidad.archivo_transaccion at USING contabilidad.archivo a WHERE at.id_archivo = a.id_archivo AND a.url_archivo LIKE 'https://smoke.cpa/%'`).catch(() => undefined);
       await dataSource.query(`DELETE FROM contabilidad.archivo WHERE url_archivo LIKE 'https://smoke.cpa/%'`).catch(() => undefined);
+      // Sin `.catch`: si el asiento no se puede borrar, la suite debe fallar.
+      await deleteSmokeImportAsientos(dataSource);
       await dataSource.query(`DELETE FROM administracion.registro_borrador WHERE clave_cliente LIKE 'smoke-draft-%'`).catch(() => undefined);
       await dataSource.query(`DELETE FROM contabilidad.venta_clase_registro WHERE estudiante_texto LIKE 'SMOKE ERROR%' OR tutor_texto LIKE 'SMOKE ERROR%'`).catch(() => undefined);
     }

@@ -54,6 +54,15 @@ const VENTAS_SMOKE = `
     SELECT id_transaccion
       FROM contabilidad.transaccion
      WHERE id_clase_por_hora IN (${CLASES_SMOKE})
+    UNION
+    SELECT id_transaccion
+      FROM contabilidad.transaccion
+     WHERE id_cliente IN (${PERSONAS_SMOKE})
+    UNION
+    -- El que crea smoke.imports-business para probar archivo-transacción.
+    SELECT id_transaccion
+      FROM contabilidad.transaccion
+     WHERE glosa = 'SMOKE ARCHIVO TRANSACCION'
   ) t
    WHERE id_transaccion IS NOT NULL`;
 
@@ -62,6 +71,11 @@ const VENTAS_SMOKE = `
  * se queden donde estaban.
  */
 const STEPS = [
+  {
+    // El archivo adjunto a un asiento del smoke apunta a la transacción: va antes.
+    label: 'contabilidad.archivo_transaccion',
+    where: `id_transaccion IN (${VENTAS_SMOKE})`,
+  },
   {
     label: 'contabilidad.transaccion_movimiento_cuenta',
     where: `id_transaccion IN (${VENTAS_SMOKE})`,
@@ -130,7 +144,17 @@ const STEPS = [
 const TRIGGERS_CONTABLES = [
   { table: 'contabilidad.transaccion_movimiento_cuenta', trigger: 'trg_proteger_movimiento_contable' },
   { table: 'contabilidad.transaccion', trigger: 'trg_proteger_cabecera_asiento' },
+  // Diferido: al borrar los movimientos, el asiento queda un instante sin ellos y
+  // el balanceo lo rechaza antes de que se borre la cabecera.
+  { table: 'contabilidad.transaccion_movimiento_cuenta', trigger: 'trg_validar_asiento_balanceado' },
 ];
+
+/** ALTER TABLE es transaccional: un ROLLBACK deja los triggers como estaban. */
+async function setTriggersContables(client, enabled) {
+  for (const { table, trigger } of TRIGGERS_CONTABLES) {
+    await client.query(`ALTER TABLE ${table} ${enabled ? 'ENABLE' : 'DISABLE'} TRIGGER ${trigger}`);
+  }
+}
 
 async function main() {
   loadProjectEnv();
@@ -156,6 +180,9 @@ async function main() {
 
   try {
     if (apply) await client.query('BEGIN');
+    // Sin esto el primer DELETE contable aborta con «Los movimientos contables no
+    // se eliminan». Antes la opción se anunciaba pero no hacía nada.
+    if (apply && bypassContabilidad) await setTriggersContables(client, false);
 
     for (const step of STEPS) {
       const where = step.dependsOnTransacciones
@@ -175,6 +202,7 @@ async function main() {
       console.log(String(affected).padStart(4) + '  ' + step.label);
     }
 
+    if (apply && bypassContabilidad) await setTriggersContables(client, true);
     if (apply) await client.query('COMMIT');
   } catch (error) {
     if (apply) await client.query('ROLLBACK').catch(() => undefined);
